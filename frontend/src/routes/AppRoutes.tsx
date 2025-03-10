@@ -8,8 +8,10 @@ import { useAuthStore } from '@/stores/authStore';
 import Loader from '@/components/ui/Loader';
 import { useAutoLogin } from '@/api/queries/authQueries';
 import { useEffect } from 'react';
-import NewsFeed from '@/features/feed/Profile';
 import Home from '@/features/feed/Home';
+import Profil from '@/features/feed/Profil';
+import Signets from '@/features/feed/Signet';
+import Explorer from '@/features/feed/Explorer';
 
 const AppRoutes = () => {
 
@@ -39,7 +41,9 @@ const AppRoutes = () => {
 
           {/* Route par défaut */}
           <Route path='/home' element={<Home />} />
-          <Route path='/accueil' element={<NewsFeed />} />
+          <Route path='/profil' element={<Profil />} />
+          <Route path='/explore' element={<Explorer />} />
+          <Route path='/signets' element={<Signets />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/error" element={<Error />} />

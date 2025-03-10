@@ -7,8 +7,7 @@ import { useLogin } from "@/api/queries/authQueries"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
-
-
+import unicornLogo from '@/assets/icons/unicorn-logo.svg'
 export default function Login() {
   const {
     register,
@@ -29,56 +28,66 @@ export default function Login() {
   }
 
   return (
-    <Card>
-      <div className="text-center">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
-          className="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center"
-        >
-          <span className="text-2xl text-white font-bold">Logo</span>
-        </motion.div>
-        <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Connexion</h2>
-      </div>
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <div className="rounded-md space-y-4">
-          <Input
-            label="Email"
-            type="email"
-            {...register("email")}
-            error={errors.email?.message}
-            placeholder="votre@email.com"
-          />
-          <Input
-            label="Mot de passe"
-            type="password"
-            {...register("password")}
-            error={errors.password?.message}
-            placeholder="••••••••"
-          />
-        </div>
-
-        <Button
-          type="submit"
-          isLoading={isSubmitting}
-          disabled={isSubmitting}
-          loadingText="Connexion en cours..."
-        >
-          Se connecter
-        </Button>
-
-        <div className="text-sm text-center">
-          <Link
-            to="/register"
-            className="font-medium text-blue-600 hover:text-blue-500 transition duration-150 ease-in-out"
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-50 via-blue-50 to-purple-50">
+      <Card className="w-full max-w-xl mx-2 p-4 sm:p-6 md:p-8 bg-white/70 backdrop-blur-sm rounded-3xl shadow-soft border border-pink-100">
+        <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mx-auto h-16 sm:h-20 w-16 sm:w-20 rounded-2xl flex items-center justify-center"
           >
-            Pas encore de compte ? S'inscrire
-          </Link>
+            <img src={unicornLogo} alt="Unicorn Logo" className="w-12 h-12 sm:w-16 sm:h-16 transform hover:scale-110 transition-transform duration-300" />
+          </motion.div>
+          <h2 className="mt-4 sm:mt-6 text-2xl sm:text-3xl font-medium text-gray-700">Connexion</h2>
+          <p className="mt-2 text-sm text-gray-500">Bienvenue sur notre plateforme</p>
         </div>
-      </form>
-    </Card>
 
+        <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-6">
+            <Input
+              label="Email"
+              type="email"
+              {...register("email")}
+              error={errors.email?.message}
+              placeholder="votre@email.com"
+              className="w-full px-5 py-3 rounded-xl border border-pink-100 bg-white/80 
+              focus:ring-2 focus:ring-blue-200 focus:border-blue-200 transition-all placeholder:text-gray-400"
+            />
+            <Input
+              label="Mot de passe"
+              type="password"
+              {...register("password")}
+              error={errors.password?.message}
+              placeholder="••••••••"
+              className="w-full px-5 py-3 rounded-xl border border-pink-100 bg-white/80
+              focus:ring-2 focus:ring-blue-200 focus:border-blue-200 transition-all placeholder:text-gray-400"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
+            loadingText="Connexion en cours..."
+            className="w-full py-3.5 bg-gradient-to-r from-pink-400 to-blue-400 text-white rounded-xl font-medium
+            hover:from-pink-500 hover:to-blue-500 transform transition-all duration-200
+            focus:ring-2 focus:ring-pink-200 focus:ring-offset-2 disabled:opacity-50"
+          >
+            Se connecter
+          </Button>
+
+          <div className="text-sm text-center mt-8">
+            <Link
+              to="/register"
+              className="font-medium text-pink-500 hover:text-blue-500 transition-colors duration-300"
+            >
+              Pas encore de compte ? S'inscrire
+            </Link>
+          </div>
+        </form>
+      </Card>
+    </div>
   )
 }
 

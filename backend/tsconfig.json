@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "baseUrl": "./src",
+      "paths": {
+        "@/*": ["*"]
+      },
+      "outDir": "./dist",
+      "rootDir": "./src",
+      "target": "ES6",
+      "module": "commonjs",
+      "esModuleInterop": true,
+      "strict": true
+    },
+    "include": ["src/**/*", "../React-TSX-Template/node_modules/app.ts"],
+    "exclude": ["node_modules", "dist"]
+  }
+  

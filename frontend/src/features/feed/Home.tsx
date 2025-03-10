@@ -9,9 +9,10 @@ export default function Home() {
     <div className="flex min-h-screen bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <Sidebar />
       <div className="flex-1 md:ml-64">
-        <div className="container mx-auto max-w-6xl px-4 pb-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_300px]">
-            <div>
+        <div className="container mx-auto px-4 pb-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Colonne principale */}
+            <div className="flex-1 max-w-3xl">
               <div className="mb-4 sticky top-0 z-10 pt-4 bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
                 <SearchBar />
                 <div className="mt-4">
@@ -20,7 +21,9 @@ export default function Home() {
               </div>
               <TweetFeed />
             </div>
-            <div className="hidden md:block">
+            
+            {/* Colonne des tendances */}
+            <div className="hidden md:block w-80 flex-shrink-0">
               <div className="sticky top-4">
                 <TrendingSection />
               </div>

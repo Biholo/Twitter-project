@@ -3,15 +3,17 @@ import PrivateRoutes from '@/routes/PrivateRoutes';
 import PublicRoutes from '@/routes/PublicRoutes';
 import Login from '@/features/auth/Login';
 import Register from '@/features/auth/Register';
-import Profile from '@/features/user/Profile';
 import Error from '@/features/Error';
-import Sidebar from '@/components/layout/Sidebar';
 import { useAuthStore } from '@/stores/authStore';
 import Loader from '@/components/ui/Loader';
 import { useAutoLogin } from '@/api/queries/authQueries';
 import { useEffect } from 'react';
+import Home from '@/features/feed/Home';
+import Profil from '@/features/feed/Profil';
+import Signets from '@/features/feed/Signet';
+import Explorer from '@/features/feed/Explorer';
+
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuthStore();
 
   const { refetch: autoLogin, isPending } = useAutoLogin();
 
@@ -24,7 +26,6 @@ const AppRoutes = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {isAuthenticated && <Sidebar />}
       <main className="flex-grow">
         <Routes>
           {/* Routes publiques */}
@@ -35,10 +36,14 @@ const AppRoutes = () => {
 
           {/* Routes privées */}
           <Route element={<PrivateRoutes />}>
-            <Route path="/profile" element={<Profile />} />
+           
           </Route>
 
           {/* Route par défaut */}
+          <Route path='/home' element={<Home />} />
+          <Route path='/profil' element={<Profil />} />
+          <Route path='/explore' element={<Explorer />} />
+          <Route path='/signets' element={<Signets />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/error" element={<Error />} />

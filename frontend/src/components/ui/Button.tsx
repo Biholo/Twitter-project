@@ -1,65 +1,56 @@
-import type React from "react"
-import { HTMLMotionProps, motion } from "framer-motion"
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
 
-type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "warning"
+import { cn } from "@/lib/utils"
 
-interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof HTMLMotionProps<"button">>,
-    HTMLMotionProps<"button"> {
-    variant?: ButtonVariant
-    isLoading?: boolean
-    loadingText?: string
-    children: React.ReactNode
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 dark:ring-offset-neutral-950 dark:focus-visible:ring-neutral-300",
+  {
+    variants: {
+      variant: {
+        default: "bg-neutral-900 text-neutral-50 hover:bg-neutral-900/90 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-50/90",
+        destructive:
+          "bg-red-500 text-neutral-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-neutral-50 dark:hover:bg-red-900/90",
+        outline:
+          "border border-neutral-200 bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800 dark:hover:text-neutral-50",
+        secondary:
+          "bg-neutral-100 text-neutral-900 hover:bg-neutral-100/80 dark:bg-neutral-800 dark:text-neutral-50 dark:hover:bg-neutral-800/80",
+        ghost: "hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-50",
+        link: "text-neutral-900 underline-offset-4 hover:underline dark:text-neutral-50",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
 }
 
-const variantStyles: Record<ButtonVariant, string> = {
-    primary: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 text-white",
-    secondary: "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500 text-white",
-    danger: "bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white",
-    success: "bg-green-600 hover:bg-green-700 focus:ring-green-500 text-white",
-    warning: "bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-400 text-black",
-}
-
-export const Button: React.FC<ButtonProps> = ({
-    children,
-    variant = "primary",
-    isLoading = false,
-    loadingText = "Chargement...",
-    disabled,
-    className = "",
-    ...props
-}) => {
-    const baseStyle =
-        "group relative w-full flex justify-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition duration-150 ease-in-out"
-    const variantStyle = variantStyles[variant]
-    const disabledStyle = "opacity-50 cursor-not-allowed"
-
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
     return (
-        <div>
-            <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={disabled || isLoading}
-                className={`${baseStyle} ${variantStyle} ${disabled || isLoading ? disabledStyle : ""} ${className}`}
-                {...props}
-            >
-                {isLoading && (
-                    <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
-                )}
-                {isLoading ? loadingText : children}
-            </motion.button>
-        </div>
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
     )
-}
+  }
+)
+Button.displayName = "Button"
 
+export { Button, buttonVariants }

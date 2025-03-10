@@ -47,13 +47,6 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      <Button
-        className="w-full py-3 mt-4 bg-gradient-to-r from-pink-400 to-blue-400 
-        text-white rounded-xl font-medium shadow-md hover:shadow-lg 
-        transform transition-all duration-200 hover:-translate-y-0.5"
-      >
-        Tweeter
-      </Button>
     </aside>
   )
 }

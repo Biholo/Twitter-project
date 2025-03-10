@@ -1,11 +1,12 @@
 import TwitterProfile from "@/components/feed/TwitterProfile"
 import TweetFeed from "@/components/feed/TweetFeed"
 import DetailedTweet from "@/components/feed/DetailedTweet"
-
+import { Sidebar } from "@/components/ui/Sidebar"
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto max-w-3xl">
+      <Sidebar/>
         <TwitterProfile />
         <div className="mt-4 grid gap-4 md:grid-cols-[1fr_300px]">
           <div>

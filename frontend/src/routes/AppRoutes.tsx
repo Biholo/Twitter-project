@@ -10,6 +10,9 @@ import { useAuthStore } from '@/stores/authStore';
 import Loader from '@/components/ui/Loader';
 import { useAutoLogin } from '@/api/queries/authQueries';
 import { useEffect } from 'react';
+import NewsFeed from '@/features/feed/Profile';
+import Home from '@/features/feed/Home';
+
 const AppRoutes = () => {
   const { isAuthenticated } = useAuthStore();
 
@@ -39,6 +42,8 @@ const AppRoutes = () => {
           </Route>
 
           {/* Route par défaut */}
+          <Route path='/home' element={<Home />} />
+          <Route path='/accueil' element={<NewsFeed />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/error" element={<Error />} />

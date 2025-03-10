@@ -12,11 +12,11 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  firstName: z
+  first_name: z
     .string()
     .min(2, "Le prénom doit contenir au moins 2 caractères")
     .max(50, "Le prénom ne peut pas dépasser 50 caractères"),
-  lastName: z
+  last_name: z
     .string()
     .min(2, "Le nom doit contenir au moins 2 caractères")
     .max(50, "Le nom ne peut pas dépasser 50 caractères"),
@@ -28,8 +28,8 @@ export const registerSchema = z.object({
     .string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")
     .max(128, "Le mot de passe ne peut pas dépasser 128 caractères"),
-  role: z
-    .enum(["admin", "employé", "client"])
+  roles: z
+    .array(z.enum(["admin", "employé", "client"]))
     .optional(),
 });
 

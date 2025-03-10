@@ -1,4 +1,4 @@
-import { FilterService } from "@/services/filterService";
+import filterService from "@/services/filterService";
 import { Model, UpdateQuery } from "mongoose";
 
 export class BaseRepository<T> {
@@ -9,8 +9,8 @@ export class BaseRepository<T> {
     }
 
     async find(filters: any = {}) {
-        const query = FilterService.buildQuery(filters);
-        const { sort, skip, limit } = FilterService.applySortingAndPagination(query, filters);
+        const query = filterService.buildQuery(filters);
+        const { sort, skip, limit } = filterService.applySortingAndPagination(query, filters);
 
         return this.model
             .find(query)
@@ -20,12 +20,12 @@ export class BaseRepository<T> {
     }
 
     async findOne(filters: any = {}) {
-        const query = FilterService.buildQuery(filters);
+        const query = filterService.buildQuery(filters);
         return this.model.findOne(query);
     }
 
     async count(filters: any = {}) {
-        const query = FilterService.buildQuery(filters);
+        const query = filterService.buildQuery(filters);
         return this.model.countDocuments(query);
     }
 
@@ -47,6 +47,10 @@ export class BaseRepository<T> {
 
     async findById(id: string) {
         return this.model.findById(id);
+    }
+
+    async findByIdAndUpdate(id: string, update: UpdateQuery<T>, options: any = {}) {
+        return this.model.findByIdAndUpdate(id, update, options);
     }
 
 } 

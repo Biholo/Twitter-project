@@ -4,9 +4,9 @@ import jwt from "jsonwebtoken"; // Utilisation correcte d'import ES6
 interface AuthenticatedRequest extends Request {
     user?: {
         id: string;
-        roles: string[]; // ✅ Correction ici (un tableau)
+        roles: string[];
         email?: string;
-        [key: string]: any; // Étendre si nécessaire
+        [key: string]: any;
     };
 }
 
@@ -20,6 +20,11 @@ export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: 
     }
 
     const token = authHeader.split(" ")[1];
+
+    if (!token) {
+        res.status(401).json({ message: "Token manquant." });
+        return;
+    }
 
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as AuthenticatedRequest["user"];
@@ -49,6 +54,10 @@ export const hasToken = (req: AuthenticatedRequest, res: Response, next: NextFun
     }
 
     const token = authHeader.split(" ")[1];
+
+    if (!token) {
+        return next(); // ✅ Laisser passer même sans token
+    }
 
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as AuthenticatedRequest["user"];

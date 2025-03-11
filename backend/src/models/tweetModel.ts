@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITweet extends Document {
-  content?: string;
+  _id: mongoose.Types.ObjectId;
+  content: string;
   post_date: Date;
   author_id: mongoose.Types.ObjectId;
   parent_tweet_id?: mongoose.Types.ObjectId;

@@ -4,12 +4,12 @@ import TokenModel, { IToken, TokenType } from '@/models/tokenModel';
 import { IUser } from '@/models/userModel';
 import { Request } from 'express';
 
-if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET) {
-  throw new Error('Les secrets JWT doivent être définis');
-}
+// if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET) {
+//   throw new Error('Les secrets JWT doivent être définis');
+// }
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "votre_clé_secrète_très_longue_et_complexe";
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "une_autre_clé_secrète_différente_très_longue";
 const ACCESS_TOKEN_EXPIRATION = "24h"; // Expiration du token d'accès
 const REFRESH_TOKEN_EXPIRATION = "30d"; // Expiration du token de rafraîchissement
 

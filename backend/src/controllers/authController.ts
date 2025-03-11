@@ -9,38 +9,42 @@ import ResetPassword from "@/models/resetPasswordModel";
 import emailService from "@/services/emailService";
 import templateService from "@/services/templateService";
 import { AuthenticatedRequest } from "@/types";
+import userRepository from "@/repositories/userRepository";
 
-
-if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET || !process.env.EMAIL_VERIFICATION_TOKEN) {
-  throw new Error('JWT secrets must be defined');
-}
-
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
-const EMAIL_VERIFICATION_TOKEN = process.env.EMAIL_VERIFICATION_TOKEN;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "votre_clé_secrète_très_longue_et_complexe";
+const EMAIL_VERIFICATION_TOKEN = process.env.EMAIL_VERIFICATION_TOKEN || "une_autre_clé_secrète_différente_très_longue";
 
 /**
  * Register a new user.
- * @param req.body.firstName - The user's first name.
- * @param req.body.lastName - The user's last name.
+ * @param req.body.username - The user's username.
+ * @param req.body.identifier_name - The user's identifier name.
  * @param req.body.email - The user's email address.
  * @param req.body.password - The user's password.
  * @param req.body.roles - Optional roles of the user (defaults to ["client"]).
  */
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const { first_name, last_name, email, password, phone, date_of_birth, gender, roles } = req.body;
+  const { username, identifier_name, email, password, roles } = req.body;
 
 
-  if (!first_name || !last_name || !email || !password) {
+  if (!username || !identifier_name || !  email || !password) {
     res.status(400).json({ message: "Tous les champs sont requis." });
     return;
   }
 
-
   try {
-    // Vérifier si l'email est déjà utilisé
-    const existingUser = await UserModel.findOne({ email });
+    // Vérifier si l'email ou l'identifier_name est déjà utilisé
+    const existingUser = await userRepository.findOne({ 
+      $or: [
+        { email: email },
+        { identifier_name: identifier_name }
+      ]
+    });
+
     if (existingUser) {
-      res.status(409).json({ message: "Cet email est déjà utilisé." });
+      const message = existingUser.email === email 
+        ? "Cet email est déjà utilisé."
+        : "Cet identifiant est déjà utilisé.";
+      res.status(409).json({ message });
       return;
     }
 
@@ -52,8 +56,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     // Créer un nouvel utilisateur
     const newUser: IUser = new UserModel({
-      first_name,
-      last_name,
+      username,
+      identifier_name,
       email,
       password: hashedPassword,
       roles: userRoles,
@@ -66,7 +70,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     // const verificationToken = jwt.sign({ id: newUser._id }, EMAIL_VERIFICATION_TOKEN);
 
     // const accountConfirmationHtml = templateService.generateHtml('accountConfirmation', { name: newUser.first_name, link: `${process.env.FRONTEND_URL}/confirm-email?token=${verificationToken}` });
-    const welcomeHtml = templateService.generateHtml('welcome', { name: newUser.first_name, link: `${process.env.FRONTEND_URL}` });
+    const welcomeHtml = templateService.generateHtml('welcome', { name: newUser.username, link: `${process.env.FRONTEND_URL}` });
 
     // await emailService.sendEmail(newUser.email, "Confirmation d'email", accountConfirmationHtml);
     await emailService.sendEmail(newUser.email, "Bienvenue", welcomeHtml);
@@ -89,6 +93,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
  */
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
+  console.log(email, password);
 
   if (!email || !password) {
     res.status(400).json({ message: "Email et mot de passe requis." });
@@ -96,7 +101,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const user = await UserModel.findOne({ email });
+    const user = await userRepository.findByEmail(email);
 
     if (!user) {
       res.status(404).json({ message: "Utilisateur introuvable." });
@@ -166,7 +171,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
   try {
     const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET) as { id: string };
-    const user = await UserModel.findById(decoded.id);
+    const user = await userRepository.findById(decoded.id);
 
     const refreshToken = await TokenModel.findOne({
       ownedBy: user?._id,
@@ -240,7 +245,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
   }
 
   try {
-    const user = await UserModel.findOne({ email });
+    const user = await userRepository.findByEmail(email);
     if (!user) {
       res.status(404).json({ message: "Utilisateur introuvable." });
       return;
@@ -258,7 +263,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
 
     const resetPasswordLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-    const html = templateService.generateHtml('resetPassword', { name: user.first_name, link: resetPasswordLink });
+    const html = templateService.generateHtml('resetPassword', { name: user.username, link: resetPasswordLink });
 
     await emailService.sendEmail(user.email, "Réinitialisation de mot de passe", html);
 

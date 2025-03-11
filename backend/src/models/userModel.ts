@@ -3,8 +3,7 @@ import { roles } from '@/config/role';
 
 export interface IUser extends Document {
   // Champs originaux
-  first_name: string;
-  last_name: string;
+  _id: mongoose.Types.ObjectId;
   email: string;
   password: string;
   roles: string[];
@@ -15,9 +14,10 @@ export interface IUser extends Document {
   
   // Nouveaux champs pour Twitter
   username: string;
+  identifier_name: string;
   bio?: string;
   accept_notifications: boolean;
-  profile_photo?: string;
+  avatar?: string;
   banner_photo?: string;
   registration_date: Date;
   created_at: Date;
@@ -25,9 +25,7 @@ export interface IUser extends Document {
 }
 
 const UserSchema = new Schema({
-  // Champs originaux
-  first_name: { type: String, required: true },
-  last_name: { type: String, required: true },
+
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   roles: { type: [String], enum: roles, required: true },
@@ -38,9 +36,10 @@ const UserSchema = new Schema({
   
   // Nouveaux champs pour Twitter
   username: { type: String, required: true, unique: true },
+  identifier_name: { type: String, required: true, unique: true },
   bio: { type: String, maxlength: 160 },
   accept_notifications: { type: Boolean, default: true },
-  profile_photo: { type: String, default: null },
+  avatar: { type: String, default: null },
   banner_photo: { type: String, default: null },
   registration_date: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now },

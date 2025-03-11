@@ -21,6 +21,6 @@ export const formatResponse = (message: string, data: any = null) => ({
   ): void {
     // Vous pouvez ici ajouter de la journalisation ou enrichir l'erreur.
     console.error(error);
-    res.status(status).json({ message });
+    res.status(status).json({ message: error.message });
   }
 

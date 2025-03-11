@@ -3,8 +3,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ITweetInteraction extends Document {
   user_id: mongoose.Types.ObjectId;
   tweet_id: mongoose.Types.ObjectId;
-  actionType: 'like' | 'retweet' | 'bookmark' | 'reply';
-  actionDate: Date;
+  action_type: 'like' | 'retweet' | 'bookmark' | 'reply';
+  action_date: Date;
   created_at: Date;
   updated_at: Date;
 }
@@ -12,12 +12,12 @@ export interface ITweetInteraction extends Document {
 const TweetInteractionSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   tweet_id: { type: Schema.Types.ObjectId, ref: 'Tweet', required: true },
-  actionType: { 
+  action_type: { 
     type: String, 
     enum: ['like', 'retweet', 'bookmark', 'reply'], 
     required: true 
   },
-  actionDate: { type: Date, default: Date.now },
+  action_date: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 }, {

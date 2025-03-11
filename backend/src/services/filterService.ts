@@ -1,7 +1,7 @@
 import mongoose, { SortOrder } from "mongoose";
 
-export class FilterService {
-    static buildQuery(filters: any) {
+class FilterService {
+    public buildQuery(filters: any) {
         const query: any = {};
 
 
@@ -20,7 +20,7 @@ export class FilterService {
         return query;
     }
 
-    static applySortingAndPagination(query: any, filters: any) {
+    public applySortingAndPagination(query: any, filters: any) {
         let sort: Record<string, SortOrder> | null = null;
 
         if (filters.sort) {
@@ -35,3 +35,6 @@ export class FilterService {
         return { sort, skip, limit };
     }
 }
+
+const filterService = new FilterService();
+export default filterService;

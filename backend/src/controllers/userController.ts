@@ -81,7 +81,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
     if (createdAt) {
       const [start, end] = (createdAt as string).split(',');
       filter.createdAt = {
-        $gte: new Date(start),
+        $gte: start ? new Date(start) : new Date(),
         $lte: end ? new Date(end) : new Date()
       };
     }
@@ -89,7 +89,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
     if (updatedAt) {
       const [start, end] = (updatedAt as string).split(',');
       filter.updatedAt = {
-        $gte: new Date(start),
+        $gte: start ? new Date(start) : new Date(),
         $lte: end ? new Date(end) : new Date()
       };
     }

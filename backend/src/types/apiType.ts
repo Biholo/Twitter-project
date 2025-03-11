@@ -5,6 +5,7 @@ export interface AuthenticatedUser {
   id: mongoose.Types.ObjectId;
   name?: string;
   email?: string;
+  role?: string[];
 }
 
 export interface AuthenticatedRequest extends Request {

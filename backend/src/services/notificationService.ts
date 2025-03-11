@@ -1,19 +1,9 @@
 import { WebSocket } from 'ws';
 import { Document, Types } from 'mongoose';
-import Notification, { INotification } from '@/models/notificationModel';
+import Notification, { INotification, NotificationType } from '@/models/notificationModel';
 import userRepository from '@/repositories/userRepository';
 import tweetRepository from '@/repositories/tweetRepository';
 import notificationRepository from '@/repositories/notificationRepository';
-
-export enum NotificationType {
-  NEW_FOLLOWER = 'NEW_FOLLOWER',
-  LIKE = 'LIKE',
-  RETWEET = 'RETWEET',
-  REPLY = 'REPLY',
-  MENTION = 'MENTION',
-  QUOTE = 'QUOTE'
-}
-
 interface NotificationResponse {
   _id: string;
   type: NotificationType;
@@ -118,7 +108,6 @@ class NotificationService {
       [NotificationType.RETWEET]: `@${username} a retweeté votre tweet`,
       [NotificationType.REPLY]: `@${username} a répondu à votre tweet`,
       [NotificationType.MENTION]: `@${username} vous a mentionné dans un tweet`,
-      [NotificationType.QUOTE]: `@${username} a cité votre tweet`
     };
     return contents[type];
   }
@@ -141,6 +130,33 @@ class NotificationService {
 
   async notifyMention(senderId: string, receiverId: string, tweetId: string): Promise<NotificationResponse> {
     return this.createNotification(NotificationType.MENTION, senderId, receiverId, tweetId);
+  }
+
+  async getNotifications(query: any): Promise<NotificationResponse[]> {
+    const notifications = await notificationRepository.findNotifications(query);
+    
+    const formattedNotifications: NotificationResponse[] = notifications.map(notification => ({
+      _id: notification._id.toString(),
+      type: notification.type as NotificationType,
+      created_at: notification.created_at,
+      read: notification.is_read,
+      sender: {
+        _id: notification.user_id.toString(),
+        username: notification.sender.username,
+        identifier_name: notification.sender.identifier_name,
+        avatar: notification.sender.avatar || ''
+      },
+      content: this.getNotificationContent(notification.type as NotificationType, notification.sender.username),
+      ...(notification.tweet && {
+        tweet: {
+          _id: notification.tweet._id.toString(),
+          content: notification.tweet.content,
+          media_url: notification.tweet.media_url
+        }
+      })
+    }));
+
+    return formattedNotifications;
   }
 }
 

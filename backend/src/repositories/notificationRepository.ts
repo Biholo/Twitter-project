@@ -8,11 +8,11 @@ class NotificationRepository extends BaseRepository<INotification> {
     super(Notification);
   }
 
-  async getUnreadNotifications(userId: mongoose.Types.ObjectId) {
-    return this.model.find({ receiver: userId, read: false })
-      .sort({ created_at: -1 })
-      .populate('sender', 'username avatar')
-      .populate('tweet', 'content');
+  async findNotifications(filter: any): Promise<any[]> {
+    return this.model.find(filter)
+      .populate('sender', 'username identifier_name avatar')
+      .populate('tweet', 'content media_url')
+      .sort({ created_at: -1 });
   }
 
   async markAllAsRead(userId: mongoose.Types.ObjectId) {
@@ -24,28 +24,6 @@ class NotificationRepository extends BaseRepository<INotification> {
 
   async markAsRead(id: mongoose.Types.ObjectId) {
     return this.model.findByIdAndUpdate(id, { read: true });
-  }
-
-  async findWithPagination(filter: any, page: number, limit: number, options: any = {}) {
-    const skip = (page - 1) * limit;
-    const [data, total] = await Promise.all([
-      this.model.find(filter)
-        .populate('sender', 'username avatar')
-        .populate('tweet', 'content')
-        .sort(options.sort || { created_at: -1 })
-        .skip(skip)
-        .limit(limit),
-      this.model.countDocuments(filter)
-    ]);
-
-    return {
-      data,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit)
-      }
-    };
   }
 }
 

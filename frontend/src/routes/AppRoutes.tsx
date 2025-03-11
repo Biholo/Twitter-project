@@ -4,8 +4,8 @@ import PublicRoutes from '@/routes/PublicRoutes';
 import Login from '@/features/auth/Login';
 import Register from '@/features/auth/Register';
 import Error from '@/features/Error';
-import { useAuthStore } from '@/stores/authStore';
 import Loader from '@/components/ui/Loader';
+import { useAuthStore } from '@/stores/authStore';
 import { useAutoLogin } from '@/api/queries/authQueries';
 import { useEffect } from 'react';
 import Home from '@/features/feed/Home';
@@ -14,7 +14,7 @@ import Signets from '@/features/feed/Signet';
 import Explorer from '@/features/feed/Explorer';
 
 const AppRoutes = () => {
-
+  const { isAuthenticated } = useAuthStore();
   const { refetch: autoLogin, isPending } = useAutoLogin();
 
   useEffect(() => {
@@ -36,16 +36,15 @@ const AppRoutes = () => {
 
           {/* Routes privées */}
           <Route element={<PrivateRoutes />}>
-           
+            <Route path='/home' element={<Home />} />
+            <Route path='/profil' element={<Profil />} />
+            <Route path='/explore' element={<Explorer />} />
+            <Route path='/signets' element={<Signets />} />
           </Route>
 
           {/* Route par défaut */}
-          <Route path='/home' element={<Home />} />
-          <Route path='/profil' element={<Profil />} />
-          <Route path='/explore' element={<Explorer />} />
-          <Route path='/signets' element={<Signets />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
+          <Route path="*" element={isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
           <Route path="/error" element={<Error />} />
         </Routes>
       </main>

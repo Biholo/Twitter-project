@@ -7,6 +7,7 @@ const hashPassword = (password: string) => bcrypt.hashSync(password, 10);
 // Création d'ObjectId pour les utilisateurs (à des fins de démonstration)
 const kilianId = new mongoose.Types.ObjectId();
 const adminId = new mongoose.Types.ObjectId();
+const johnId = new mongoose.Types.ObjectId();
 
 // Tweet parent pour tester les réponses
 const parentTweetId = new mongoose.Types.ObjectId();
@@ -14,6 +15,7 @@ const parentTweetId = new mongoose.Types.ObjectId();
 export const fixtureIds = {
   kilianId,
   adminId,
+  johnId,
   parentTweetId
 };
 
@@ -40,5 +42,16 @@ export const userFixtures: Partial<IUser>[] = [
     created_at: new Date(),
     updated_at: new Date(),
     bio: "Administrateur du site",
+  },
+  {
+    _id: fixtureIds.johnId,
+    identifier_name: "john",
+    username: "John",
+    email: "John@gmail.com",
+    password: hashPassword("Adminpassword123!"),
+    roles: ["ROLE_USER"],
+    created_at: new Date(),
+    updated_at: new Date(),
+    bio: "Développeur passionné",
   }
 ];

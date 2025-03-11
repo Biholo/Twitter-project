@@ -25,27 +25,42 @@ const EMAIL_VERIFICATION_TOKEN = process.env.EMAIL_VERIFICATION_TOKEN || "une_au
 export const register = async (req: Request, res: Response): Promise<void> => {
   const { username, identifier_name, email, password, roles } = req.body;
 
-
-  if (!username || !identifier_name || !  email || !password) {
+  if (!username || !identifier_name || !email || !password) {
     res.status(400).json({ message: "Tous les champs sont requis." });
     return;
   }
 
+  // Validation de l'identifier_name
+  const identifierNameRegex = /^[a-z0-9_-]+$/;
+  if (!identifierNameRegex.test(identifier_name)) {
+    res.status(400).json({ 
+      message: "L'identifiant ne peut contenir que des lettres minuscules, des chiffres, des tirets (-) et des underscores (_)." 
+    });
+    return;
+  }
+
   try {
-    // Vérifier si l'email ou l'identifier_name est déjà utilisé
-    const existingUser = await userRepository.findOne({ 
+    // Vérifier si l'email, l'identifier_name ou le username est déjà utilisé
+    const existingUser = await userRepository.findOne({
       $or: [
-        { email: email },
-        { identifier_name: identifier_name }
+        { email },
+        { identifier_name }      
       ]
     });
 
     if (existingUser) {
-      const message = existingUser.email === email 
-        ? "Cet email est déjà utilisé."
-        : "Cet identifiant est déjà utilisé.";
-      res.status(409).json({ message });
-      return;
+      if (existingUser.email === email) {
+        res.status(409).json({ message: "Cet email est déjà utilisé." });
+        return;
+      }
+      if (existingUser.identifier_name === identifier_name) {
+        res.status(409).json({ message: "Cet identifiant est déjà utilisé." });
+        return;
+      }
+      if (existingUser.username === username) {
+        res.status(409).json({ message: "Ce nom d'utilisateur est déjà utilisé." });
+        return;
+      }
     }
 
     // Hacher le mot de passe
@@ -66,16 +81,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     await newUser.save();
 
 
-    // //create verification token without expiration date
-    // const verificationToken = jwt.sign({ id: newUser._id }, EMAIL_VERIFICATION_TOKEN);
-
-    // const accountConfirmationHtml = templateService.generateHtml('accountConfirmation', { name: newUser.first_name, link: `${process.env.FRONTEND_URL}/confirm-email?token=${verificationToken}` });
-    const welcomeHtml = templateService.generateHtml('welcome', { name: newUser.username, link: `${process.env.FRONTEND_URL}` });
-
-    // await emailService.sendEmail(newUser.email, "Confirmation d'email", accountConfirmationHtml);
-    await emailService.sendEmail(newUser.email, "Bienvenue", welcomeHtml);
-
-    // Remplacer la génération manuelle des tokens par generateTokens
+  
     const { accessToken, refreshToken } = await generateTokens(newUser, req);
 
     res.status(200).json({ access_token: accessToken.token, refresh_token: refreshToken.token });

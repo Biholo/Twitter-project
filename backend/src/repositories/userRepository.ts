@@ -8,6 +8,10 @@ class UserRepository extends BaseRepository<IUser> {
     super(User);
   }
 
+  async findByEmailOrIdentifierName(email: string, identifier_name: string): Promise<IUser | null> {
+    return this.model.findOne({ $or: [{ email }, { identifier_name }] });
+  }
+
   async findByEmail(email: string): Promise<IUser | null> {
     return this.model.findOne({ email });
   }

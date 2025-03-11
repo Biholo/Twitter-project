@@ -1,5 +1,7 @@
 import User from "@/models/userModel";
 import Tweet from "@/models/tweetModel";
+import { notifications } from './notificationFixtures';
+import Notification from '@/models/notificationModel';
 
 import { userFixtures } from "./userFixture";
 import { tweetFixtures } from "./tweetFixtures";
@@ -14,8 +16,14 @@ export async function loadFixtures(): Promise<void> {
     await User.insertMany(userFixtures);
     await Tweet.deleteMany({});
     await Tweet.insertMany(tweetFixtures);
-    console.log("Les fixtures ont été chargées avec succès !");
+
+    // Notifications
+    await Notification.deleteMany({});
+    await Notification.insertMany(notifications);
+
+    console.log("✅ Toutes les fixtures ont été chargées avec succès");
   } catch (error) {
-    console.error("Erreur lors du chargement des fixtures :", error);
+    console.error("❌ Erreur lors du chargement des fixtures:", error);
+    throw error;
   }
 }

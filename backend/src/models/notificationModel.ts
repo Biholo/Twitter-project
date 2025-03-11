@@ -1,8 +1,16 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export enum NotificationType {
+  NEW_FOLLOWER = 'NEW_FOLLOWER',
+  LIKE = 'LIKE',
+  RETWEET = 'RETWEET',
+  REPLY = 'REPLY',
+  MENTION = 'MENTION',
+}
+
 export interface INotification extends Document {
   _id: mongoose.Types.ObjectId;
-  type: 'like' | 'retweet' | 'reply' | 'follow' | 'mention';
+  type: NotificationType;
   message: string;
   is_read: boolean;
   notification_date: Date;
@@ -14,12 +22,7 @@ export interface INotification extends Document {
 }
 
 const NotificationSchema = new Schema({
-  
-  type: { 
-    type: String, 
-    enum: ['like', 'retweet', 'reply', 'follow', 'mention'], 
-    required: true 
-  },
+  type: { type: String, enum: Object.values(NotificationType), required: true },
   message: { type: String, required: true },
   is_read: { type: Boolean, default: false },
   notification_date: { type: Date, default: Date.now },

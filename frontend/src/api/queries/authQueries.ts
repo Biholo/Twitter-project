@@ -4,7 +4,6 @@ import { authService } from "@/api/authService";
 import { AuthResponse } from "@/types";
 import Cookies from 'js-cookie';
 import { useNavigate } from "react-router-dom";
-import { log } from "console";
 
 export const useRegister = () => {
     const { login } = useAuthStore();

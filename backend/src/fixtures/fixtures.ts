@@ -1,14 +1,16 @@
-import User from "@/models/userModel";
-import Tweet from "@/models/tweetModel";
-import { notifications } from './notificationFixtures';
-import Notification from '@/models/notificationModel';
 import Follow from '@/models/followModel';
+import Hashtag from '@/models/hashtagModel';
+import Notification from '@/models/notificationModel';
 import TweetInteraction from '@/models/tweetInteractionModel';
-
-import { userFixtures } from "./userFixture";
+import Tweet from "@/models/tweetModel";
+import User from "@/models/userModel";
+import TweetHashtag from '@/repositories/tweetHashtagModel';
+import { hashtagFixtures } from './hashtagFixtures';
+import { notifications } from './notificationFixtures';
 import { tweetFixtures } from "./tweetFixtures";
-import { followFixtures } from "./followFixtures";
+import { tweetHashtagFixtures } from './tweetHashtagFixtures';
 import { tweetInteractionFixtures } from "./tweetInteractionFixtures";
+import { userFixtures } from "./userFixture";
 
 /**
  * Charge l'ensemble des fixtures dans la base de données.
@@ -23,7 +25,9 @@ export async function loadFixtures(): Promise<void> {
       Tweet.deleteMany({}),
       Notification.deleteMany({}),
       Follow.deleteMany({}),
-      TweetInteraction.deleteMany({})
+      TweetInteraction.deleteMany({}),
+      Hashtag.deleteMany({}),
+      TweetHashtag.deleteMany({})
     ]);
 
     // 2. Insertion des utilisateurs en premier
@@ -32,34 +36,35 @@ export async function loadFixtures(): Promise<void> {
 
     // 3. Insertion des tweets
     console.log("📝 Insertion des tweets...");
-    const insertedTweets = await Tweet.insertMany(tweetFixtures);
+    await Tweet.insertMany(tweetFixtures);
 
-    // 4. Mise à jour des IDs de tweets dans les interactions
-    console.log("🔄 Mise à jour des références de tweets...");
-    const updatedInteractions = tweetInteractionFixtures.map((interaction, index) => ({
-      ...interaction,
-      tweet_id: insertedTweets[index % insertedTweets.length]?._id.toString() // Conversion en string
-    }));
+    // 4. Insertion des hashtags
+    console.log("🔖 Insertion des hashtags...");
+    await Hashtag.insertMany(hashtagFixtures);
 
-    // 5. Insertion des follows
+    // 5. Insertion des associations tweet-hashtag
+    console.log("🔗 Insertion des associations tweet-hashtag...");
+    await TweetHashtag.insertMany(tweetHashtagFixtures);
+
+    // 6. Insertion des follows
     console.log("🤝 Insertion des follows...");
     // await Follow.insertMany(followFixtures);
 
-    // 6. Insertion des notifications
+    // 7. Insertion des notifications
     console.log("🔔 Insertion des notifications...");
     await Notification.insertMany(notifications);
 
-    // 7. Insertion des interactions
+    // 8. Insertion des interactions
     console.log("👍 Insertion des interactions...");
-    await TweetInteraction.insertMany(updatedInteractions);
+    await TweetInteraction.insertMany(tweetInteractionFixtures);
 
     console.log("✅ Toutes les fixtures ont été chargées avec succès");
   } catch (error) {
-    console.error("❌ Erreur lors du chargement des fixtures:", error);
+    // console.error("❌ Erreur lors du chargement des fixtures:", error);
     // Log plus détaillé de l'erreur
     if (error instanceof Error) {
-      console.error("Message d'erreur:", error.message);
-      console.error("Stack trace:", error.stack);
+      // console.error("Message d'erreur:", error.message);
+      // console.error("Stack trace:", error.stack);
     }
     throw error;
   }

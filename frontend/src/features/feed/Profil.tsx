@@ -1,10 +1,14 @@
-import DetailedTweet from "@/components/feed/DetailedTweet"
 import TrendingSection from "@/components/feed/TrendingSection"
-import TweetFeed from "@/components/feed/TweetFeed"
 import TwitterProfile from "@/components/feed/TwitterProfile"
 import { Sidebar } from "@/components/ui/Sidebar"
+import { useGetTweetByUser } from "@/api/queries/tweetQueries";
+import TweetFeed from "@/components/feed/TweetFeed";
 
 export default function Profil() {
+  const { data: tweets, isLoading } = useGetTweetByUser();
+  
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <Sidebar />
@@ -15,9 +19,8 @@ export default function Profil() {
             <div className="flex-1 max-w-3xl">
               <TwitterProfile />
               <div className="mt-4">
-                <DetailedTweet />
                 <div className="mt-4">
-                  <TweetFeed />
+                  <TweetFeed tweets={tweets} />
                 </div>
               </div>
             </div>

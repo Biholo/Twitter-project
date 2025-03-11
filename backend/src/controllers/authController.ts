@@ -25,7 +25,6 @@ const EMAIL_VERIFICATION_TOKEN = process.env.EMAIL_VERIFICATION_TOKEN || "une_au
 export const register = async (req: Request, res: Response): Promise<void> => {
   const { username, identifier_name, email, password, roles } = req.body;
 
-
   if (!username || !identifier_name || !  email || !password) {
     res.status(400).json({ message: "Tous les champs sont requis." });
     return;

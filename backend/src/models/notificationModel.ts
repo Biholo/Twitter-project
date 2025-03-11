@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface INotification extends Document {
+  _id: mongoose.Types.ObjectId;
   type: 'like' | 'retweet' | 'reply' | 'follow' | 'mention';
   message: string;
   is_read: boolean;
@@ -13,6 +14,7 @@ export interface INotification extends Document {
 }
 
 const NotificationSchema = new Schema({
+  
   type: { 
     type: String, 
     enum: ['like', 'retweet', 'reply', 'follow', 'mention'], 

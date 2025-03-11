@@ -9,7 +9,7 @@ import ResetPassword from "@/models/resetPasswordModel";
 import emailService from "@/services/emailService";
 import templateService from "@/services/templateService";
 import { AuthenticatedRequest } from "@/types";
-import userRepository from "@/repositories/useRepository";
+import userRepository from "@/repositories/userRepository";
 
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "votre_clé_secrète_très_longue_et_complexe";
 const EMAIL_VERIFICATION_TOKEN = process.env.EMAIL_VERIFICATION_TOKEN || "une_autre_clé_secrète_différente_très_longue";

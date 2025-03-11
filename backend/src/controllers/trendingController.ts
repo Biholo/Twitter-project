@@ -3,8 +3,9 @@ import { handleError } from '@/utils/responseFormatter';
 import hashtagRepository from '@/repositories/hashtagRepository';
 import tweetRepository from '@/repositories/tweetRepository';
 import { TrendingHashtagsQuery, TrendingTweetsQuery } from '@/validators/trendingValidator';
+import { AuthenticatedRequest } from '@/types';
 
-type RequestWithValidatedQuery<T> = Request & { query: T };
+type RequestWithValidatedQuery<T> = AuthenticatedRequest & { query: T };
 
 export const getTrendingHashtags = async (
     req: RequestWithValidatedQuery<TrendingHashtagsQuery>,
@@ -33,15 +34,29 @@ export const getTrendingTweets = async (
 ): Promise<void> => {
     try {
         const { limit, date } = req.query;
+        const userId = req.user?.id;
 
-        const trendingTweets = await tweetRepository.getTrendingTweets({
+        // Si aucune date n'est fournie, on utilise la date du jour
+        const searchDate = date ? new Date(date) : new Date();
+
+        // Vérification que la date est valide
+        if (isNaN(searchDate.getTime())) {
+            res.status(400).json({
+                message: "La date fournie n'est pas valide"
+            });
+            return;
+        }
+
+        const result = await tweetRepository.findTrendingTweets({
             limit,
-            date
+            date: searchDate,
+            authenticatedUserId: userId?.toString()
         });
 
         res.status(200).json({
             message: "Tweets tendances récupérés avec succès",
-            data: trendingTweets
+            data: result.tweets,
+            pagination: result.pagination
         });
     } catch (error) {
         handleError(res, error, "Erreur lors de la récupération des tweets tendances");

@@ -562,6 +562,286 @@ class TweetRepository extends BaseRepository<ITweet> {
         { $limit: limit }
     ]);
 }
+
+async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: number, date: Date, authenticatedUserId?: string }) {
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(startDate);
+    endDate.setHours(23, 59, 59, 999);
+
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          created_at: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'tweetinteractions',
+          localField: '_id',
+          foreignField: 'tweet_id',
+          as: 'interactions'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'author_id',
+          foreignField: '_id',
+          as: 'author'
+        }
+      },
+      { $unwind: '$author' },
+      {
+        $addFields: {
+          likes_count: {
+            $size: {
+              $filter: {
+                input: '$interactions',
+                as: 'interaction',
+                cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+              }
+            }
+          },
+          saves_count: {
+            $size: {
+              $filter: {
+                input: '$interactions',
+                as: 'interaction',
+                cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+              }
+            }
+          },
+          retweets_count: {
+            $size: {
+              $filter: {
+                input: '$interactions',
+                as: 'interaction',
+                cond: { $eq: ['$$interaction.interaction_type', 'retweet'] }
+              }
+            }
+          },
+          engagement_score: {
+            $add: [
+              {
+                $size: {
+                  $filter: {
+                    input: '$interactions',
+                    as: 'interaction',
+                    cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+                  }
+                }
+              },
+              {
+                $multiply: [
+                  {
+                    $size: {
+                      $filter: {
+                        input: '$interactions',
+                        as: 'interaction',
+                        cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+                      }
+                    }
+                  },
+                  2
+                ]
+              },
+              {
+                $multiply: [
+                  {
+                    $size: {
+                      $filter: {
+                        input: '$interactions',
+                        as: 'interaction',
+                        cond: { $eq: ['$$interaction.interaction_type', 'retweet'] }
+                      }
+                    }
+                  },
+                  3
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ];
+
+    // Ajout des interactions de l'utilisateur authentifié si présent
+    if (authenticatedUserId) {
+      pipeline.push({
+        $lookup: {
+          from: 'tweetinteractions',
+          let: { tweet_id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$tweet_id', '$$tweet_id'] },
+                    { $eq: ['$user_id', new Types.ObjectId(authenticatedUserId)] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'currentUserInteractions'
+        }
+      },
+      {
+        $addFields: {
+          is_liked: {
+            $in: ['like', '$currentUserInteractions.interaction_type']
+          },
+          is_saved: {
+            $in: ['save', '$currentUserInteractions.interaction_type']
+          },
+          is_retweeted: {
+            $in: ['retweet', '$currentUserInteractions.interaction_type']
+          }
+        }
+      });
+    }
+
+    // Ajout des réponses récentes
+    pipeline.push({
+      $lookup: {
+        from: 'tweets',
+        let: { tweetId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { 
+                $and: [
+                  { $eq: ['$parent_tweet_id', '$$tweetId'] },
+                  { $eq: ['$tweet_type', 'reply'] }
+                ]
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'author_id',
+              foreignField: '_id',
+              as: 'author'
+            }
+          },
+          { $unwind: '$author' },
+          {
+            $lookup: {
+              from: 'tweetinteractions',
+              localField: '_id',
+              foreignField: 'tweet_id',
+              as: 'interactions'
+            }
+          },
+          {
+            $addFields: {
+              likes_count: {
+                $size: {
+                  $filter: {
+                    input: '$interactions',
+                    as: 'interaction',
+                    cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+                  }
+                }
+              },
+              saves_count: {
+                $size: {
+                  $filter: {
+                    input: '$interactions',
+                    as: 'interaction',
+                    cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+                  }
+                }
+              },
+              retweets_count: {
+                $size: {
+                  $filter: {
+                    input: '$interactions',
+                    as: 'interaction',
+                    cond: { $eq: ['$$interaction.interaction_type', 'retweet'] }
+                  }
+                }
+              }
+            }
+          },
+          { $sort: { created_at: -1 } },
+          { $limit: 5 },
+          {
+            $project: {
+              _id: 1,
+              content: 1,
+              media_url: 1,
+              created_at: 1,
+              likes_count: 1,
+              saves_count: 1,
+              retweets_count: 1,
+              author: {
+                _id: '$author._id',
+                username: '$author.username',
+                identifier_name: '$author.identifier_name',
+                avatar: '$author.avatar'
+              }
+            }
+          }
+        ],
+        as: 'replies'
+      }
+    });
+
+    // Tri et projection finale
+    pipeline.push(
+      { $sort: { engagement_score: -1 } },
+      { $limit: limit },
+      {
+        $project: {
+          _id: 1,
+          content: 1,
+          media_url: 1,
+          hashtags: 1,
+          created_at: 1,
+          engagement_score: 1,
+          'author._id': 1,
+          'author.username': 1,
+          'author.identifier_name': 1,
+          'author.avatar': 1,
+          likes_count: 1,
+          saves_count: 1,
+          retweets_count: 1,
+          is_liked: 1,
+          is_saved: 1,
+          is_retweeted: 1,
+          replies: 1,
+          replies_count: { $size: '$replies' }
+        }
+      }
+    );
+
+    const [tweets, total] = await Promise.all([
+      this.model.aggregate(pipeline),
+      this.model.countDocuments({
+        created_at: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      })
+    ]);
+
+    return {
+      tweets,
+      pagination: {
+        total,
+        page: 1,
+        pages: Math.ceil(total / limit),
+        has_more: total > limit
+      }
+    };
+  }
 }
 
 const tweetRepository = new TweetRepository();

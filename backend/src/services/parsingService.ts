@@ -2,7 +2,7 @@ import { ITweet } from "@/models/tweetModel";
 import mentionRepository from "@/repositories/mentionRepository";
 import hashtagRepository from "@/repositories/hashtagRepository";
 import tweetHashtagRepository from "@/repositories/tweetHashtagRepository";
-import userRepository from "@/repositories/useRepository";
+import userRepository from "@/repositories/userRepository";
 
 
 interface ParsedContent {

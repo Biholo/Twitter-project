@@ -2,14 +2,25 @@ import { Server } from 'http';
 import { WebSocket, WebSocketServer } from 'ws';
 import notificationService from './notificationService';
 import { verifyToken } from '@/utils/jwt';
+import userRepository from '@/repositories/userRepository';
 
-export class WebSocketManager {
+interface ConnectedUser {
+  userId: string;
+  username: string;
+  identifier_name: string;
+  avatar: string;
+  connections: WebSocket[];
+}
+
+class WebSocketManager {
   private wss: WebSocketServer;
-  private notificationService: NotificationService;
+  private notificationService: any;
+  private connectedUsers: Map<string, ConnectedUser>;
 
   constructor(server: Server) {
     this.wss = new WebSocketServer({ server });
     this.notificationService = notificationService;
+    this.connectedUsers = new Map();
     this.init();
   }
 
@@ -18,21 +29,25 @@ export class WebSocketManager {
       try {
         // Extraire et vérifier le token
         const token = this.extractToken(req);
-        const userId = await this.authenticateConnection(token);
+        const user = await this.authenticateConnection(token);
 
-        // Ajouter le client aux connexions WebSocket
-        this.notificationService.addClient(userId, ws);
+        // Ajouter l'utilisateur aux connexions
+        this.addUserConnection(user, ws);
+
+        // Notifier tous les clients du changement de la liste des utilisateurs connectés
+        this.broadcastConnectedUsers();
 
         // Gérer la déconnexion
         ws.on('close', () => {
-          this.notificationService.removeClient(userId, ws);
+          this.removeUserConnection(user.userId, ws);
+          this.broadcastConnectedUsers();
         });
 
         // Gérer les messages reçus
         ws.on('message', async (message: string) => {
           try {
             const data = JSON.parse(message);
-            await this.handleMessage(userId, data);
+            await this.handleMessage(user.userId, data);
           } catch (error) {
             console.error('Erreur de traitement du message:', error);
           }
@@ -45,6 +60,63 @@ export class WebSocketManager {
     });
   }
 
+  private addUserConnection(user: Omit<ConnectedUser, 'connections'>, ws: WebSocket): void {
+    if (!this.connectedUsers.has(user.userId)) {
+      this.connectedUsers.set(user.userId, {
+        ...user,
+        connections: [ws]
+      });
+    } else {
+      const existingUser = this.connectedUsers.get(user.userId);
+      if (existingUser) {
+        existingUser.connections.push(ws);
+      }
+    }
+  }
+
+  private removeUserConnection(userId: string, ws: WebSocket): void {
+    const user = this.connectedUsers.get(userId);
+    if (user) {
+      user.connections = user.connections.filter(conn => conn !== ws);
+      if (user.connections.length === 0) {
+        this.connectedUsers.delete(userId);
+      }
+    }
+  }
+
+  private broadcastConnectedUsers(): void {
+    const connectedUsers = Array.from(this.connectedUsers.values()).map(user => ({
+      userId: user.userId,
+      username: user.username,
+      identifier_name: user.identifier_name,
+      avatar: user.avatar
+    }));
+
+    const message = JSON.stringify({
+      type: 'CONNECTED_USERS_UPDATE',
+      data: connectedUsers
+    });
+
+    this.wss.clients.forEach(client => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
+
+  public getConnectedUsers(): Array<Omit<ConnectedUser, 'connections'>> {
+    return Array.from(this.connectedUsers.values()).map(user => ({
+      userId: user.userId,
+      username: user.username,
+      identifier_name: user.identifier_name,
+      avatar: user.avatar
+    }));
+  }
+
+  public isUserConnected(userId: string): boolean {
+    return this.connectedUsers.has(userId);
+  }
+
   private extractToken(req: any): string {
     const token = req.url.split('token=')[1];
     if (!token) {
@@ -53,10 +125,21 @@ export class WebSocketManager {
     return token;
   }
 
-  private async authenticateConnection(token: string): Promise<string> {
+  private async authenticateConnection(token: string): Promise<Omit<ConnectedUser, 'connections'>> {
     try {
       const decoded = await verifyToken(token);
-      return decoded.id;
+      const user = await userRepository.findById(decoded.userId);
+      
+      if (!user) {
+        throw new Error('Utilisateur non trouvé');
+      }
+
+      return {
+        userId: user.id.toString(),
+        username: user.username,
+        identifier_name: user.identifier_name,
+        avatar: user.avatar || ''
+      };
     } catch (error) {
       throw new Error('Token invalide');
     }
@@ -65,10 +148,23 @@ export class WebSocketManager {
   private async handleMessage(userId: string, data: any): Promise<void> {
     // Gérer différents types de messages
     switch (data.type) {
-      case 'READ_NOTIFICATION':
-        await this.notificationService.markAsRead(data.notificationId);
+      case 'NEW_FOLLOWER':
+          const newFollower = await this.notificationService.getNewFollower(data.userId);
         break;
-      // Ajouter d'autres cas selon les besoins
+      case 'LIKE':
+        const like = await this.notificationService.getLike(data.userId);
+        break;
+      case 'RETWEET':
+        const retweet = await this.notificationService.getRetweet(data.userId);
+        break;
+      case 'REPLY':
+        const reply = await this.notificationService.getReply(data.userId);
+        break;
+      case 'MENTION':
+        const mention = await this.notificationService.getMention(data.userId);
+        break;        
     }
   }
 }
+
+export default WebSocketManager;

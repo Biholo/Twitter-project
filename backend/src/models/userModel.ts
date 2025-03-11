@@ -3,7 +3,7 @@ import { roles } from '@/config/role';
 
 export interface IUser extends Document {
   // Champs originaux
-
+  _id: mongoose.Types.ObjectId;
   email: string;
   password: string;
   roles: string[];
@@ -17,7 +17,7 @@ export interface IUser extends Document {
   identifier_name: string;
   bio?: string;
   accept_notifications: boolean;
-  profile_photo?: string;
+  avatar?: string;
   banner_photo?: string;
   registration_date: Date;
   created_at: Date;
@@ -39,7 +39,7 @@ const UserSchema = new Schema({
   identifier_name: { type: String, required: true, unique: true },
   bio: { type: String, maxlength: 160 },
   accept_notifications: { type: Boolean, default: true },
-  profile_photo: { type: String, default: null },
+  avatar: { type: String, default: null },
   banner_photo: { type: String, default: null },
   registration_date: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now },

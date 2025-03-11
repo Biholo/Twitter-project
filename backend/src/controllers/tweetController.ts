@@ -251,3 +251,67 @@ export const updateTweet = async (req: AuthenticatedRequest, res: Response): Pro
         handleError(res, error, "Erreur lors de la modification du tweet.");
     }
 };
+
+/**
+ * Récupère les tweets favoris ou sauvegardés d'un utilisateur
+ * @param req.params.id - L'ID du tweet
+ * @param req.query.type - Le type de tweets à récupérer ('liked', 'saved' ou 'retweet')
+ * @param req.query.page - Numéro de page (default: 1)
+ * @param req.query.limit - Nombre d'éléments par page (default: 10)
+ */
+export const getUserTweetCollection = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { type = 'liked', page = '1', limit = '10', user_id } = req.query;
+        const authenticatedUserId = req.user?.id;
+
+        // Vérification du type
+        if (type !== 'liked' && type !== 'saved' && type !== 'retweet') {
+            res.status(400).json({
+                message: "Le type doit être 'liked', 'saved' ou 'retweet'"
+            });
+            return;
+        }
+
+        // Protection des tweets sauvegardés
+        if (type === 'saved' && (!authenticatedUserId || id !== authenticatedUserId.toString())) {
+            res.status(403).json({
+                message: "Vous ne pouvez pas accéder aux tweets sauvegardés d'un autre utilisateur"
+            });
+            return;
+        }
+
+        const filters: TweetFilters = {
+            page: parseInt(page as string),
+            limit: parseInt(limit as string),
+            user_id: id
+        };
+
+        // Configuration des filtres selon le type
+        switch(type) {
+            case 'liked':
+                filters.include_liked = true;
+                break;
+            case 'saved':
+                filters.include_saved = true;
+                break;
+            case 'retweet':
+                filters.tweet_type = 'retweet';
+                break;
+        }
+
+        const result = await tweetRepository.findTweetsWithFilters({
+            filters,
+            authenticatedUserId: user_id as string
+        });
+
+        res.status(200).json({
+            message: `Tweets ${type === 'liked' ? 'favoris' : type === 'saved' ? 'sauvegardés' : 'retweetés'} récupérés avec succès`,
+            data: result.tweets,
+            pagination: result.pagination
+        });
+
+    } catch (error) {
+        handleError(res, error, `Erreur lors de la récupération des tweets ${req.query.type === 'liked' ? 'favoris' : req.query.type === 'saved' ? 'sauvegardés' : 'retweetés'}.`);
+    }
+};

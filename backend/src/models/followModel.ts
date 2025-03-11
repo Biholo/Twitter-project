@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IFollow extends Document {
   follower_id: mongoose.Types.ObjectId;
   following_id: mongoose.Types.ObjectId;
-  followDate: Date;
+  follow_date: Date;
   created_at: Date;
   updated_at: Date;
 }
@@ -11,7 +11,7 @@ export interface IFollow extends Document {
 const FollowSchema = new Schema({
   follower_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   following_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  followDate: { type: Date, default: Date.now },
+  follow_date: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 }, {
@@ -19,7 +19,7 @@ const FollowSchema = new Schema({
 });
 
 // Index composé pour éviter qu'un utilisateur suive plusieurs fois la même personne
-FollowSchema.index({ followerId: 1, followingId: 1 }, { unique: true });
+FollowSchema.index({ follower_id: 1, following_id: 1 }, { unique: true });
 
 // Middleware pour mettre à jour le champ updated_at avant chaque sauvegarde
 FollowSchema.pre('save', function(next) {

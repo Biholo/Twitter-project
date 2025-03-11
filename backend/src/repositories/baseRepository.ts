@@ -45,6 +45,8 @@ export class BaseRepository<T> {
         return this.model.deleteOne(filter);
     }
 
+    
+
     async findById(id: string) {
         return this.model.findById(id);
     }

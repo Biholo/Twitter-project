@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
-import { createTweet, likeTweet, unlikeTweet, saveTweet, unsaveTweet, getTweets, getTweetDetails, updateTweet } from "@/controllers/tweetController";
+import { createTweet, likeTweet, unlikeTweet, saveTweet, unsaveTweet, getTweets, getTweetDetails, updateTweet, getUserTweetCollection } from "@/controllers/tweetController";
 import { isAuthenticated } from "@/middlewares/auth";
 import { validateZod } from "@/middlewares/validateZod";
-import { createTweetSchema, getTweetsQuerySchema, tweetIdSchema, updateTweetSchema } from "@/validators/tweetValidator";
+import { createTweetSchema, getTweetsQuerySchema, tweetIdSchema, updateTweetSchema, getUserTweetCollectionQuerySchema } from "@/validators/tweetValidator";
 
 export function tweetRoutes() {
   const router = express.Router();
@@ -15,6 +15,7 @@ export function tweetRoutes() {
   router.get("/", isAuthenticated, validateZod(getTweetsQuerySchema, "query"), getTweets);
   router.get("/:id", isAuthenticated, validateZod(tweetIdSchema, "params"), getTweetDetails);
   router.put("/:id", isAuthenticated, validateZod(tweetIdSchema, "params"), validateZod(updateTweetSchema, "body"), updateTweet);
+  router.get("/:id/interactions", isAuthenticated, validateZod(tweetIdSchema, "params"), validateZod(getUserTweetCollectionQuerySchema, "query"), getUserTweetCollection);
   return router;
 }
 

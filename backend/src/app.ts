@@ -15,10 +15,6 @@ import dotenv from "dotenv";
 import connect from "@/config/conn";
 import { loadFixtures } from "@/fixtures/fixtures";
 
-// Import des routes 
-import { authRoutes } from "@/routes/authRoutes";
-import { followRoutes } from "@/routes/followRoutes"; // Import des routes de follow
-
 dotenv.config();
 
 export function createExpressApp() {
@@ -31,13 +27,11 @@ export function createExpressApp() {
   app.use(httpLogger);
   app.use(limiter);
 
-  // Enregistrer les routes
-  app.use("/auth", authRoutes());
-  app.use("/follow", followRoutes());
+  registerRoutes(app);
  
   setupErrorMiddleware(app);
 
-  loadFixtures();  
+  // loadFixtures();  
   
   return app;
 }

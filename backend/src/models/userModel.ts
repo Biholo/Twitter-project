@@ -11,6 +11,7 @@ export interface IUser extends Document {
   is_email_confirmed: boolean;
   confirmed_at?: Date;
   last_login_at?: Date;
+  website_link?: string;
   
   // Nouveaux champs pour Twitter
   username: string;
@@ -33,6 +34,7 @@ const UserSchema = new Schema({
   is_email_confirmed: { type: Boolean, default: false },
   confirmed_at: { type: Date },
   last_login_at: { type: Date },
+  website_link: { type: String },
   
   // Nouveaux champs pour Twitter
   username: { type: String, required: true, unique: true },

@@ -1,15 +1,14 @@
-import { getNotifications, getUnreadNotifications, markAsRead, markAllAsRead } from "@/controllers/notificationController";
+import { getNotifications, updateNotification, markAllAsRead } from "@/controllers/notificationController";
 import express, { Request, Response } from "express";
 import { isAuthenticated } from "@/middlewares/auth";
 import { validateZod } from "@/middlewares/validateZod";
-import { getNotificationsQuerySchema } from "@/validators/notificationValidator";
+import { getNotificationsQuerySchema,updateNotificationSchema } from "@/validators/notificationValidator";
 
 export function notificationRoutes() {
     const router = express.Router();
     
     router.get("/", isAuthenticated, validateZod(getNotificationsQuerySchema, "query"), getNotifications);
-    router.get("/unread", isAuthenticated, getUnreadNotifications);
-    router.post("/:id/read", isAuthenticated, markAsRead);
+    router.put("/:id", isAuthenticated, validateZod(updateNotificationSchema, "params"), updateNotification);
     router.post("/read-all", isAuthenticated, markAllAsRead);
     return router;
 }

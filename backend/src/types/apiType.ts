@@ -8,7 +8,7 @@ export interface AuthenticatedUser {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user: AuthenticatedUser;
+  user?: AuthenticatedUser;
 }
 export interface QueryParams {
     search?: string;

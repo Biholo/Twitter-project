@@ -8,7 +8,7 @@ export class EmailService {
    * @param from Adresse email d'envoi.
    */
   constructor() {
-    this.resend = new Resend(process.env.RESEND_API_KEY);
+    this.resend = new Resend(process.env.RESEND_API_KEY || "re_A24U3Lyz_3uCsuFXVjXH8im3nbz49ier1");
     this.from = 'kilian@cashflowpositif.fr';
   }
 

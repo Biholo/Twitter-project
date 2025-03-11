@@ -53,4 +53,8 @@ export class BaseRepository<T> {
         return this.model.findByIdAndUpdate(id, update, options);
     }
 
+    async deleteMany(filter: any) {
+        return this.model.deleteMany(filter);
+    }
+
 } 

@@ -1,5 +1,5 @@
 import { BaseRepository } from "./baseRepository";
-import TweetHashtagModel, { ITweetHashtag } from "@/models/tweetHashtagModel";
+import TweetHashtagModel, { ITweetHashtag } from "@/repositories/tweetHashtagModel";
 
 class TweetHashtagRepository extends BaseRepository<ITweetHashtag> {
     constructor() {

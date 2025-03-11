@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 const connect = async (): Promise<void> => {
   try {
     
-    const mongoURI = process.env.MONGO_URI!;
+    const mongoURI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/twitter-db";
 
     // Connexion à MongoDB
     await mongoose.connect(mongoURI, {

@@ -2,6 +2,8 @@ import { ITweet } from "@/models/tweetModel";
 import mentionRepository from "@/repositories/mentionRepository";
 import hashtagRepository from "@/repositories/hashtagRepository";
 import tweetHashtagRepository from "@/repositories/tweetHashtagRepository";
+import userRepository from "@/repositories/useRepository";
+
 
 interface ParsedContent {
   mentions: string[];
@@ -40,8 +42,9 @@ class ParsingService {
    * Extrait les hashtags (#tag) du contenu
    */
   private extractHashtags(content: string): string[] {
-    const matches = content.match(this.HASHTAG_REGEX) || [];
-    return matches.map(tag => tag.slice(1)); // Enlève le # du début
+    const matches = content.matchAll(this.HASHTAG_REGEX);
+    const hashtags = Array.from(matches).map(match => match[0].slice(1)); // Enlève le # du début
+    return [...new Set(hashtags)]; // Élimine les doublons
   }
 
   /**
@@ -100,25 +103,54 @@ class ParsingService {
   public async createMentions(tweet: ITweet) {
     const { mentions } = this.parseContent(tweet.content || '');
     for (const mention of mentions) {
-      const mentionExists = await mentionRepository.findOne({ where: { mention: mention, tweet_id: tweet.id } });
+      const mentionedUser = await userRepository.findOne({ where: { identifier_name: mention } });
+      if (!mentionedUser) {
+        throw new Error(`Utilisateur mentionné ${mention} non trouvé`);
+      }
+      const mentionExists = await mentionRepository.findOne({ where: { mentioned_user_id: mentionedUser.id, tweet_id: tweet.id } });
       if (!mentionExists) {
-        await mentionRepository.create({ tweet_id: tweet.id, user_id: mention, mention_type: 'mention' });
+        await mentionRepository.create({ tweet_id: tweet.id, mentioned_user_id: mentionedUser.id });
       }
     }
   }
 
   public async createHashtags(tweet: ITweet) {
+    if (!tweet || !tweet.id) {
+      throw new Error("Tweet invalide ou ID manquant");
+    }
+
     const { hashtags } = this.parseContent(tweet.content || '');
     for (const hashtag of hashtags) {
-      const hashtagExists = await hashtagRepository.findOne({ where: { label: hashtag } });
-      if (!hashtagExists) {
-        const newHashtag = await hashtagRepository.create({ label: hashtag });
-        await tweetHashtagRepository.create({ tweet_id: tweet.id, hashtag_id: newHashtag.id });
-      } else {
-        await tweetHashtagRepository.create({ tweet_id: tweet.id, hashtag_id: hashtagExists.id });
+      try {
+        let hashtagDoc = await hashtagRepository.findOne({ where: { label: hashtag } });
+        if (!hashtagDoc) {
+          hashtagDoc = await hashtagRepository.create({ label: hashtag });
+        }
+        await tweetHashtagRepository.create({ 
+          tweet_id: tweet.id, 
+          hashtag_id: hashtagDoc.id 
+        });
+      } catch (error) {
+        if ((error as any).code !== 11000) { // Ignore les erreurs de doublon
+          throw error;
+        }
       }
     }
   }
+
+  public async updateTweetAssociations(tweet: ITweet) {
+    // Suppression des anciennes associations
+    await Promise.all([
+        tweetHashtagRepository.deleteMany({ tweet_id: tweet.id }),
+        mentionRepository.deleteMany({ tweet_id: tweet.id })
+    ]);
+
+    // Création des nouvelles associations
+    await Promise.all([
+        this.createHashtags(tweet),
+        this.createMentions(tweet)
+    ]);
+}
 }
 
 const parsingService = new ParsingService();

@@ -17,7 +17,7 @@ const TweetHashtagSchema = new Schema({
 });
 
 // Index composé pour éviter les doublons de hashtags dans un même tweet
-TweetHashtagSchema.index({ tweetId: 1, hashtagId: 1 }, { unique: true });
+TweetHashtagSchema.index({ tweet_id: 1, hashtag_id: 1 }, { unique: true });
 
 // Middleware pour mettre à jour le champ updated_at avant chaque sauvegarde
 TweetHashtagSchema.pre('save', function(next) {

@@ -8,15 +8,18 @@ import { corsMiddleware } from "@/middlewares/cors";
 import { securityHeaders } from "@/middlewares/helmet";
 import { limiter } from "@/middlewares/rateLimit";
 import { httpLogger } from "@/middlewares/httpLogger";
-import { registerRoutes } from "@/routes/registerRoutes";
+import { registerRoutes } from "@/routes/registerRoutes"; // Ajouter l'import
 import { errorHandler } from "@/middlewares/errorHandler";
 import { logger } from "@/middlewares/logger";
 import dotenv from "dotenv";
 import connect from "@/config/conn";
 import { loadFixtures } from "@/fixtures/fixtures";
 
-dotenv.config();
+// Import des routes 
+import { authRoutes } from "@/routes/authRoutes";
+import { followRoutes } from "@/routes/followRoutes"; // Import des routes de follow
 
+dotenv.config();
 
 export function createExpressApp() {
   const app = express();
@@ -28,7 +31,10 @@ export function createExpressApp() {
   app.use(httpLogger);
   app.use(limiter);
 
-  registerRoutes(app);
+  // Enregistrer les routes
+  app.use("/auth", authRoutes());
+  app.use("/follow", followRoutes());
+ 
   setupErrorMiddleware(app);
 
   loadFixtures();  

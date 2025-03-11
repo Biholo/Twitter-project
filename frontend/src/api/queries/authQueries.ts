@@ -3,7 +3,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { authService } from "@/api/authService";
 import { AuthResponse } from "@/types";
 import Cookies from 'js-cookie';
-
+import { useNavigate } from "react-router-dom";
+import { log } from "console";
 
 export const useRegister = () => {
     const { login } = useAuthStore();
@@ -30,8 +31,8 @@ export const useRegister = () => {
 };
 
 export const useLogin = () => {
-    const { login } = useAuthStore();
-
+    const { login, setUser } = useAuthStore();
+    const navigate = useNavigate();
 
     return useMutation<
         { access_token: string; refresh_token: string },
@@ -54,9 +55,11 @@ export const useLogin = () => {
 
         onSuccess: async (response: AuthResponse) => {
             login(response.access_token, response.refresh_token);
+            const res = await authService.getUserByToken(response.access_token);
+            setUser(res?.user || null);
             console.log('Login successful');
+            navigate('/home');
         },
-
     });
 };
 
@@ -69,13 +72,11 @@ export const useAutoLogin = () => {
         queryFn: async () => {
             const access_token = Cookies.get('access_token');
             const refresh_token = Cookies.get('refresh_token');
-
-
             if (access_token && refresh_token) {
                 try {
                     const response = await authService.getUserByToken(access_token);
                     login(access_token, refresh_token);
-                    setUser(response?.data || null);
+                    setUser(response?.user || null);
                     setIsAuthenticated(true);
                     return true;
 

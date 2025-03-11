@@ -1,9 +1,13 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
+import { useAuthStore } from "@/stores/authStore";
 import { Calendar, Link2, MapPin } from "lucide-react"
 
 export default function TwitterProfile() {
+
+  const { user } = useAuthStore();
+  
   return (
     <div className="overflow-hidden rounded-xl bg-white/80 backdrop-blur-sm shadow-sm dark:bg-gray-800/80">
       {/* Banner with gradient */}
@@ -20,16 +24,16 @@ export default function TwitterProfile() {
         <div className="absolute -top-16 left-4 rounded-full border-4 border-white dark:border-gray-800">
           <Avatar className="h-32 w-32">
             <AvatarImage src="/placeholder.svg?height=128&width=128" alt="@username" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarFallback>{user?.username.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         </div>
 
         <div className="flex justify-between">
           <div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
-              Jean Dupont
+              {user?.username}
             </h1>
-            <p className="text-gray-500 dark:text-gray-400">@jean_dupont</p>
+            <p className="text-gray-500 dark:text-gray-400">@{user?.identifier_name}</p>
           </div>
           <div className="flex gap-2">
             <Button
@@ -49,7 +53,7 @@ export default function TwitterProfile() {
         </div>
 
         <p className="mt-4">
-          Développeur passionné 💻 | Amoureux de la tech 🚀 | Toujours à la recherche de nouvelles aventures 🌍✨
+          {user?.bio}
         </p>
 
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
@@ -65,7 +69,7 @@ export default function TwitterProfile() {
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4 text-purple-500" />
-            <span>A rejoint en Janvier 2018</span>
+            <span>A rejoint en {user?.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) : ''} </span>
           </div>
         </div>
 

@@ -22,7 +22,6 @@ class AuthService {
 
     public async loginUser(credentials: LoginCredentials): Promise<AuthResponse> {
         const response = await api.fetchRequest('/api/auth/login', 'POST', credentials);
-        console.log(response);
         if (response.access_token) {
             Cookies.set('access_token', response.access_token, { expires: 1 });
             Cookies.set('refresh_token', response.refresh_token, { expires: 7 });

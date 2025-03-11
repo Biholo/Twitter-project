@@ -9,14 +9,10 @@ export default function TwitterProfile() {
   const { user } = useAuthStore();
   
   return (
-    <div className="overflow-hidden rounded-xl bg-white/80 backdrop-blur-sm shadow-sm dark:bg-gray-800/80">
+    <div className="overflow-hidden rounded-xl bg-white/80 backdrop-blur-sm shadow-sm dark:bg-gray-800/80 mt-5">
       {/* Banner with gradient */}
       <div className="h-48 w-full bg-gradient-to-r from-pink-400 to-blue-500">
-        <img
-          src="/placeholder.svg?height=192&width=768"
-          alt="Profile banner"
-          className="h-full w-full object-cover opacity-60"
-        />
+        
       </div>
 
       {/* Profile Info - Fix avatar overlap */}

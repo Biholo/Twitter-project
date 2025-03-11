@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/Card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 

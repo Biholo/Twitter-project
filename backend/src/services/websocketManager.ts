@@ -1,8 +1,11 @@
 import { Server } from 'http';
 import { WebSocket, WebSocketServer } from 'ws';
-import notificationService from './notificationService';
-import { verifyToken } from '@/utils/jwt';
+import { extractTokenFromHeader, verifyToken } from '@/utils/jwt';
 import userRepository from '@/repositories/userRepository';
+
+declare global {
+  var server: Server;
+}
 
 interface ConnectedUser {
   userId: string;
@@ -13,46 +16,53 @@ interface ConnectedUser {
 }
 
 class WebSocketManager {
-  private wss: WebSocketServer;
-  private notificationService: any;
+  private static instance: WebSocketManager | null = null;
+  private wss: WebSocketServer | null = null;
   private connectedUsers: Map<string, ConnectedUser>;
 
-  constructor(server: Server) {
-    this.wss = new WebSocketServer({ server });
-    this.notificationService = notificationService;
+  private constructor() {
     this.connectedUsers = new Map();
+  }
+
+  public static getInstance(): WebSocketManager {
+    if (!WebSocketManager.instance) {
+      WebSocketManager.instance = new WebSocketManager();
+    }
+    return WebSocketManager.instance;
+  }
+
+  public initialize(server: Server): void {
+    if (this.wss) return;
+    
+    this.wss = new WebSocketServer({ server });
     this.init();
   }
 
   private init(): void {
+    if (!this.wss) return;
+
     this.wss.on('connection', async (ws: WebSocket, req) => {
       try {
-        // Extraire et vérifier le token
         const token = this.extractToken(req);
-        const user = await this.authenticateConnection(token);
+        const decoded = await verifyToken(token);
+        const user = await userRepository.findById(decoded.id);
+        
+        if (!user) {
+          throw new Error('Utilisateur non trouvé');
+        }
 
-        // Ajouter l'utilisateur aux connexions
-        this.addUserConnection(user, ws);
+        const userInfo = {
+          userId: user.id.toString(),
+          username: user.username,
+          identifier_name: user.identifier_name,
+          avatar: user.avatar || ''
+        };
 
-        // Notifier tous les clients du changement de la liste des utilisateurs connectés
-        this.broadcastConnectedUsers();
-
-        // Gérer la déconnexion
+        this.addUserConnection(userInfo, ws);
+        
         ws.on('close', () => {
-          this.removeUserConnection(user.userId, ws);
-          this.broadcastConnectedUsers();
+          this.removeUserConnection(userInfo.userId, ws);
         });
-
-        // Gérer les messages reçus
-        ws.on('message', async (message: string) => {
-          try {
-            const data = JSON.parse(message);
-            await this.handleMessage(user.userId, data);
-          } catch (error) {
-            console.error('Erreur de traitement du message:', error);
-          }
-        });
-
       } catch (error) {
         console.error('Erreur de connexion WebSocket:', error);
         ws.close();
@@ -84,87 +94,30 @@ class WebSocketManager {
     }
   }
 
-  private broadcastConnectedUsers(): void {
-    const connectedUsers = Array.from(this.connectedUsers.values()).map(user => ({
-      userId: user.userId,
-      username: user.username,
-      identifier_name: user.identifier_name,
-      avatar: user.avatar
-    }));
+  public notifyUser(userId: string): void {
+    const user = this.connectedUsers.get(userId);
+    if (user && this.wss) {
+      const message = JSON.stringify({
+        type: 'NOTIFICATION',
+        data: { timestamp: new Date().toISOString() }
+      });
 
-    const message = JSON.stringify({
-      type: 'CONNECTED_USERS_UPDATE',
-      data: connectedUsers
-    });
-
-    this.wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    });
-  }
-
-  public getConnectedUsers(): Array<Omit<ConnectedUser, 'connections'>> {
-    return Array.from(this.connectedUsers.values()).map(user => ({
-      userId: user.userId,
-      username: user.username,
-      identifier_name: user.identifier_name,
-      avatar: user.avatar
-    }));
-  }
-
-  public isUserConnected(userId: string): boolean {
-    return this.connectedUsers.has(userId);
+      user.connections.forEach(connection => {
+        if (connection.readyState === WebSocket.OPEN) {
+          connection.send(message);
+        }
+      });
+    }
   }
 
   private extractToken(req: any): string {
-    const token = req.url.split('token=')[1];
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const token = url.searchParams.get('token');
     if (!token) {
       throw new Error('Token manquant');
     }
     return token;
   }
-
-  private async authenticateConnection(token: string): Promise<Omit<ConnectedUser, 'connections'>> {
-    try {
-      const decoded = await verifyToken(token);
-      const user = await userRepository.findById(decoded.userId);
-      
-      if (!user) {
-        throw new Error('Utilisateur non trouvé');
-      }
-
-      return {
-        userId: user.id.toString(),
-        username: user.username,
-        identifier_name: user.identifier_name,
-        avatar: user.avatar || ''
-      };
-    } catch (error) {
-      throw new Error('Token invalide');
-    }
-  }
-
-  private async handleMessage(userId: string, data: any): Promise<void> {
-    // Gérer différents types de messages
-    switch (data.type) {
-      case 'NEW_FOLLOWER':
-          const newFollower = await this.notificationService.getNewFollower(data.userId);
-        break;
-      case 'LIKE':
-        const like = await this.notificationService.getLike(data.userId);
-        break;
-      case 'RETWEET':
-        const retweet = await this.notificationService.getRetweet(data.userId);
-        break;
-      case 'REPLY':
-        const reply = await this.notificationService.getReply(data.userId);
-        break;
-      case 'MENTION':
-        const mention = await this.notificationService.getMention(data.userId);
-        break;        
-    }
-  }
 }
 
-export default WebSocketManager;
+export default WebSocketManager.getInstance();

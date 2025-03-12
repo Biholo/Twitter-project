@@ -6,6 +6,7 @@ import { AuthenticatedRequest, TweetFilters } from '@/types';
 import { handleError } from '@/utils/responseFormatter';
 import { Response } from 'express';
 import { Types } from 'mongoose';
+import notificationService from '@/services/notificationService';
 
 export const createTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
@@ -21,6 +22,13 @@ export const createTweet = async (req: AuthenticatedRequest, res: Response): Pro
 
         await parsingService.createMentions(tweet);
         await parsingService.createHashtags(tweet);
+
+        if(parent_tweet_id) {
+            const parentTweet = await tweetRepository.findById(parent_tweet_id.toString());
+            if(parentTweet && userId && parentTweet.author_id.toString() !== userId.toString()) {
+                await notificationService.notifyReply(userId.toString() , parentTweet.author_id.toString(), tweet._id.toString());
+            }
+        }
 
         res.status(201).json({
             message: "Tweet créé avec succès",
@@ -73,8 +81,9 @@ export const likeTweet = async (req: AuthenticatedRequest, res: Response): Promi
             action_type: 'like',
             action_date: new Date()
         });
+
+        await notificationService.notifyLike(userObjectId.toString(), tweetExists.author_id.toString(), tweetObjectId.toString());
         
-        console.log("Nouvelle interaction créée:", newLike);
         
         // Incrémenter le compteur de likes
         const updatedTweet = await tweetRepository.update(

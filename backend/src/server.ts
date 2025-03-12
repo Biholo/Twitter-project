@@ -1,9 +1,11 @@
 import { createExpressApp } from "@/app";
 import http from "http";
+import WebSocketManager from "@/services/websocketManager";
 
 export function runServer() {
   const app = createExpressApp();
   const server = http.createServer(app);
+  const wss = WebSocketManager.initialize(server);
 
   console.log("Démarrage du serveur...");
 

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken"; // Utilisation correcte d'import ES6
+import { extractTokenFromHeader, verifyToken } from "@/utils/jwt";
 
 interface AuthenticatedRequest extends Request {
     user?: {
@@ -11,58 +11,28 @@ interface AuthenticatedRequest extends Request {
 }
 
 // 🔹 Middleware pour vérifier si l'utilisateur est authentifié
-export const isAuthenticated = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res.status(401).json({ message: "Token manquant ou mal formaté." });
-        return;
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    if (!token) {
-        res.status(401).json({ message: "Token manquant." });
-        return;
-    }
-
+export const isAuthenticated = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as AuthenticatedRequest["user"];
-
-        if (!decoded || !decoded.id || !decoded.roles) {
-            res.status(401).json({ message: "Token invalide." });
-            return;
-        }
-
-        req.user = decoded; // ✅ Affectation correcte
-
+        const token = extractTokenFromHeader(req.headers.authorization);
+        const decoded = await verifyToken(token);
+        req.user = decoded;
         next();
     } catch (error) {
         console.error("Erreur d'authentification:", error);
-        res.status(401).json({ message: "Token invalide ou expiré." });
-        return;
+        res.status(401).json({ message: (error as Error).message });
     }
 };
 
-
 // 🔹 Middleware pour attacher le token (s'il existe) sans bloquer l'accès
-export const hasToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return next(); // ✅ Laisser passer même sans token
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    if (!token) {
-        return next(); // ✅ Laisser passer même sans token
-    }
-
+export const hasToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as AuthenticatedRequest["user"];
-        req.user = decoded; // ✅ Attacher les infos du user
-
+        if (!req.headers.authorization) {
+            return next();
+        }
+        
+        const token = extractTokenFromHeader(req.headers.authorization);
+        const decoded = await verifyToken(token);
+        req.user = decoded;
         console.log("Utilisateur détecté avec token:", req.user);
     } catch (error) {
         console.warn("Token invalide, mais l'accès n'est pas bloqué:", error);

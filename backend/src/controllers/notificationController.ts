@@ -28,7 +28,7 @@ export const getNotifications = async (req: AuthenticatedRequest, res: Response)
       filter.is_read = read === 'true';
     }
 
-    const notifications = await notificationService.getNotifications(filter);
+    const notifications = await notificationRepository.findNotifications(filter);
 
     res.status(200).json({
         message: "Vous avez bien récupéré vos notifications",

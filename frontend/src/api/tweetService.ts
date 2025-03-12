@@ -29,6 +29,7 @@ class TweetApi {
     }
 
     public async likeTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
+        console.log(tweet_id);
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}/like`, "POST", null, true);
         return response;
     }

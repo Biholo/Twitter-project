@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    env_file:
+      - backend/.env
+    ports:
+      - "8000:8000"
+    networks:
+      - app
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    env_file:
+      - frontend/.env
+    ports:
+      - "4173:4173"
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge

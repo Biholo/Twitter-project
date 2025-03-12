@@ -5,7 +5,7 @@ import TopicCard from "@/components/feed/TopicCard";
 import SuggestionCard from "@/components/feed/SuggestionCard";
 
 export default function ExploreContent() {
-  const { data: trendingTweets = [], isLoading: isLoadingTrendingTweets } = useTrendingTweets();
+  const { data: trendingTweets = [], isLoading: _isLoadingTrendingTweets } = useTrendingTweets();
   const { data: trendingHashtags = [], isLoading: isLoadingTrendingHashtags } = useTrendingHashtags({
     timeframe: 'daily'
   });

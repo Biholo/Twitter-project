@@ -8,7 +8,7 @@ import { Tweet as TweetComponent } from "@/components/feed/Tweet"
 export default function Signets() {
   const { user } = useAuthStore();
   const userId = user?._id || "";
-  const { data: tweets = [], isLoading, isError } = useGetTweetsCollection(
+  const { data: tweets = [], isLoading, isError: _isError } = useGetTweetsCollection(
     userId,
     {
       type: "saved",

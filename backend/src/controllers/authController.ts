@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { handleError } from "@/utils/responseFormatter";
 import UserModel, { IUser } from "@/models/userModel";
 import TokenModel, { IToken, TokenType } from "@/models/tokenModel";
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { generateTokens } from "@/services/authService";
 import ResetPassword from "@/models/resetPasswordModel";
 import emailService from "@/services/emailService";
@@ -11,8 +11,12 @@ import templateService from "@/services/templateService";
 import { AuthenticatedRequest } from "@/types";
 import userRepository from "@/repositories/userRepository";
 
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "votre_clé_secrète_très_longue_et_complexe";
-const EMAIL_VERIFICATION_TOKEN = process.env.EMAIL_VERIFICATION_TOKEN || "une_autre_clé_secrète_différente_très_longue";
+const REFRESH_TOKEN_SECRET =
+  process.env.REFRESH_TOKEN_SECRET ||
+  "votre_clé_secrète_très_longue_et_complexe";
+const EMAIL_VERIFICATION_TOKEN =
+  process.env.EMAIL_VERIFICATION_TOKEN ||
+  "une_autre_clé_secrète_différente_très_longue";
 
 /**
  * Register a new user.
@@ -33,8 +37,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   // Validation de l'identifier_name
   const identifierNameRegex = /^[a-z0-9_-]+$/;
   if (!identifierNameRegex.test(identifier_name)) {
-    res.status(400).json({ 
-      message: "L'identifiant ne peut contenir que des lettres minuscules, des chiffres, des tirets (-) et des underscores (_)." 
+    res.status(400).json({
+      message:
+        "L'identifiant ne peut contenir que des lettres minuscules, des chiffres, des tirets (-) et des underscores (_).",
     });
     return;
   }
@@ -42,10 +47,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     // Vérifier si l'email, l'identifier_name ou le username est déjà utilisé
     const existingUser = await userRepository.findOne({
-      $or: [
-        { email },
-        { identifier_name }      
-      ]
+      $or: [{ email }, { identifier_name }],
     });
 
     if (existingUser) {
@@ -58,7 +60,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         return;
       }
       if (existingUser.username === username) {
-        res.status(409).json({ message: "Ce nom d'utilisateur est déjà utilisé." });
+        res
+          .status(409)
+          .json({ message: "Ce nom d'utilisateur est déjà utilisé." });
         return;
       }
     }
@@ -80,17 +84,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     await newUser.save();
 
-
-  
     const { accessToken, refreshToken } = await generateTokens(newUser, req);
 
-    res.status(200).json({ access_token: accessToken.token, refresh_token: refreshToken.token });
-
+    res
+      .status(200)
+      .json({
+        access_token: accessToken.token,
+        refresh_token: refreshToken.token,
+      });
   } catch (error) {
     handleError(res, error, "Erreur lors de l'inscription.");
   }
 };
-
 
 /**
  * Log in a user.
@@ -127,34 +132,42 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Remplacer la génération manuelle des tokens par generateTokens
     const { accessToken, refreshToken } = await generateTokens(user, req);
 
-    res.status(200).json({ access_token: accessToken.token, refresh_token: refreshToken.token });
+    res
+      .status(200)
+      .json({
+        access_token: accessToken.token,
+        refresh_token: refreshToken.token,
+      });
   } catch (error) {
     handleError(res, error, "Erreur lors de la connexion.");
   }
 };
 
-
 /**
  * Retrieve a user from an access token.
  * @header Authorization - Bearer token containing the access token.
  */
-export const getUserFromToken = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getUserFromToken = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   const userReq = req.user;
 
   try {
     // Convert the user document to a plain JavaScript object
-    const user = await UserModel.findById(userReq?.id).select("-password").lean();
+    const user = await UserModel.findById(userReq?.id)
+      .select("-password")
+      .lean();
     if (!user) {
       res.status(404).json({ message: "Utilisateur introuvable." });
       return;
     }
 
-
     user.last_login_at = new Date();
 
     res.status(200).json({
       message: "Utilisateur récupéré avec succès.",
-      user: user
+      user: user,
     });
   } catch (error) {
     console.log(error);
@@ -162,12 +175,14 @@ export const getUserFromToken = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
-
 /**
  * Refresh an access token.
  * @param req.body.token - The refresh token.
  */
-export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+export const refreshToken = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { token } = req.body;
 
   if (!token) {
@@ -196,16 +211,24 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     }
 
     // Générer les nouveaux tokens en utilisant generateTokens
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await generateTokens(user, req);
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      await generateTokens(user, req);
 
-    res.status(200).json({ access_token: newAccessToken.token, refresh_token: newRefreshToken.token });
+    res
+      .status(200)
+      .json({
+        access_token: newAccessToken.token,
+        refresh_token: newRefreshToken.token,
+      });
   } catch (error) {
-    handleError(res, error, "Erreur lors de la rafraîchissement du token.", 403);
+    handleError(
+      res,
+      error,
+      "Erreur lors de la rafraîchissement du token.",
+      403
+    );
   }
 };
-
-
-
 
 /**
  * Log out a user by invalidating the refresh token.
@@ -215,7 +238,11 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
   const { token } = req.body;
 
   if (!token) {
-    res.status(400).json({ message: "Token de rafraîchissement requis pour la déconnexion." });
+    res
+      .status(400)
+      .json({
+        message: "Token de rafraîchissement requis pour la déconnexion.",
+      });
     return;
   }
 
@@ -226,9 +253,17 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    await TokenModel.deleteOne({ ownedBy: user._id, token: token, type: TokenType.REFRESH_TOKEN });
+    await TokenModel.deleteOne({
+      ownedBy: user._id,
+      token: token,
+      type: TokenType.REFRESH_TOKEN,
+    });
 
-    await TokenModel.deleteOne({ ownedBy: user._id, token: token, type: TokenType.ACCESS_TOKEN });
+    await TokenModel.deleteOne({
+      ownedBy: user._id,
+      token: token,
+      type: TokenType.ACCESS_TOKEN,
+    });
 
     res.status(200).json({ message: "Déconnexion réussie." });
   } catch (error) {
@@ -236,13 +271,14 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-
-
 /**
  * Request a password reset.
  * @param req.body.email - The user's email address.
  */
-export const requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+export const requestPasswordReset = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { email } = req.body;
 
   if (!email) {
@@ -257,7 +293,9 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
       return;
     }
 
-    const resetToken = jwt.sign({ id: user._id }, REFRESH_TOKEN_SECRET, { expiresIn: "1h" });
+    const resetToken = jwt.sign({ id: user._id }, REFRESH_TOKEN_SECRET, {
+      expiresIn: "1h",
+    });
 
     const resetPassword = new ResetPassword({
       token: resetToken,
@@ -269,23 +307,40 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
 
     const resetPasswordLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-    const html = templateService.generateHtml('resetPassword', { name: user.username, link: resetPasswordLink });
+    const html = templateService.generateHtml("resetPassword", {
+      name: user.username,
+      link: resetPasswordLink,
+    });
 
-    await emailService.sendEmail(user.email, "Réinitialisation de mot de passe", html);
+    await emailService.sendEmail(
+      user.email,
+      "Réinitialisation de mot de passe",
+      html
+    );
 
-    res.status(200).json({ message: "Réinitialisation de mot de passe demandée avec succès." });
+    res
+      .status(200)
+      .json({
+        message: "Réinitialisation de mot de passe demandée avec succès.",
+      });
   } catch (error) {
-    handleError(res, error, "Erreur lors de la demande de réinitialisation de mot de passe.");
+    handleError(
+      res,
+      error,
+      "Erreur lors de la demande de réinitialisation de mot de passe."
+    );
   }
 };
-
 
 /**
  * Reset a user's password.
  * @param req.body.token - The reset token.
  * @param req.body.password - The new password.
  */
-export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { token, password } = req.body;
 
   if (!token || !password) {
@@ -318,7 +373,11 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
     res.status(200).json({ message: "Mot de passe réinitialisé avec succès." });
   } catch (error) {
-    handleError(res, error, "Erreur lors de la réinitialisation de mot de passe.");
+    handleError(
+      res,
+      error,
+      "Erreur lors de la réinitialisation de mot de passe."
+    );
   }
 };
 
@@ -326,11 +385,16 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
  * Check if token of reset password is valid.
  * @param req.body.token - The token to check.
  */
-export const checkToken = async (req: Request, res: Response): Promise<void> => {
+export const checkToken = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { token } = req.params;
 
   if (!token) {
-    res.status(400).json({ message: "Token de réinitialisation de mot de passe requis." });
+    res
+      .status(400)
+      .json({ message: "Token de réinitialisation de mot de passe requis." });
     return;
   }
 
@@ -351,7 +415,10 @@ export const checkToken = async (req: Request, res: Response): Promise<void> => 
  * Confirm a user's email.
  * @param req.body.token - The confirmation token.
  */
-export const confirmEmail = async (req: Request, res: Response): Promise<void> => {
+export const confirmEmail = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { token } = req.body;
 
   if (!token) {
@@ -360,7 +427,9 @@ export const confirmEmail = async (req: Request, res: Response): Promise<void> =
   }
 
   try {
-    const decoded = jwt.verify(token, EMAIL_VERIFICATION_TOKEN) as { id: string };
+    const decoded = jwt.verify(token, EMAIL_VERIFICATION_TOKEN) as {
+      id: string;
+    };
     const user = await UserModel.findById(decoded.id);
     if (!user) {
       res.status(404).json({ message: "Utilisateur introuvable." });
@@ -377,17 +446,21 @@ export const confirmEmail = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-
 /**
  * Update password
  * @param req.body.old_password - The old password.
  * @param req.body.new_password - The new password.
  */
-export const updatePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const updatePassword = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
   const { old_password, new_password } = req.body;
 
   if (!old_password || !new_password) {
-    res.status(400).json({ message: "Ancien mot de passe et nouveau mot de passe requis." });
+    res
+      .status(400)
+      .json({ message: "Ancien mot de passe et nouveau mot de passe requis." });
     return;
   }
 

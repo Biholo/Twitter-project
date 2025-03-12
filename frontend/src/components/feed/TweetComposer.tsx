@@ -4,7 +4,7 @@ import { Card, CardHeader } from "@/components/ui/Card"
 import { Separator } from "@/components/ui/Separator"
 import { Textarea } from "@/components/ui/Textarea"
 import { Calendar, Image, Smile } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useAuthStore } from "@/stores/authStore"
 import { useCreateTweet } from "@/api/queries/tweetQueries"
 export function TweetComposer() {

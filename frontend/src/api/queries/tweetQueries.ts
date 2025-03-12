@@ -81,11 +81,60 @@ export const useCreateTweet = () => {
 
 // Vous pouvez ajouter d'autres hooks pour les autres opérations (like, retweet, bookmark, etc.)
 export const useLikeTweet = () => {
+    const { user } = useAuthStore();
+    
     return useMutation({
-        mutationFn: (tweetId: string) => tweetApi.likeTweet(tweetId),
-        // Implémentez la mise à jour optimiste similaire à useCreateTweet
+        mutationFn: async (tweetId: string) => {
+            const tweets = queryClient.getQueryData<{ data: Tweet[] }>(["tweets", user?._id]);
+            const tweet = tweets?.data?.find(t => t._id === tweetId);
+            
+            if (tweet?.is_liked) {
+                return tweetApi.unlikeTweet(tweetId);
+            } else {
+                return tweetApi.likeTweet(tweetId);
+            }
+        },
+
+        onMutate: async (tweetId) => {
+            await queryClient.cancelQueries({ queryKey: ["tweets", user?._id] });
+            
+            const previousTweets = queryClient.getQueryData<{ data: Tweet[] }>(["tweets", user?._id]);
+            
+            // Mise à jour optimiste du cache
+            queryClient.setQueryData<{ data: Tweet[] }>(["tweets", user?._id], (old) => {
+                if (!old?.data) return previousTweets;
+                return {
+                    ...old,
+                    data: old.data.map(tweet => {
+                        if (tweet._id === tweetId) {
+                            const newIsLiked = !tweet.is_liked;
+                            return {
+                                ...tweet,
+                                is_liked: newIsLiked,
+                                likes_count: newIsLiked ? tweet.likes_count + 1 : tweet.likes_count - 1
+                            };
+                        }
+                        return tweet;
+                    })
+                };
+            });
+            
+            return { previousTweets };
+        },
+
+        onSuccess: () => {
+            // Rafraîchir les tweets après un like réussi
+            queryClient.invalidateQueries({ queryKey: ["tweets", user?._id] });
+        },
+
+        onError: (error, tweetId, context) => {
+            console.error("Erreur lors du like:", error);
+            if (context?.previousTweets) {
+                queryClient.setQueryData(["tweets", user?._id], context.previousTweets);
+            }
+        }
     });
-}
+};
 
 export const useBookmarkTweet = () => {
     return useMutation({

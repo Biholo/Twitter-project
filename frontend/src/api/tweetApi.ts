@@ -13,6 +13,14 @@ class TweetApi {
         const response = await api.fetchRequest(this.baseUrl, "GET", null, true);
         return response.data;
     }
+
+    public async likeTweet(tweetId: string): Promise<ApiResponse<Tweet>> {
+        return api.fetchRequest(`${this.baseUrl}/${tweetId}/like`, "POST", null, true);
+    }
+
+    public async unlikeTweet(tweetId: string): Promise<ApiResponse<Tweet>> {
+        return api.fetchRequest(`${this.baseUrl}/${tweetId}/unlike`, "POST", null, true);
+    }
 }
 
 export default TweetApi;

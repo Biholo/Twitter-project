@@ -3,12 +3,31 @@ import { Button } from "@/components/ui/Button"
 import { Card, CardFooter, CardHeader } from "@/components/ui/Card"
 import { Tweet as TweetType } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import { useLikeTweet } from "@/api/queries/tweetQueries";
 
 export function Tweet({ tweet }: { tweet: TweetType }) {
   const [isBookmarked, setIsBookmarked] = useState(tweet.is_bookmarked || false);
   const [imageError, setImageError] = useState(false);
+  const [isLiked, setIsLiked] = useState(tweet.is_liked || false);
+  const [likesCount, setLikesCount] = useState(tweet.likes_count);
+  
+  const { mutate: likeTweet } = useLikeTweet();
+
+  // Mettre à jour l'état local quand le tweet change
+  useEffect(() => {
+    setIsLiked(tweet.is_liked || false);
+    setLikesCount(tweet.likes_count);
+  }, [tweet.is_liked, tweet.likes_count]);
+
+  const handleLike = async () => {
+    try {
+      await likeTweet(tweet._id);
+    } catch (error) {
+      console.error("Erreur lors du like:", error);
+    }
+  };
 
   const handleShare = () => {
     // TODO: Implement share functionality
@@ -120,9 +139,14 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
             <Repeat2 className="h-4 w-4" />
             <span>{tweet.retweets_count}</span>
           </Button>
-          <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-red-500">
-            <ThumbsUp className="h-4 w-4" />
-            <span>{tweet.likes_count}</span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 ${isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+            onClick={handleLike}
+          >
+            <ThumbsUp className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            <span>{likesCount}</span>
           </Button>
           <Button 
             variant="ghost" 

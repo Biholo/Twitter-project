@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détection et Citations par Émotion</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        img { border: 3px solid #333; width: 640px; height: 480px; }
+        button { font-size: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Détection des Visages et Citations par Émotion</h1>
+
+    <img id="videoStream" src="http://127.0.0.1:5000/video_feed" alt="Flux Vidéo en Temps Réel">
+    <br>
+    <button onclick="captureEmotion()">📸 Capturer l'Émotion</button>
+    <p id="emotionDisplay">Aucune émotion capturée.</p>
+    <h2>Prévisualisation :</h2>
+    <img id="capturedImage" src="" style="display:none; width: 400px;">
+    <h2>Citation Inspirante :</h2>
+    <p id="quoteText"></p>
+
+    <script>
+        async function captureEmotion() {
+            let response = await fetch("http://127.0.0.1:5000/capture_emotion", { method: "POST" });
+            let data = await response.json();
+            document.getElementById("emotionDisplay").innerText = "Émotion Capturée : " + data.captured_emotion;
+            document.getElementById("capturedImage").src = "http://127.0.0.1:5000" + data.temp_image_path;
+            document.getElementById("capturedImage").style.display = "block";
+            document.getElementById("quoteText").innerText = data.quote;
+        }
+    </script>
+</body>
+</html>

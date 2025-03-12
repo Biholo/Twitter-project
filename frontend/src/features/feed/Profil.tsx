@@ -1,44 +1,100 @@
-import TrendingSection from "@/components/feed/TrendingSection"
 import TwitterProfile from "@/components/feed/TwitterProfile"
-import { Sidebar } from "@/components/ui/Sidebar"
-import { useGetTweetByUser } from "@/api/queries/tweetQueries";
-import TweetFeed from "@/components/feed/TweetFeed";
+import { useGetTweetsCollection, useGetTweets } from "@/api/queries/tweetQueries";
+import { Tweet } from "@/types";
+import { Tweet as TweetComponent } from "@/components/feed/Tweet";
+import { useAuthStore } from "@/stores/authStore";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
+const tabs = [
+  { id: 'posts', label: 'Posts' },
+  { id: 'likes', label: 'J\'aime' },
+  { id: 'retweets', label: 'Retweets' },
+];
 
 export default function Profil() {
-  const { data: tweets, isLoading } = useGetTweetByUser();
+  const { user } = useAuthStore();
+  const [selectedTab, setSelectedTab] = useState<string>("posts");
+  const userId = user?._id || "";
   
-  if (isLoading) return <div>Loading...</div>;
+  const { data: tweets, isLoading: isLoadingTweets } = useGetTweets({ user_id: userId });
+  const { data: tweetsLiked, isLoading: isLoadingLikes } = useGetTweetsCollection(userId, { type: 'liked', user_id: userId });
+  const { data: tweetsRetweeted, isLoading: isLoadingRetweets } = useGetTweetsCollection(userId, { type: 'retweet', user_id: userId });
+
+  const renderContent = () => {
+    switch (selectedTab) {
+      case 'likes':
+        return isLoadingLikes ? (
+          <p>Chargement des likes...</p>
+        ) : tweetsLiked && tweetsLiked.length > 0 ? (
+          tweetsLiked.map((tweet: Tweet) => (
+            <TweetComponent key={tweet._id} tweet={tweet} />
+          ))
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+            Aucun tweet liké
+          </p>
+        );
+
+      case 'retweets':
+        return isLoadingRetweets ? (
+          <p>Chargement des retweets...</p>
+        ) : tweetsRetweeted && tweetsRetweeted.length > 0 ? (
+          tweetsRetweeted.map((tweet: Tweet) => (
+            <TweetComponent key={tweet._id} tweet={tweet} />
+          ))
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+            Aucun retweet
+          </p>
+        );
+
+      default:
+        return isLoadingTweets ? (
+          <p>Chargement des tweets...</p>
+        ) : tweets && tweets.length > 0 ? (
+          tweets.map((tweet: Tweet) => (
+            <TweetComponent key={tweet._id} tweet={tweet} />
+          ))
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+            Aucun tweet n'est disponible
+          </p>
+        );
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-      <Sidebar />
-      <div className="md:ml-64">
-        <div className="container mx-auto px-4 pb-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Colonne principale */}
-            <div className="flex-1 max-w-3xl">
-              <TwitterProfile />
-              <div className="mt-4">
-                <div className="mt-4">
-                  <TweetFeed tweets={tweets} />
-                </div>
-              </div>
-            </div>
-            
-            {/* Colonne des tendances */}
-            <div className="hidden md:block w-80 flex-shrink-0">
-              <div className="sticky top-4">
-                <div className="rounded-xl bg-white/80 backdrop-blur-sm p-4 shadow-sm dark:bg-gray-800/80">
-                  <div className="space-y-4">
-                    <TrendingSection />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <>
+      <TwitterProfile />
+      
+      {/* Navigation par onglets */}
+      <div className="mt-4">
+        <nav className="w-full justify-start border-b bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 p-0" aria-label="Tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              className={cn(
+                "rounded-none border-b-2 border-transparent px-4 py-2",
+                selectedTab === tab.id
+                  ? "border-b-2 bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Contenu */}
+      <div className="mt-4">
+        <div className="space-y-4">
+          {renderContent()}
         </div>
       </div>
-    </div>
-  )
+    </>
+  );
 }
 

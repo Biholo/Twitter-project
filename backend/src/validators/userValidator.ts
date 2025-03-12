@@ -119,7 +119,7 @@ export const filterUserSchema = z.object({
 });
 
 export const idParamSchema = z.object({
-  id: z.string().uuid("L'ID doit être un UUID valide")
+  id: z.string().regex(/^[0-9a-fA-F]{24}$/, "L'ID doit être un ID MongoDB valide")
 });
 
 

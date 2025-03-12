@@ -5,7 +5,7 @@ class TweetApi {
 
     public async createTweet(tweet: Tweet): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest("/api/tweets", "POST", tweet, true);
-        return response.data;
+        return response;
     }
 
     public async getTweets(queries: {
@@ -25,42 +25,41 @@ class TweetApi {
         tweet_type?: string | null
     } = {}): Promise<ApiResponse<Tweet[]>> {
         const response = await api.fetchRequest("/api/tweets", "GET", queries, true);
-        return response.data;
+        return response;
     }
 
     public async likeTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}/like`, "POST", null, true);
-        return response.data;
+        return response;
     }
 
     public async unlikeTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}/unlike`, "POST", null, true);
-        return response.data;
+        return response;
     }
 
     public async bookmarkTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}/save`, "POST", null, true);
-        return response.data;
+        return response;
     }
 
     public async unbookmarkTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}/unsave`, "POST", null, true);
-        return response.data;
+        return response;
     }
 
     public async getTweetById(tweet_id: string): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}`, "GET", null, true);
-        return response.data;
+        return response;
     }
 
-    public async getUserTweetCollection(queries: {
+    public async getUserTweetCollection(userId: string, queries: {
         type?: 'liked' | 'saved' | 'retweet',
-        page?: string,
-        limit?: string,
-        user_id?: string
+        page?: number,
+        limit?: number,
     } = {}): Promise<ApiResponse<Tweet[]>> {
-        const response = await api.fetchRequest('/api/tweets/collection', 'GET', queries, true);
-        return response.data;
+        const response = await api.fetchRequest(`/api/tweets/${userId}/interactions`, 'GET', queries, true);
+        return response;
     }
     
         

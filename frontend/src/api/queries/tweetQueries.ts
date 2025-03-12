@@ -1,25 +1,12 @@
 import TweetApi from "@/api/tweetService";
 import queryClient from "@/configs/queryClient";
 import { useAuthStore } from "@/stores/authStore";
-import { Tweet, TweetQueryParams } from "@/types/tweetType";
+import { Tweet, TweetQueryParams, InteractionResponse } from "@/types/tweetType";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const tweetApi = new TweetApi();
 
-export const useGetTweetByUser = () => {
-    const { user } = useAuthStore();
-    
-    return useQuery({ 
-        queryKey: ["tweets", user?._id], 
-        queryFn: () => {
-            if (user?._id) {
-                return tweetApi.getTweets();
-            }
-            return null;
-        },
-        enabled: !!user?._id
-    });
-}
+
 
 export const useCreateTweet = () => {
     const { user } = useAuthStore();
@@ -33,7 +20,7 @@ export const useCreateTweet = () => {
             await queryClient.cancelQueries({ queryKey: ["tweets", user?._id] });
             
             // Sauvegarder l'état précédent
-            const previousTweets = queryClient.getQueryData<{ data: Tweet[] }>(["tweets", user?._id]);
+            const previousTweets = queryClient.getQueryData(["tweets", user?._id]);
             
             // Créer un faux ID temporaire pour le nouveau tweet
             const tempId = `temp-${Date.now()}`;
@@ -47,17 +34,30 @@ export const useCreateTweet = () => {
                 retweets_count: 0,
                 saves_count: 0,
                 replies: [],
-                // Ajouter d'autres propriétés par défaut si nécessaire
+                created_at: new Date().toISOString(),
                 ...newTweet,
             };
             
             // Mettre à jour le cache avec le nouveau tweet
-            queryClient.setQueryData<{ data: Tweet[] }>(["tweets", user?._id], (old) => {
+            queryClient.setQueryData(["tweets", user?._id], (old: any) => {                
+                // Si old est null ou undefined
                 if (!old) return { data: [optimisticTweet] };
-                return { 
-                    ...old,
-                    data: [optimisticTweet, ...old.data] 
-                };
+                
+                // Si old est un tableau (la réponse directe est un tableau)
+                if (Array.isArray(old)) {
+                    return [optimisticTweet, ...old];
+                }
+                
+                // Si old a une propriété data qui est un tableau
+                if (old.data && Array.isArray(old.data)) {
+                    return { 
+                        ...old,
+                        data: [optimisticTweet, ...old.data] 
+                    };
+                }
+                
+                // Si old est un objet mais sans propriété data ou data n'est pas un tableau
+                return { data: [optimisticTweet] };
             });
             
             // Retourner le contexte avec l'état précédent pour pouvoir revenir en arrière en cas d'erreur
@@ -226,13 +226,32 @@ export const useUnbookmarkTweet = () => {
 export const useGetTweets = (params: TweetQueryParams = {}) => {
     const queryKey = ['tweets', params];
     
-    return useQuery({
+    return useQuery<Tweet[], Error>({
         queryKey,
-        queryFn: () => tweetApi.getTweets(params),
-        select: (response) => ({
-            tweets: response.data,
-        }),
+        queryFn: () => tweetApi.getTweets(params).then(response => 
+            Array.isArray(response) ? response : response.data
+        ),
         placeholderData: (previousData) => previousData,
         staleTime: 1000 * 60
     });
 };
+
+export const useGetTweetsCollection = (userId: string, params: {
+    type?: 'liked' | 'saved' | 'retweet',
+    page?: number,
+    limit?: number,
+    user_id?: string
+} = {}) => {
+    const queryKey = ['tweets', params];
+    
+    return useQuery<Tweet[], Error>({
+        queryKey,
+        queryFn: () => tweetApi.getUserTweetCollection(userId, params).then(response =>
+            Array.isArray(response) ? response : response.data
+        ),
+        placeholderData: (previousData) => previousData,
+        staleTime: 1000 * 60
+    });
+};
+
+

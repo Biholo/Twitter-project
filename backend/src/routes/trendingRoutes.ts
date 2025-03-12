@@ -1,12 +1,14 @@
 import { Router } from 'express';
-import { getTrendingHashtags, getTrendingTweets } from '@/controllers/trendingController';
+import { getTrendingHashtags, getTrendingTweets, getFollowSuggestions } from '@/controllers/trendingController';
 import { validateZod } from '@/middlewares/validateZod';
-import { trendingHashtagsSchema, trendingTweetsSchema } from '@/validators/trendingValidator';
+import { trendingHashtagsSchema, trendingTweetsSchema, trendingSuggestionsSchema } from '@/validators/trendingValidator';
+import { isAuthenticated } from "@/middlewares/auth";
 
 export function trendingRoutes() {
     const router = Router();
 
-    router.get('/hashtags', validateZod(trendingHashtagsSchema, "query"), getTrendingHashtags);
-    router.get('/tweets', validateZod(trendingTweetsSchema, "query"), getTrendingTweets);
+    router.get('/hashtags',isAuthenticated, validateZod(trendingHashtagsSchema, "query"), getTrendingHashtags);
+    router.get('/tweets', isAuthenticated, validateZod(trendingTweetsSchema, "query"), getTrendingTweets);
+    router.get('/suggestions', isAuthenticated, getFollowSuggestions);
     return router;
 }

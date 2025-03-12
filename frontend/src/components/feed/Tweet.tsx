@@ -5,20 +5,39 @@ import { Tweet as TweetType } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
-
+import { useLikeTweet, useUnlikeTweet, useBookmarkTweet, useUnbookmarkTweet } from "@/api/queries/tweetQueries"
+import { useAuthStore } from "@/stores/authStore"
 export function Tweet({ tweet }: { tweet: TweetType }) {
   const [imageError, setImageError] = useState(false);
+  const { user } = useAuthStore();
+  const { mutate: likeTweet, isPending: isLikePending } = useLikeTweet();
+  const { mutate: unlikeTweet, isPending: isUnlikePending } = useUnlikeTweet();
+  const { mutate: bookmarkTweet, isPending: isBookmarkPending } = useBookmarkTweet();
+  const { mutate: unbookmarkTweet, isPending: isUnbookmarkPending } = useUnbookmarkTweet();
 
   const handleShare = () => {
     // TODO: Implement share functionality
   };
 
   const handleBookmark = () => {
-    // TODO: Implement bookmark functionality
+    if(!user) {
+      return;
+    }
+    if(tweet.is_saved) {
+      unbookmarkTweet(tweet._id);
+    } else {
+      bookmarkTweet(tweet._id);
+    }
   };
 
   const handleLike = () => {
-    // TODO: Implement like functionality
+    if (user) {
+      if(tweet.is_liked) {
+        unlikeTweet(tweet._id);
+      } else {
+        likeTweet(tweet._id);
+      }
+    }
   };
 
   const handleRetweet = () => {
@@ -27,6 +46,10 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
 
   const handleReply = () => {
     // TODO: Implement reply functionality
+  };
+
+  const openImageInFullScreen = () => {
+    // TODO: Implement open image in full screen functionality
   };
 
 
@@ -111,7 +134,7 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
                     variant="secondary" 
                     size="sm" 
                     className="bg-white/80 backdrop-blur-sm"
-                    onClick={() => window.open(tweet.media_url, '_blank')}
+                    onClick={openImageInFullScreen}
                   >
                     Voir l'image complète
                   </Button>

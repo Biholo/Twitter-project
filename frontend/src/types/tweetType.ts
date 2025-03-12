@@ -6,11 +6,12 @@ export interface Tweet {
     content: string;
     parent_tweet_id: string | null;
     tweet_type: "tweet" | "reply" | "retweet";
-    retweets_count: number;
     created_at: string;
     author: Author
     likes_count: number; 
     saves_count: number;
+    retweets_count: number;
+    is_retweeted: boolean;
     is_liked: boolean;
     is_saved: boolean;
     media_url: string | null;
@@ -39,3 +40,16 @@ export interface TweetQueryParams {
     tweet_type?: 'tweet' | 'reply' | 'retweet';
 }
 
+export interface InteractionResponse {
+    message: string;
+    tweet: {
+        user_id: string;
+        tweet_id: string;
+        action_type: 'like' | 'bookmark' | 'retweet';
+        _id: string;
+        action_date: string;
+        created_at: string;
+        updated_at: string;
+        __v: number;
+    }
+}

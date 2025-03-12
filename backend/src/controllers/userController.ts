@@ -170,7 +170,7 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
  */
 export const followUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.id;
     const followerId = req.user?.id;
 
     if (!userId || !followerId) {
@@ -202,7 +202,7 @@ export const followUser = async (req: AuthenticatedRequest, res: Response): Prom
  */
 export const unfollowUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.id;
     const followerId = req.user?.id;
 
     if (!userId || !followerId) {

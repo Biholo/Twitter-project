@@ -1,13 +1,30 @@
-FROM node:16-alpine
+FROM node:22.14-slim as base
+
+RUN apt update -y && \
+    apt install -y openssl
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+FROM base as builder
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
-
 COPY . .
 
-## Expose the port from the .env file
-EXPOSE ${PORT}
+RUN pnpm install
+RUN pnpm build
 
-CMD ["npm", "start"]
+FROM base as production
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+## Expose the port from the .env file
+EXPOSE 8000
+
+CMD ["pnpm", "run", "serve"]

@@ -9,7 +9,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useGetNotifications, useMarkAsRead, useMarkAllAsRead } from "@/api/queries/notificationQueries"
 import { Notification } from "@/types"
 import { useAuthStore } from "@/stores/authStore"
-
+import websocketService from "@/services/websocketService"
+import { queryClient } from "@/configs/queryClient"
 export default function TrendingSection() {
   const { user } = useAuthStore();
   const { data: trendingHashtag, isLoading: isLoadingTrendingHashtag } = useTrendingHashtags();
@@ -18,13 +19,20 @@ export default function TrendingSection() {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
 
-  const { data: notifications = [], isLoading: isLoadingNotifications } = useGetNotifications(user?._id || "");
+  const { data: notifications = [] } = useGetNotifications(user?._id || "");
   const { mutate: markAsReadMutation } = useMarkAsRead();
   const { mutate: markAllAsReadMutation } = useMarkAllAsRead();
 
   const displayedSuggestions = showAllSuggestions 
     ? trendingSuggestions 
     : trendingSuggestions.slice(0, 2);
+
+  useEffect(() => {
+    websocketService.subscribe('NOTIFICATION', (data: any) => {
+        console.log('Notification reçue:', data);
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    });
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

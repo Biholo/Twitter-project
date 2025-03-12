@@ -5,7 +5,7 @@ import WebSocketManager from "@/services/websocketManager";
 export function runServer() {
   const app = createExpressApp();
   const server = http.createServer(app);
-  const wss = new WebSocketManager(server);
+  const wss = WebSocketManager.initialize(server);
 
   console.log("Démarrage du serveur...");
 

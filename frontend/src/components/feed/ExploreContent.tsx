@@ -3,8 +3,6 @@ import { useTrendingTweets, useTrendingHashtags, useTrendingSuggestions } from "
 import { Tweet as TweetComponent } from "@/components/feed/Tweet";
 import TopicCard from "@/components/feed/TopicCard";
 import SuggestionCard from "@/components/feed/SuggestionCard";
-// Sample data for explore page
-
 
 export default function ExploreContent() {
   const { data: trendingTweets = [], isLoading: _isLoadingTrendingTweets } = useTrendingTweets();
@@ -84,6 +82,6 @@ export default function ExploreContent() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 

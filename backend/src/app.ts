@@ -13,6 +13,7 @@ import { errorHandler } from "@/middlewares/errorHandler";
 import { logger } from "@/middlewares/logger";
 import dotenv from "dotenv";
 import connect from "@/config/conn";
+import { loadFixtures } from "@/fixtures/fixtures";
 
 dotenv.config();
 

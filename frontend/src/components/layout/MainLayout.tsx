@@ -15,7 +15,7 @@ export default function MainLayout() {
                 {/* Contenu principal avec marges automatiques */}
                 <main className="flex-1 flex justify-center">
                     <div className="w-full max-w-screen-xl mx-auto px-4 md:px-8">
-                        <div className="flex justify-center md:justify-between items-start gap-8">
+                        <div className="flex justify-center items-start gap-8">
                             {/* Espace égal à gauche en desktop */}
                             <div className="hidden md:block w-64 shrink-0" />
 
@@ -23,7 +23,6 @@ export default function MainLayout() {
                             <div className="w-full max-w-[600px] min-w-0">
                                 <Outlet />
                             </div>
-
 
                         </div>
                     </div>

@@ -236,12 +236,12 @@ class TweetRepository extends BaseRepository<ITweet> {
                       {
                         $cond: {
                           if: { $and: [{ $eq: [true, include_liked] }, { $eq: [true, include_saved] }] },
-                          then: { $in: ['$action_type', ['like', 'save']] },
+                          then: { $in: ['$action_type', ['like', 'bookmark']] },
                           else: {
                             $cond: {
                               if: { $eq: [true, include_liked] },
                               then: { $eq: ['$action_type', 'like'] },
-                              else: { $eq: ['$action_type', 'save'] }
+                              else: { $eq: ['$action_type', 'bookmark'] }
                             }
                           }
                         }
@@ -365,7 +365,7 @@ class TweetRepository extends BaseRepository<ITweet> {
             $filter: {
               input: '$interactions',
               as: 'interaction',
-              cond: { $eq: ['$$interaction.action_type', 'save'] }
+              cond: { $eq: ['$$interaction.action_type', 'bookmark'] }
             }
           }
         },
@@ -382,7 +382,7 @@ class TweetRepository extends BaseRepository<ITweet> {
           $cond: {
             if: authenticatedUserId,
             then: {
-              $in: ['save', '$currentUserInteractions.action_type']
+              $in: ['bookmark', '$currentUserInteractions.action_type']
             },
             else: false
           }

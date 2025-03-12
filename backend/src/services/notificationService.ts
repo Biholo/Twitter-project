@@ -4,6 +4,8 @@ import Notification, { INotification, NotificationType } from '@/models/notifica
 import userRepository from '@/repositories/userRepository';
 import tweetRepository from '@/repositories/tweetRepository';
 import notificationRepository from '@/repositories/notificationRepository';
+import mongoose from 'mongoose';
+
 interface NotificationResponse {
   _id: string;
   type: NotificationType;

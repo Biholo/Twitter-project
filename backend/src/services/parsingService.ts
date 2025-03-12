@@ -3,7 +3,7 @@ import mentionRepository from "@/repositories/mentionRepository";
 import hashtagRepository from "@/repositories/hashtagRepository";
 import tweetHashtagRepository from "@/repositories/tweetHashtagRepository";
 import userRepository from "@/repositories/userRepository";
-
+import notificationService from "@/services/notificationService";
 
 interface ParsedContent {
   mentions: string[];
@@ -110,6 +110,7 @@ class ParsingService {
       const mentionExists = await mentionRepository.findOne({ where: { mentioned_user_id: mentionedUser.id, tweet_id: tweet.id } });
       if (!mentionExists) {
         await mentionRepository.create({ tweet_id: tweet.id, mentioned_user_id: mentionedUser.id });
+        await notificationService.notifyMention(tweet.author_id.toString(), mentionedUser.id.toString(), tweet.id.toString());
       }
     }
   }

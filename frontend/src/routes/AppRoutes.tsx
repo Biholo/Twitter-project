@@ -14,14 +14,29 @@ import Signets from '@/features/feed/Signet';
 import Explorer from '@/features/feed/Explorer';
 import MainLayout from '@/components/layout/MainLayout';
 import TweetDetails from '@/features/feed/TweetDetails';
-
+import websocketService from '@/services/websocketService';
+import Cookies from 'js-cookie';
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { refetch: autoLogin, isPending } = useAutoLogin();
 
   useEffect(() => {
     autoLogin();
   }, [autoLogin]);
+
+  // Gestion de la connexion WebSocket
+  useEffect(() => {
+    if (isAuthenticated && user?._id) {
+      const token = Cookies.get('access_token');
+      if (token) {
+        websocketService.connect(token);
+
+        return () => {
+          websocketService.disconnect();
+        };
+      }
+    }
+  }, [isAuthenticated, user?._id]);
 
   if (isPending) return <Loader />
 

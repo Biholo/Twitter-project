@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import userService from "../userService";
-import queryClient from "@/configs/queryClient";
+import { queryClient } from "@/configs/queryClient";
 import { UpdateUser } from "@/types";
 
 export const useFollowUser = () => {

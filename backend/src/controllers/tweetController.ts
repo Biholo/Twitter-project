@@ -9,6 +9,7 @@ import { TweetFilters } from '@/types';
 import { ITweet } from '@/models/tweetModel';
 import { Types } from 'mongoose';
 import { ITweetInteraction } from '@/models/tweetInteractionModel';
+import notificationService from '@/services/notificationService';
 
 export const createTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {

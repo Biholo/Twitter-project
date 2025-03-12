@@ -8,7 +8,7 @@ export function notificationRoutes() {
     const router = express.Router();
     
     router.get("/", isAuthenticated, validateZod(getNotificationsQuerySchema, "query"), getNotifications);
-    router.put("/:id", isAuthenticated, validateZod(updateNotificationSchema, "params"), updateNotification);
+    router.patch("/:id", isAuthenticated, validateZod(updateNotificationSchema, "params"), updateNotification);
     router.post("/read-all", isAuthenticated, markAllAsRead);
     return router;
 }

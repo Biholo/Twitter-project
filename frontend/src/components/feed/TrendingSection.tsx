@@ -3,24 +3,118 @@ import { Card, CardContent, CardHeader } from "@/components/ui/Card"
 import SuggestionCard from "./SuggestionCard"
 import TopicCard from "@/components/feed/TopicCard"
 import { useTrendingHashtags, useTrendingSuggestions } from "@/api/queries/trendingQueries"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { Bell, Check } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useGetNotifications, useMarkAsRead, useMarkAllAsRead } from "@/api/queries/notificationQueries"
+import { Notification } from "@/types"
+import { useAuthStore } from "@/stores/authStore"
 
 export default function TrendingSection() {
+  const { user } = useAuthStore();
   const { data: trendingHashtag, isLoading: isLoadingTrendingHashtag } = useTrendingHashtags();
   const { data: trendingSuggestions = [], isLoading: isLoadingTrendingSuggestions } = useTrendingSuggestions();
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  const { data: notifications = [], isLoading: isLoadingNotifications } = useGetNotifications(user?._id || "");
+  const { mutate: markAsReadMutation } = useMarkAsRead();
+  const { mutate: markAllAsReadMutation } = useMarkAllAsRead();
 
   const displayedSuggestions = showAllSuggestions 
     ? trendingSuggestions 
     : trendingSuggestions.slice(0, 2);
 
   useEffect(() => {
-    if (trendingSuggestions) {
-      console.log(trendingSuggestions);
-    }
-  }, [trendingSuggestions]);  
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const markAsRead = (notificationId: string) => {
+    markAsReadMutation(notificationId);
+  };
+
+  const markAllAsRead = () => {
+    markAllAsReadMutation();
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="relative" ref={notificationRef}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full hover:bg-pink-50 dark:hover:bg-pink-950"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            <Bell className="h-5 w-5 text-gray-600" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </Button>
+
+          <AnimatePresence>
+            {showNotifications && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg z-50 border border-gray-200 dark:border-gray-700"
+              >
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs flex items-center gap-1 text-gray-600 hover:text-gray-900"
+                        onClick={markAllAsRead}
+                      >
+                        <Check className="h-3 w-3" />
+                        Tout marquer comme lu
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {notifications.map((notification: Notification) => (
+                      <div
+                        key={notification._id}
+                        className={`p-3 rounded-lg transition-colors cursor-pointer ${
+                          notification.read
+                            ? "bg-gray-50 dark:bg-gray-700/50"
+                            : "bg-blue-50 dark:bg-blue-900/20"
+                        }`}
+                        onClick={() => markAsRead(notification._id)}
+                      >
+                        <p className="text-sm">{notification.content}</p>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {notification.created_at.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
       <Card className="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">
         <CardHeader className="pb-2">
           <h3 className="font-semibold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">

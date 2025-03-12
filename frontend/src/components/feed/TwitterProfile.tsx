@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { useAuthStore } from "@/stores/authStore";
 import { Calendar, Link2, MapPin } from "lucide-react"
 

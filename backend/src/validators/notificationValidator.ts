@@ -1,5 +1,5 @@
+import { NotificationType } from '@/models/notificationModel';
 import { z } from 'zod';
-import { NotificationType } from '@/services/notificationService';
 
 export const updateNotificationSchema = z.object({
   read: z.boolean().optional(),

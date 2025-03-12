@@ -9,6 +9,7 @@ export const useRegister = () => {
     const { login } = useAuthStore();
 
     return useMutation({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mutationFn: async (userData: any) => {
             const response = await authService.registerUser({
                 email: userData.email,
@@ -93,11 +94,11 @@ export const useAutoLogin = () => {
 
                             const userData = await authService.getUserByToken(newTokens.access_token);
                             login(newTokens.access_token, newTokens.refresh_token);
-                            setUser(userData?.data || null);
+                            setUser(userData?.user || null);
                             setIsAuthenticated(true);
                             console.log('Auto login successful with refreshed token');
                             return true;
-                        } catch (refreshError) {
+                        } catch (_) {
                             console.error('Failed to refresh token, user needs to log in again.');
                             handleLogout();
                         }

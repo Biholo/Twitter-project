@@ -103,7 +103,7 @@ export const createFileUploadMiddleware = (options: UploadOptions) => {
         req.fileContent = req.file.buffer.toString('utf-8');
       }
 
-      next();
+      return next();
     });
   };
 };

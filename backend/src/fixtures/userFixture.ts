@@ -1,5 +1,5 @@
 import User, { IUser } from "@/models/userModel";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 
 // Fonction pour générer un hash de mot de passe
@@ -16,9 +16,8 @@ export const fixtureIds = {
   kilianId,
   adminId,
   johnId,
-  parentTweetId
+  parentTweetId,
 };
-
 
 export const userFixtures: Partial<IUser>[] = [
   {
@@ -53,5 +52,5 @@ export const userFixtures: Partial<IUser>[] = [
     created_at: new Date(),
     updated_at: new Date(),
     bio: "Développeur passionné",
-  }
+  },
 ];

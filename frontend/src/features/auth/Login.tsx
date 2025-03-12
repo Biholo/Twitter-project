@@ -17,7 +17,7 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   })
 
-  const { mutate: loginUser, isPending } = useLogin();
+  const { mutate: loginUser, isPending: _isPending } = useLogin();
 
   const onSubmit = async (data: LoginFormData) => {
     try {

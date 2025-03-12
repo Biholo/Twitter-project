@@ -13,6 +13,7 @@ import Profil from '@/features/feed/Profil';
 import Signets from '@/features/feed/Signet';
 import Explorer from '@/features/feed/Explorer';
 import MainLayout from '@/components/layout/MainLayout';
+import TweetDetails from '@/features/feed/TweetDetails';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuthStore();
@@ -41,6 +42,7 @@ const AppRoutes = () => {
               <Route path='/profil' element={<Profil />} />
               <Route path='/explore' element={<Explorer />} />
               <Route path='/signets' element={<Signets />} />
+              <Route path='/tweet/:id' element={<TweetDetails />} />
             </Route>
           </Route>
 

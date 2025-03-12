@@ -144,6 +144,7 @@ export default function Profil() {
                 {...register("bio")}
                 placeholder="Bio"
                 maxLength={160}
+                className="p-2"
                 error={errors.bio?.message}
               />
             </div>

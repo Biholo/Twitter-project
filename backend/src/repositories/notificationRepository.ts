@@ -11,7 +11,7 @@ class NotificationRepository extends BaseRepository<INotification> {
   async findNotifications(filter: any): Promise<any[]> {
     return this.model.find(filter)
       .populate('sender', 'username identifier_name avatar')
-      .populate('tweet', 'content media_url')
+      .populate('tweet', 'content media_url') 
       .sort({ created_at: -1 });
   }
 

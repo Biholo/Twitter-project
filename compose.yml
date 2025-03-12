@@ -1,4 +1,5 @@
 services:
+<<<<<<< Updated upstream
   backend:
     build:
       context: backend
@@ -26,6 +27,57 @@ services:
       - ./frontend/src:/app/src
     networks:
       - app
+=======
+  # backend:
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile
+  #   container_name: backend-dev
+  #   env_file:
+  #     - backend/.env
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./backend/src:/app/src
+  #   networks:
+  #     - app
+
+  # frontend:
+  #   build:
+  #     context: frontend
+  #     dockerfile: Dockerfile
+  #   container_name: frontend-dev
+  #   env_file:
+  #     - frontend/.env
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend/src:/app/src
+  #   networks:
+  #     - app
+
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: twitter
+      MONGO_INITDB_ROOT_USERNAME: m0ng0db
+      MONGO_INITDB_ROOT_PASSWORD: p4ssw0rd
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app
+
+volumes:
+  mongodb_data:
+>>>>>>> Stashed changes
 
 networks:
   app:

@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import { handleError } from '@/utils/responseFormatter';
 import hashtagRepository from '@/repositories/hashtagRepository';
 import tweetRepository from '@/repositories/tweetRepository';
-import { TrendingHashtagsQuery, TrendingTweetsQuery } from '@/validators/trendingValidator';
+import { TrendingHashtagsQuery, TrendingTweetsQuery, TrendingSuggestionsQuery } from '@/validators/trendingValidator';
 import { AuthenticatedRequest } from '@/types';
+import userRepository from '@/repositories/userRepository';
 
 type RequestWithValidatedQuery<T> = AuthenticatedRequest & { query: T };
 
@@ -60,5 +61,34 @@ export const getTrendingTweets = async (
         });
     } catch (error) {
         handleError(res, error, "Erreur lors de la récupération des tweets tendances");
+    }
+};
+
+export const getFollowSuggestions = async (
+    req: AuthenticatedRequest,
+    res: Response
+): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        console.log("userId", userId);
+        
+        if (!userId) {
+            res.status(401).json({
+                message: "Utilisateur non authentifié"
+            });
+            return;
+        }
+
+        const suggestions = await userRepository.getFollowSuggestions({
+            userId: userId.toString(),
+            minSuggestions: 3
+        });
+
+        res.status(200).json({
+            message: "Suggestions d'abonnement récupérées avec succès",
+            data: suggestions
+        });
+    } catch (error) {
+        handleError(res, error, "Erreur lors de la récupération des suggestions d'abonnement");
     }
 };

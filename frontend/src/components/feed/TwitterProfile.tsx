@@ -90,34 +90,7 @@ export default function TwitterProfile() {
           </div>
         </div>
 
-        <Tabs defaultValue="posts" className="mt-6">
-          <TabsList className="w-full justify-start border-b bg-transparent p-0">
-            <TabsTrigger
-              value="posts"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-blue-500 data-[state=active]:bg-transparent"
-            >
-              Posts
-            </TabsTrigger>
-            <TabsTrigger
-              value="replies"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-blue-500 data-[state=active]:bg-transparent"
-            >
-              Réponses
-            </TabsTrigger>
-            <TabsTrigger
-              value="media"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-blue-500 data-[state=active]:bg-transparent"
-            >
-              Médias
-            </TabsTrigger>
-            <TabsTrigger
-              value="likes"
-              className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-blue-500 data-[state=active]:bg-transparent"
-            >
-              J'aime
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+       
       </div>
     </div>
   )

@@ -8,7 +8,7 @@ import { corsMiddleware } from "@/middlewares/cors";
 import { securityHeaders } from "@/middlewares/helmet";
 import { limiter } from "@/middlewares/rateLimit";
 import { httpLogger } from "@/middlewares/httpLogger";
-import { registerRoutes } from "@/routes/registerRoutes";
+import { registerRoutes } from "@/routes/registerRoutes"; // Ajouter l'import
 import { errorHandler } from "@/middlewares/errorHandler";
 import { logger } from "@/middlewares/logger";
 import dotenv from "dotenv";
@@ -16,7 +16,6 @@ import connect from "@/config/conn";
 import { loadFixtures } from "@/fixtures/fixtures";
 
 dotenv.config();
-
 
 export function createExpressApp() {
   const app = express();
@@ -29,9 +28,10 @@ export function createExpressApp() {
   app.use(limiter);
 
   registerRoutes(app);
+ 
   setupErrorMiddleware(app);
 
-  loadFixtures();  
+  // loadFixtures();  
   
   return app;
 }

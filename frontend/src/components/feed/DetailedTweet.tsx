@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/Card"
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/Separator"
 import { MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 
 // Update the detailed tweet with gradient colors and better emojis

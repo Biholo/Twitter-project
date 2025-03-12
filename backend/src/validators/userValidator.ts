@@ -7,33 +7,59 @@ import { roles } from '@/config/role';
  * Validates data when updating user information.
  */
 export const updateUserSchema = z.object({
-  firstName: z
+  username: z
     .string()
-    .min(2, "Le prénom doit contenir au moins 2 caractères")
-    .max(50, "Le prénom ne peut pas dépasser 50 caractères")
+    .min(2, "Le nom d'utilisateur doit contenir au moins 2 caractères")
+    .max(50, "Le nom d'utilisateur ne peut pas dépasser 50 caractères")
     .optional(),
-  lastName: z
+
+  identifier_name: z
     .string()
-    .min(2, "Le nom doit contenir au moins 2 caractères")
-    .max(50, "Le nom ne peut pas dépasser 50 caractères")
+    .regex(/^[a-z0-9_-]+$/, "L'identifiant ne peut contenir que des lettres minuscules, des chiffres, des tirets (-) et des underscores (_)")
+    .min(2, "L'identifiant doit contenir au moins 2 caractères")
+    .max(30, "L'identifiant ne peut pas dépasser 30 caractères")
     .optional(),
-  phone: z
-    .string()
-    .min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres")
-    .max(15, "Le numéro de téléphone ne peut pas dépasser 15 chiffres")
-    .optional(),
+
   email: z
     .string()
     .email("Format d'email invalide")
+    .optional(),
+
+  bio: z
+    .string()
+    .max(160, "La bio ne peut pas dépasser 160 caractères")
+    .optional(),
+
+  accept_notifications: z
+    .boolean()
+    .optional(),
+
+  avatar: z
+    .string()
+    .url("L'URL de l'avatar n'est pas valide")
+    .nullable()
+    .optional(),
+
+  banner_photo: z
+    .string()
+    .url("L'URL de la photo de bannière n'est pas valide")
+    .nullable()
+    .optional(),
+
+  roles: z
+    .array(z.enum(roles as [string, ...string[]]))
+    .optional(),
+
+  website_link: z
+    .string()
+    .url("L'URL du site web n'est pas valide")
+    .nullable()
     .optional(),
 
   password: z
     .string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")
     .max(128, "Le mot de passe ne peut pas dépasser 128 caractères")
-    .optional(),
-  role: z
-    .enum(["admin", "employé", "client"])
     .optional(),
 }).refine((data) => Object.keys(data).length > 0, {
   message: "Au moins un champ doit être fourni pour la mise à jour"
@@ -92,6 +118,11 @@ export const filterUserSchema = z.object({
     .default(10)
 });
 
+export const idParamSchema = z.object({
+  id: z.string().regex(/^[0-9a-fA-F]{24}$/, "L'ID doit être un ID MongoDB valide")
+});
+
 
 export type UpdateUserData = z.infer<typeof updateUserSchema>;
 export type FilterUserData = z.infer<typeof filterUserSchema>;
+export type IdParamSchema = z.infer<typeof idParamSchema>;

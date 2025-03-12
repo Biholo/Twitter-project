@@ -2,10 +2,10 @@ import { User } from "./userType";
 
 // Données d'inscription
 export interface RegisterCredentials {
-    firstName: string;
-    lastName: string;
+    username: string;
+    identifier_name: string;
     email: string;
-    phone: string;
+    password: string;
 }
 
 // Données de connexion

@@ -19,8 +19,8 @@ export class BaseRepository<T> {
             .limit(limit);
     }
 
-    async findOne(filters: any = {}) {
-        const query = filterService.buildQuery(filters);
+    async findOne(filters: any = {}, skipFilterService: boolean = false) {
+        const query = skipFilterService ? filters : filterService.buildQuery(filters);
         return this.model.findOne(query);
     }
 
@@ -44,6 +44,8 @@ export class BaseRepository<T> {
     async delete(filter: any) {
         return this.model.deleteOne(filter);
     }
+
+    
 
     async findById(id: string) {
         return this.model.findById(id);

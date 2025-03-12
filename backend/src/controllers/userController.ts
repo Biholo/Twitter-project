@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { handleError } from "@/utils/responseFormatter";
 import User, { IUser } from "@/models/userModel";
+import userRepository from "@/repositories/userRepository";
+import mongoose from "mongoose";
+import { AuthenticatedRequest } from "@/types";
+import followRepository from "@/repositories/followRepository";
 
 /**
  * Met à jour les informations d'un utilisateur
@@ -11,27 +15,38 @@ import User, { IUser } from "@/models/userModel";
  * @param req.body.password - Le mot de passe de l'utilisateur (optionnel)
  * @param req.body.roles - Les rôles de l'utilisateur (optionnel)
  */
-export const patchUser = async (req: Request, res: Response): Promise<void> => {
+export const patchUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id } = req.params;
   const updateData = req.body;
+  const authenticatedUser = req.user;
 
   try {
-    // Si les permissions sont incluses, les ajouter aux données de mise à jour
+    const isAdmin = authenticatedUser?.role?.includes('ROLE_ADMIN');
+    const isOwnProfile = authenticatedUser?.id.toString() === id;
     if (updateData.roles) {
-      updateData.roles = updateData.roles;
+      if (!isAdmin) {
+        delete updateData.roles;
+      }
+    }
+    if(!isOwnProfile && !isAdmin) {
+      res.status(403).json({ message: "Vous n'avez pas les permissions pour modifier ce profil." });
+      return;
     }
 
-    const user = await User.findByIdAndUpdate(id, updateData, { 
+    const updatedUser = await userRepository.update(id, updateData, { 
       new: true,
       runValidators: true 
-    }).select("-password");
+    });
     
-    if (!user) {
+    if (!updatedUser) {
       res.status(404).json({ message: "Utilisateur non trouvé." });
       return;
     }
 
-    res.status(200).json(user);
+    res.status(200).json({
+      message: "Utilisateur mis à jour avec succès.",
+      data: updatedUser
+    });
   } catch (error) {
     handleError(res, error, "Erreur lors de la mise à jour de l'utilisateur.");
   }
@@ -127,14 +142,91 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
  */
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await User.findById(req.params.id).select("-password -refreshToken");
+    const userId = req.params.id;
+    if (!userId) {
+      res.status(400).json({ message: "L'ID de l'utilisateur est requis." });
+      return;
+    }
+
+    const user = await userRepository.getProfileByUserId(new mongoose.Types.ObjectId(userId));
+
     if (!user) {
       res.status(404).json({ message: "Utilisateur non trouvé." });
       return;
     }
-    res.status(200).json(user);
+
+    res.status(200).json({
+      message: "Utilisateur récupéré avec succès.",
+      data: user
+    });
   } catch (error) {
     handleError(res, error, "Erreur lors de la récupération de l'utilisateur.");
+  }
+};
+
+/**
+ * Follow a user
+ * @param req.params.id - L'ID de l'utilisateur à suivre
+ */
+export const followUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.id;
+    const followerId = req.user?.id;
+
+    if (!userId || !followerId) {
+      res.status(400).json({ message: "L'ID de l'utilisateur et le followerId sont requis." });
+      return;
+    }
+
+    const existingFollow = await followRepository.findOne({ follower_id: followerId, following_id: userId });
+    if (existingFollow) {
+      res.status(400).json({ message: "Vous suivez déjà cet utilisateur." });
+      return;
+    }
+    
+    const newFollow =  followRepository.create({ follower_id: followerId, following_id: userId });
+    
+    res.status(201).json({
+      message: "Utilisateur suivi avec succès.",
+      data: newFollow
+    });
+    
+  } catch (error) {
+    handleError(res, error, "Erreur lors de la suivi de l'utilisateur.");
+  }
+};
+
+/**
+ * Unfollow a user
+ * @param req.params.id - L'ID de l'utilisateur à suivre
+ */
+export const unfollowUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.id;
+    const followerId = req.user?.id;
+
+    if (!userId || !followerId) {
+      res.status(400).json({ message: "L'ID de l'utilisateur et le followerId sont requis." });
+      return;
+    }
+
+    const existingFollow = await followRepository.findOne({ follower_id: followerId, following_id: userId });
+    if (!existingFollow) {
+      res.status(400).json({ message: "Vous ne suivez pas cet utilisateur." });
+      return;
+    }
+
+    await followRepository.delete({ _id: existingFollow._id });
+    
+    res.status(200).json({
+      message: "Utilisateur désabonné avec succès.",
+      data: existingFollow
+    });
+    return;
+    
+  } catch (error) {
+    handleError(res, error, "Erreur lors de la désabonnement de l'utilisateur.");
+    return;
   }
 };
 
@@ -155,3 +247,4 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     handleError(res, error, "Erreur lors de la suppression de l'utilisateur.");
   }
 };
+

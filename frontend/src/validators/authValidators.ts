@@ -21,12 +21,12 @@ export const registerSchema = z.object({
     confirmPassword: z
       .string()
       .min(1, 'La confirmation du mot de passe est requise'),
-    firstName: z
+    username: z
       .string()
-      .min(2, 'Le prénom doit contenir au moins 2 caractères'),
-    lastName: z
+      .min(2, 'Le username doit contenir au moins 2 caractères'),
+    identifierName: z
       .string()
-      .min(2, 'Le nom doit contenir au moins 2 caractères'),
+      .min(2, 'Le identifierName doit contenir au moins 2 caractères'),
   }).refine((data) => data.password === data.confirmPassword, {
     message: 'Les mots de passe ne correspondent pas',
     path: ['confirmPassword'],

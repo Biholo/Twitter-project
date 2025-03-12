@@ -1,37 +1,40 @@
 import FeedTabs from "@/components/feed/FeedTabs"
-import TrendingSection from "@/components/feed/TrendingSection"
-import TweetFeed from "@/components/feed/TweetFeed"
 import SearchBar from "@/components/layout/Searchbar"
-import { Sidebar } from "@/components/ui/Sidebar"
+import { useGetTweetsCollection } from "@/api/queries/tweetQueries";
+import { Tweet } from "@/types";
+import { Tweet as TweetComponent } from "@/components/feed/Tweet";
+import { useAuthStore } from "@/stores/authStore";
+import { TweetComposer } from "@/components/feed/TweetComposer"
 
 export default function Home() {
+  const { user } = useAuthStore();
+  const userId = user?._id || "";
+  const { data: tweets, isLoading } = useGetTweetsCollection(userId);
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-      <Sidebar />
-      <div className="flex-1 md:ml-64">
-        <div className="container mx-auto px-4 pb-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Colonne principale */}
-            <div className="flex-1 max-w-3xl">
-              <div className="mb-4 sticky top-0 z-10 pt-4 bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-                <SearchBar />
-                <div className="mt-4">
-                  <FeedTabs />
-                </div>
-              </div>
-              <TweetFeed />
-            </div>
-            
-            {/* Colonne des tendances */}
-            <div className="hidden md:block w-80 flex-shrink-0">
-              <div className="sticky top-4">
-                <TrendingSection />
-              </div>
-            </div>
-          </div>
+    <>
+      {/* En-tête fixe */}
+      <div className="sticky top-0 z-20 pt-4 pb-2 bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="mb-4">
+          <SearchBar />
         </div>
+        <FeedTabs />
       </div>
-    </div>
+
+      {/* Contenu défilant */}
+      <div className="space-y-4 py-4">
+        <TweetComposer />
+        {isLoading ? (
+          <p className="text-center text-gray-500 dark:text-gray-400">Chargement des tweets...</p>
+        ) : !tweets || tweets.length === 0 ? (
+          <p className="text-center text-gray-500 dark:text-gray-400">Aucun tweet n'est disponible</p>
+        ) : (
+          tweets.map((tweet: Tweet) => (
+            <TweetComponent key={tweet._id} tweet={tweet} />
+          ))
+        )}
+      </div>
+    </>
   )
 }
 

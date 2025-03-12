@@ -45,24 +45,22 @@ export default function Register() {
 
         <form className="mt-6 sm:mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Prénom"
-                {...register("firstName")}
-                error={errors.firstName?.message}
-                placeholder="Jean"
-                className="w-full px-3 py-2 rounded-xl border border-pink-100 bg-white/80 
-                focus:ring-2 focus:ring-blue-200 focus:border-blue-200 transition-all placeholder:text-gray-400"
-              />
-              <Input
-                label="Nom"
-                {...register("lastName")}
-                error={errors.lastName?.message}
-                placeholder="Dupont"
-                className="w-full px-3 py-2 rounded-xl border border-pink-100 bg-white/80 
-                focus:ring-2 focus:ring-blue-200 focus:border-blue-200 transition-all placeholder:text-gray-400"
-              />
-            </div>
+            <Input
+              label="Username"
+              {...register("username")}
+              error={errors.username?.message}
+              placeholder="Username"
+              className="w-full px-3 py-2 rounded-xl border border-pink-100 bg-white/80 
+              focus:ring-2 focus:ring-blue-200 focus:border-blue-200 transition-all placeholder:text-gray-400"
+            />
+            <Input
+              label="Identifier Name"
+              {...register("identifierName")}
+              error={errors.identifierName?.message}
+              placeholder="@username"
+              className="w-full px-3 py-2 rounded-xl border border-pink-100 bg-white/80 
+              focus:ring-2 focus:ring-blue-200 focus:border-blue-200 transition-all placeholder:text-gray-400"
+            />
             <Input
               label="Email"
               type="email"
@@ -94,12 +92,13 @@ export default function Register() {
 
           <Button
             type="submit"
-            isLoading={isSubmitting}
-            disabled={isSubmitting}
+            isLoading={isPending}
+            disabled={isPending}
             loadingText="Inscription en cours..."
-            className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-pink-400 to-blue-400 text-white rounded-xl font-medium
+            className={`w-full py-2.5 sm:py-3 bg-gradient-to-r from-pink-400 to-blue-400 text-white rounded-xl font-medium
             hover:from-pink-500 hover:to-blue-500 transform transition-all duration-200
-            focus:ring-2 focus:ring-pink-200 focus:ring-offset-2 disabled:opacity-50"
+            focus:ring-2 focus:ring-pink-200 focus:ring-offset-2 disabled:opacity-50
+            ${isPending ? 'animate-pulse' : ''}`}
           >
             S'inscrire
           </Button>
@@ -107,7 +106,7 @@ export default function Register() {
           <div className="text-sm text-center mt-4 sm:mt-6">
             <Link
               to="/login"
-              className="font-medium text-pink-500 hover:text-blue-500 transition-colors duration-300"
+              className="font-medium text-pink-500 hover:text-blue-500 transition-colors duration-300 hover:underline"
             >
               Déjà un compte ? Se connecter
             </Link>

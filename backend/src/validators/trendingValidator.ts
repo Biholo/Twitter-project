@@ -27,5 +27,13 @@ export const trendingTweetsSchema = z.object({
             })
 });
 
+export const trendingSuggestionsSchema = z.object({
+    limit: z.string()
+        .optional()
+        .transform(val => parseInt(val || '10'))
+        .pipe(z.number().min(1).max(50)),
+});
+
 export type TrendingHashtagsQuery = z.infer<typeof trendingHashtagsSchema>;
 export type TrendingTweetsQuery = z.infer<typeof trendingTweetsSchema>; 
+export type TrendingSuggestionsQuery = z.infer<typeof trendingSuggestionsSchema>;

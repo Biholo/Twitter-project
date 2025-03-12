@@ -1,9 +1,15 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export enum TweetInteractionType {
+  LIKE = 'like',
+  RETWEET = 'retweet',
+  BOOKMARK = 'bookmark',
+}
+
 export interface ITweetInteraction extends Document {
   user_id: mongoose.Types.ObjectId;
   tweet_id: mongoose.Types.ObjectId;
-  action_type: 'like' | 'retweet' | 'bookmark' | 'reply';
+  action_type: TweetInteractionType;
   action_date: Date;
   created_at: Date;
   updated_at: Date;
@@ -14,7 +20,7 @@ const TweetInteractionSchema = new Schema({
   tweet_id: { type: Schema.Types.ObjectId, ref: 'Tweet', required: true },
   action_type: { 
     type: String, 
-    enum: ['like', 'retweet', 'bookmark', 'reply'], 
+    enum: Object.values(TweetInteractionType), 
     required: true 
   },
   action_date: { type: Date, default: Date.now },
@@ -23,9 +29,6 @@ const TweetInteractionSchema = new Schema({
 }, {
   timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
-
-// Index composé pour éviter les doublons d'interactions du même type par le même utilisateur sur le même tweet
-TweetInteractionSchema.index({ user_id: 1, tweet_id: 1, actionType: 1 }, { unique: true });
 
 // Middleware pour mettre à jour le champ updated_at avant chaque sauvegarde
 TweetInteractionSchema.pre('save', function(next) {

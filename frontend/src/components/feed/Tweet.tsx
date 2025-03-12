@@ -1,12 +1,12 @@
+import { useBookmarkTweet, useLikeTweet, useUnbookmarkTweet, useUnlikeTweet } from "@/api/queries/tweetQueries"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Card, CardFooter, CardHeader } from "@/components/ui/Card"
+import { useAuthStore } from "@/stores/authStore"
 import { Tweet as TweetType } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { useLikeTweet, useUnlikeTweet, useBookmarkTweet, useUnbookmarkTweet } from "@/api/queries/tweetQueries"
-import { useAuthStore } from "@/stores/authStore"
 import { useNavigate } from "react-router-dom"
 
 export function Tweet({ tweet }: { tweet: TweetType }) {
@@ -39,11 +39,22 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
 
   const handleLike = () => {
     if (user) {
+      console.log("Tentative de like/unlike pour le tweet:", tweet._id);
       if(tweet.is_liked) {
-        unlikeTweet(tweet._id);
+        console.log("Tweet déjà liké, tentative d'unlike");
+        unlikeTweet(tweet._id, {
+          onSuccess: () => console.log("Unlike réussi"),
+          onError: (error) => console.error("Erreur lors de l'unlike:", error)
+        });
       } else {
-        likeTweet(tweet._id);
+        console.log("Tweet non liké, tentative de like");
+        likeTweet(tweet._id, {
+          onSuccess: () => console.log("Like réussi"),
+          onError: (error) => console.error("Erreur lors du like:", error)
+        });
       }
+    } else {
+      console.log("Utilisateur non connecté, impossible de liker");
     }
   };
 
@@ -87,8 +98,8 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
   };
   
   return (
-    <Card className="overflow-hidden bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none" onClick={openTweetDetails}>
-      <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4">
+    <Card className="overflow-hidden bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">
+      <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4 cursor-pointer" onClick={openTweetDetails}>
         <Avatar>
           <AvatarImage src={`/placeholder.svg?height=40&width=40&text=${tweet.author.username}`} alt={tweet.author.username} />
           <AvatarFallback>{tweet.author.username.substring(0, 2)}</AvatarFallback>

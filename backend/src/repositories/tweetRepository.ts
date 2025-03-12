@@ -65,7 +65,7 @@ class TweetRepository extends BaseRepository<ITweet> {
             $filter: {
               input: '$interactions',
               as: 'interaction',
-              cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+              cond: { $eq: ['$$interaction.action_type', 'like'] }
             }
           }
         },
@@ -74,7 +74,7 @@ class TweetRepository extends BaseRepository<ITweet> {
             $filter: {
               input: '$interactions',
               as: 'interaction',
-              cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+              cond: { $eq: ['$$interaction.action_type', 'save'] }
             }
           }
         },
@@ -82,7 +82,7 @@ class TweetRepository extends BaseRepository<ITweet> {
           $cond: {
             if: authenticatedUserId,
             then: {
-              $in: ['like', '$currentUserInteractions.interaction_type']
+              $in: ['like', '$currentUserInteractions.action_type']
             },
             else: false
           }
@@ -91,7 +91,7 @@ class TweetRepository extends BaseRepository<ITweet> {
           $cond: {
             if: authenticatedUserId,
             then: {
-              $in: ['save', '$currentUserInteractions.interaction_type']
+              $in: ['save', '$currentUserInteractions.action_type']
             },
             else: false
           }
@@ -139,7 +139,7 @@ class TweetRepository extends BaseRepository<ITweet> {
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+                    cond: { $eq: ['$$interaction.action_type', 'like'] }
                   }
                 }
               },
@@ -148,7 +148,7 @@ class TweetRepository extends BaseRepository<ITweet> {
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+                    cond: { $eq: ['$$interaction.action_type', 'save'] }
                   }
                 }
               }
@@ -236,12 +236,12 @@ class TweetRepository extends BaseRepository<ITweet> {
                       {
                         $cond: {
                           if: { $and: [{ $eq: [true, include_liked] }, { $eq: [true, include_saved] }] },
-                          then: { $in: ['$interaction_type', ['like', 'save']] },
+                          then: { $in: ['$action_type', ['like', 'save']] },
                           else: {
                             $cond: {
                               if: { $eq: [true, include_liked] },
-                              then: { $eq: ['$interaction_type', 'like'] },
-                              else: { $eq: ['$interaction_type', 'save'] }
+                              then: { $eq: ['$action_type', 'like'] },
+                              else: { $eq: ['$action_type', 'save'] }
                             }
                           }
                         }
@@ -356,7 +356,7 @@ class TweetRepository extends BaseRepository<ITweet> {
             $filter: {
               input: '$interactions',
               as: 'interaction',
-              cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+              cond: { $eq: ['$$interaction.action_type', 'like'] }
             }
           }
         },
@@ -365,7 +365,7 @@ class TweetRepository extends BaseRepository<ITweet> {
             $filter: {
               input: '$interactions',
               as: 'interaction',
-              cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+              cond: { $eq: ['$$interaction.action_type', 'save'] }
             }
           }
         },
@@ -373,7 +373,7 @@ class TweetRepository extends BaseRepository<ITweet> {
           $cond: {
             if: authenticatedUserId,
             then: {
-              $in: ['like', '$currentUserInteractions.interaction_type']
+              $in: ['like', '$currentUserInteractions.action_type']
             },
             else: false
           }
@@ -382,7 +382,7 @@ class TweetRepository extends BaseRepository<ITweet> {
           $cond: {
             if: authenticatedUserId,
             then: {
-              $in: ['save', '$currentUserInteractions.interaction_type']
+              $in: ['save', '$currentUserInteractions.action_type']
             },
             else: false
           }
@@ -523,7 +523,7 @@ class TweetRepository extends BaseRepository<ITweet> {
                                 $filter: {
                                     input: '$interactions',
                                     as: 'interaction',
-                                    cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+                                    cond: { $eq: ['$$interaction.action_type', 'like'] }
                                 }
                             }
                         },
@@ -534,7 +534,7 @@ class TweetRepository extends BaseRepository<ITweet> {
                                         $filter: {
                                             input: '$interactions',
                                             as: 'interaction',
-                                            cond: { $eq: ['$$interaction.interaction_type', 'retweet'] }
+                                            cond: { $eq: ['$$interaction.action_type', 'retweet'] }
                                         }
                                     }
                                 },
@@ -603,7 +603,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
               $filter: {
                 input: '$interactions',
                 as: 'interaction',
-                cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+                cond: { $eq: ['$$interaction.action_type', 'like'] }
               }
             }
           },
@@ -612,7 +612,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
               $filter: {
                 input: '$interactions',
                 as: 'interaction',
-                cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+                cond: { $eq: ['$$interaction.action_type', 'save'] }
               }
             }
           },
@@ -621,7 +621,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
               $filter: {
                 input: '$interactions',
                 as: 'interaction',
-                cond: { $eq: ['$$interaction.interaction_type', 'retweet'] }
+                cond: { $eq: ['$$interaction.action_type', 'retweet'] }
               }
             }
           },
@@ -632,7 +632,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+                    cond: { $eq: ['$$interaction.action_type', 'like'] }
                   }
                 }
               },
@@ -643,7 +643,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                       $filter: {
                         input: '$interactions',
                         as: 'interaction',
-                        cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+                        cond: { $eq: ['$$interaction.action_type', 'save'] }
                       }
                     }
                   },
@@ -657,7 +657,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                       $filter: {
                         input: '$interactions',
                         as: 'interaction',
-                        cond: { $eq: ['$$interaction.interaction_type', 'retweet'] }
+                          cond: { $eq: ['$$interaction.action_type', 'retweet'] }
                       }
                     }
                   },
@@ -694,13 +694,13 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
       {
         $addFields: {
           is_liked: {
-            $in: ['like', '$currentUserInteractions.interaction_type']
+            $in: ['like', '$currentUserInteractions.action_type']
           },
           is_saved: {
-            $in: ['save', '$currentUserInteractions.interaction_type']
+            $in: ['save', '$currentUserInteractions.action_type']
           },
           is_retweeted: {
-            $in: ['retweet', '$currentUserInteractions.interaction_type']
+            $in: ['retweet', '$currentUserInteractions.action_type']
           }
         }
       });
@@ -746,7 +746,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.interaction_type', 'like'] }
+                    cond: { $eq: ['$$interaction.action_type', 'like'] }
                   }
                 }
               },
@@ -755,7 +755,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.interaction_type', 'save'] }
+                    cond: { $eq: ['$$interaction.action_type', 'save'] }
                   }
                 }
               },
@@ -764,7 +764,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.interaction_type', 'retweet'] }
+                    cond: { $eq: ['$$interaction.action_type', 'retweet'] }
                   }
                 }
               }

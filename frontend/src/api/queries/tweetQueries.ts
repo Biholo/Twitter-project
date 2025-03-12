@@ -1,7 +1,7 @@
 import TweetApi from "@/api/tweetService";
 import queryClient from "@/configs/queryClient";
 import { useAuthStore } from "@/stores/authStore";
-import { Author, Tweet, TweetQueryParams, CreateTweet } from "@/types/tweetType";
+import { CreateTweet, Tweet, TweetQueryParams } from "@/types/tweetType";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const tweetApi = new TweetApi();
@@ -29,159 +29,150 @@ export const useCreateTweet = () => {
 };
 
 export const useLikeTweet = () => {
+  const { user } = useAuthStore();
+  
   return useMutation({
     mutationFn: (tweetId: string) => tweetApi.likeTweet(tweetId),
     onMutate: async (tweetId) => {
-      await queryClient.cancelQueries({ queryKey: ["tweets"] });
-      const previousTweets = queryClient.getQueryData<{ data: Tweet[] }>([
-        "tweets",
-      ]);
+      await queryClient.cancelQueries({ queryKey: ["tweets", user?._id] });
+      const previousTweets = queryClient.getQueryData<Tweet[]>(["tweets", user?._id]);
 
-      queryClient.setQueryData<{ data: Tweet[] }>(["tweets"], (old) => {
-        if (!old) return { data: [] };
-        return {
-          ...old,
-          data: old.data.map((tweet) =>
-            tweet._id === tweetId
-              ? {
-                  ...tweet,
-                  likes_count: tweet.likes_count + 1,
-                  is_liked: true,
-                }
-              : tweet
-          ),
-        };
+      queryClient.setQueryData<Tweet[]>(["tweets", user?._id], (old) => {
+        if (!old) return [];
+        
+        return old.map((tweet) =>
+          tweet._id === tweetId
+            ? {
+                ...tweet,
+                likes_count: tweet.likes_count + 1,
+                is_liked: true,
+              }
+            : tweet
+        );
       });
 
       return { previousTweets };
     },
     onError: (_, __, context) => {
       if (context?.previousTweets) {
-        queryClient.setQueryData(["tweets"], context.previousTweets);
+        queryClient.setQueryData(["tweets", user?._id], context.previousTweets);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tweets"] });
+      queryClient.invalidateQueries({ queryKey: ["tweets", user?._id] });
     },
   });
 };
 
 export const useUnlikeTweet = () => {
+  const { user } = useAuthStore();
   return useMutation({
     mutationFn: (tweetId: string) => tweetApi.unlikeTweet(tweetId),
     onMutate: async (tweetId) => {
-      await queryClient.cancelQueries({ queryKey: ["tweets"] });
-      const previousTweets = queryClient.getQueryData<{ data: Tweet[] }>([
-        "tweets",
-      ]);
+      await queryClient.cancelQueries({ queryKey: ["tweets", user?._id] });
+      const previousTweets = queryClient.getQueryData<Tweet[]>(["tweets", user?._id]);
 
-      queryClient.setQueryData<{ data: Tweet[] }>(["tweets"], (old) => {
-        if (!old) return { data: [] };
-        return {
-          ...old,
-          data: old.data.map((tweet) =>
-            tweet._id === tweetId
-              ? {
-                  ...tweet,
-                  likes_count: Math.max(0, tweet.likes_count - 1),
-                  is_liked: false,
-                }
-              : tweet
-          ),
-        };
+      queryClient.setQueryData<Tweet[]>(["tweets", user?._id], (old) => {
+        if (!old) return [];
+        
+        return old.map((tweet) =>
+          tweet._id === tweetId
+            ? {
+                ...tweet,
+                likes_count: Math.max(0, tweet.likes_count - 1),
+                is_liked: false,
+              }
+            : tweet
+        );
       });
 
       return { previousTweets };
     },
     onError: (_, __, context) => {
       if (context?.previousTweets) {
-        queryClient.setQueryData(["tweets"], context.previousTweets);
+        queryClient.setQueryData(["tweets", user?._id], context.previousTweets);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tweets"] });
+      queryClient.invalidateQueries({ queryKey: ["tweets", user?._id] });
     },
   });
 };
 
 export const useBookmarkTweet = () => {
+  const { user } = useAuthStore();
   return useMutation({
     mutationFn: (tweetId: string) => tweetApi.bookmarkTweet(tweetId),
     onMutate: async (tweetId) => {
-      await queryClient.cancelQueries({ queryKey: ["tweets"] });
-      const previousTweets = queryClient.getQueryData<{ data: Tweet[] }>([
-        "tweets",
-      ]);
+      await queryClient.cancelQueries({ queryKey: ["tweets", user?._id] });
+      const previousTweets = queryClient.getQueryData<Tweet[]>(["tweets", user?._id]);
 
-      queryClient.setQueryData<{ data: Tweet[] }>(["tweets"], (old) => {
-        if (!old) return { data: [] };
-        return {
-          ...old,
-          data: old.data.map((tweet) =>
-            tweet._id === tweetId
-              ? {
-                  ...tweet,
-                  saves_count: tweet.saves_count + 1,
-                  is_saved: true,
-                }
-              : tweet
-          ),
-        };
+      queryClient.setQueryData<Tweet[]>(["tweets", user?._id], (old) => {
+        if (!old) return [];
+        
+        return old.map((tweet) =>
+          tweet._id === tweetId
+            ? {
+                ...tweet,
+                saves_count: tweet.saves_count + 1,
+                is_saved: true,
+              }
+            : tweet
+        );
       });
 
       return { previousTweets };
     },
     onError: (_, __, context) => {
       if (context?.previousTweets) {
-        queryClient.setQueryData(["tweets"], context.previousTweets);
+        queryClient.setQueryData(["tweets", user?._id], context.previousTweets);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tweets"] });
+      queryClient.invalidateQueries({ queryKey: ["tweets", user?._id] });
     },
   });
 };
 
 export const useUnbookmarkTweet = () => {
+  const { user } = useAuthStore();
+
   return useMutation({
     mutationFn: (tweetId: string) => tweetApi.unbookmarkTweet(tweetId),
     onMutate: async (tweetId) => {
-      await queryClient.cancelQueries({ queryKey: ["tweets"] });
-      const previousTweets = queryClient.getQueryData<{ data: Tweet[] }>([
-        "tweets",
-      ]);
+      await queryClient.cancelQueries({ queryKey: ["tweets", user?._id] });
+      const previousTweets = queryClient.getQueryData<Tweet[]>(["tweets", user?._id]);
 
-      queryClient.setQueryData<{ data: Tweet[] }>(["tweets"], (old) => {
-        if (!old) return { data: [] };
-        return {
-          ...old,
-          data: old.data.map((tweet) =>
-            tweet._id === tweetId
-              ? {
-                  ...tweet,
-                  saves_count: Math.max(0, tweet.saves_count - 1),
-                  is_saved: false,
-                }
-              : tweet
-          ),
-        };
+      queryClient.setQueryData<Tweet[]>(["tweets", user?._id], (old) => {
+        if (!old) return [];
+        
+        return old.map((tweet) =>
+          tweet._id === tweetId
+            ? {
+                ...tweet,
+                saves_count: Math.max(0, tweet.saves_count - 1),
+                is_saved: false,
+              }
+            : tweet
+        );
       });
 
       return { previousTweets };
     },
     onError: (_, __, context) => {
       if (context?.previousTweets) {
-        queryClient.setQueryData(["tweets"], context.previousTweets);
+        queryClient.setQueryData(["tweets", user?._id], context.previousTweets);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["tweets"] });
+      queryClient.invalidateQueries({ queryKey: ["tweets", user?._id] });
     },
   });
 };
 
 export const useGetTweets = (params: TweetQueryParams = {}) => {
-  const queryKey = ["tweets", params];
+  const { user } = useAuthStore();
+  const queryKey = ["tweets", user?._id];
 
   return useQuery<Tweet[], Error>({
     queryKey,
@@ -205,7 +196,8 @@ export const useGetTweetsCollection = (
     user_id?: string;
   } = {}
 ) => {
-  const queryKey = ["tweets", params];
+  const { user } = useAuthStore();
+  const queryKey = ["tweets", user?._id];
 
   return useQuery<Tweet[], Error>({
     queryKey,

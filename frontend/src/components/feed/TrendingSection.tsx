@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/Card"
 import SuggestionCard from "./SuggestionCard"
 import TopicCard from "@/components/feed/TopicCard"
 import { useTrendingHashtags, useTrendingSuggestions } from "@/api/queries/trendingQueries"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export default function TrendingSection() {
   const { data: trendingHashtag, isLoading: isLoadingTrendingHashtag } = useTrendingHashtags();
@@ -13,12 +13,7 @@ export default function TrendingSection() {
   const displayedSuggestions = showAllSuggestions 
     ? trendingSuggestions 
     : trendingSuggestions.slice(0, 2);
-
-  useEffect(() => {
-    if (trendingSuggestions) {
-      console.log(trendingSuggestions);
-    }
-  }, [trendingSuggestions]);  
+ 
   return (
     <div className="space-y-4">
       <Card className="bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">

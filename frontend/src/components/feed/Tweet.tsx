@@ -10,10 +10,10 @@ import { useAuthStore } from "@/stores/authStore"
 export function Tweet({ tweet }: { tweet: TweetType }) {
   const [imageError, setImageError] = useState(false);
   const { user } = useAuthStore();
-  const { mutate: likeTweet, isPending: isLikePending } = useLikeTweet();
-  const { mutate: unlikeTweet, isPending: isUnlikePending } = useUnlikeTweet();
-  const { mutate: bookmarkTweet, isPending: isBookmarkPending } = useBookmarkTweet();
-  const { mutate: unbookmarkTweet, isPending: isUnbookmarkPending } = useUnbookmarkTweet();
+  const { mutate: likeTweet, isPending: _isLikePending } = useLikeTweet();
+  const { mutate: unlikeTweet, isPending: _isUnlikePending } = useUnlikeTweet();
+  const { mutate: bookmarkTweet, isPending: _isBookmarkPending } = useBookmarkTweet();
+  const { mutate: unbookmarkTweet, isPending: _isUnbookmarkPending } = useUnbookmarkTweet();
 
   const handleShare = () => {
     // TODO: Implement share functionality

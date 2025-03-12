@@ -49,3 +49,9 @@ export interface InteractionResponse {
     __v: number;
   };
 }
+
+export interface CreateTweet {
+  parent_tweet_id?: string;
+  content: string;
+  tweet_type: "tweet" | "reply" | "retweet";
+}

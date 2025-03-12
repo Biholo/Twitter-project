@@ -1,9 +1,9 @@
 import { api } from "@/api/interceptor";
-import { Tweet, ApiResponse } from "@/types";
+import { Tweet, ApiResponse, CreateTweet } from "@/types";
 
 class TweetApi {
 
-    public async createTweet(tweet: Tweet): Promise<ApiResponse<Tweet>> {
+    public async createTweet(tweet: CreateTweet): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest("/api/tweets", "POST", tweet, true);
         return response;
     }

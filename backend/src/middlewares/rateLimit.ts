@@ -37,8 +37,8 @@ if (environment === 'production') {
 
 export const limiter = rateLimit({
   store,
-  windowMs: 15 * 60 * 1000, // Fenêtre de 15 minutes
-  max: 100, // Limite à 100 requêtes par IP par fenêtre
+  windowMs: 1 * 60 * 1000, // Fenêtre de 1 minute
+  max: 10000, // Limite à 100 requêtes par IP par fenêtre
   message: "Trop de requêtes, veuillez réessayer plus tard.",
 });
 

@@ -7,6 +7,8 @@ import { Tweet as TweetType } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+
 export function Tweet({ tweet }: { tweet: TweetType }) {
   const [imageError, setImageError] = useState(false);
   const { user } = useAuthStore();
@@ -14,6 +16,11 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
   const { mutate: unlikeTweet, isPending: _isUnlikePending } = useUnlikeTweet();
   const { mutate: bookmarkTweet, isPending: _isBookmarkPending } = useBookmarkTweet();
   const { mutate: unbookmarkTweet, isPending: _isUnbookmarkPending } = useUnbookmarkTweet();
+  const navigate = useNavigate();
+
+  const openTweetDetails = () => {
+    navigate(`/tweet/${tweet._id}`);
+  }
 
   const handleShare = () => {
     // TODO: Implement share functionality
@@ -92,7 +99,7 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
   
   return (
     <Card className="overflow-hidden bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">
-      <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4">
+      <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4 cursor-pointer" onClick={openTweetDetails}>
         <Avatar>
           <AvatarImage src={`/placeholder.svg?height=40&width=40&text=${tweet.author.username}`} alt={tweet.author.username} />
           <AvatarFallback>{tweet.author.username.substring(0, 2)}</AvatarFallback>

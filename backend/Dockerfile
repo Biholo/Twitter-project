@@ -14,17 +14,7 @@ WORKDIR /app
 COPY . .
 
 RUN pnpm install
-RUN pnpm build
 
-FROM base as production
-
-WORKDIR /app
-
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-
-## Expose the port from the .env file
 EXPOSE 8000
 
-CMD ["pnpm", "run", "serve"]
+CMD ["pnpm", "run", "dev"]

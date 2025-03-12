@@ -47,7 +47,7 @@ export function TweetComposer() {
           <div className="flex-1">
             <Textarea
               placeholder="Quoi de neuf ?"
-              className="border-none resize-none focus-visible:ring-0 p-0 text-lg"
+              className="border-none resize-none focus-visible:ring-0 p-0 text-lg p-2"
               value={tweetText}
               onChange={(e) => setTweetText(e.target.value)}
               maxLength={280}

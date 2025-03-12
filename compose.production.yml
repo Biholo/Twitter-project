@@ -3,13 +3,10 @@ services:
     build:
       context: backend
       dockerfile: Dockerfile
-    container_name: backend-dev
     env_file:
       - backend/.env
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend/src:/app/src
     networks:
       - app
 
@@ -17,13 +14,10 @@ services:
     build:
       context: frontend
       dockerfile: Dockerfile
-    container_name: frontend-dev
     env_file:
       - frontend/.env
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend/src:/app/src
+      - "4173:4173"
     networks:
       - app
 

@@ -10,7 +10,12 @@ export const useRegister = () => {
 
     return useMutation({
         mutationFn: async (userData: any) => {
-            const response = await authService.registerUser(userData);
+            const response = await authService.registerUser({
+                email: userData.email,
+                password: userData.password,
+                username: userData.username,
+                identifier_name: userData.identifierName,
+            });
             if (response.access_token && response.refresh_token) {
 
                 login(response.access_token, response.refresh_token);

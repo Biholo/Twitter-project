@@ -16,6 +16,11 @@ export const getTweetsQuerySchema = z.object({
   mentions: z.string().optional(),
   from_date: z.string().optional(),
   to_date: z.string().optional(),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+  parent_tweet_id: z.string().regex(/^[0-9a-fA-F]{24}$/, "L'ID doit être un ObjectId MongoDB valide").optional(),
+  include_liked: z.boolean().optional(),
+  include_saved: z.boolean().optional(),
   tweet_type: z.enum(['tweet', 'reply', 'retweet']).optional(),
 });
 

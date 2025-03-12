@@ -31,7 +31,7 @@ export function createExpressApp() {
  
   setupErrorMiddleware(app);
 
-  loadFixtures();  
+  // loadFixtures();  
   
   return app;
 }

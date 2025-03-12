@@ -5,19 +5,53 @@ import { Tweet as TweetType } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
-
+import { useLikeTweet, useUnlikeTweet, useBookmarkTweet, useUnbookmarkTweet } from "@/api/queries/tweetQueries"
+import { useAuthStore } from "@/stores/authStore"
 export function Tweet({ tweet }: { tweet: TweetType }) {
-  const [isBookmarked, setIsBookmarked] = useState(tweet.is_bookmarked || false);
   const [imageError, setImageError] = useState(false);
+  const { user } = useAuthStore();
+  const { mutate: likeTweet, isPending: isLikePending } = useLikeTweet();
+  const { mutate: unlikeTweet, isPending: isUnlikePending } = useUnlikeTweet();
+  const { mutate: bookmarkTweet, isPending: isBookmarkPending } = useBookmarkTweet();
+  const { mutate: unbookmarkTweet, isPending: isUnbookmarkPending } = useUnbookmarkTweet();
 
   const handleShare = () => {
     // TODO: Implement share functionality
   };
 
   const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
+    if(!user) {
+      return;
+    }
+    if(tweet.is_saved) {
+      unbookmarkTweet(tweet._id);
+    } else {
+      bookmarkTweet(tweet._id);
+    }
   };
-  
+
+  const handleLike = () => {
+    if (user) {
+      if(tweet.is_liked) {
+        unlikeTweet(tweet._id);
+      } else {
+        likeTweet(tweet._id);
+      }
+    }
+  };
+
+  const handleRetweet = () => {
+    // TODO: Implement retweet functionality
+  };
+
+  const handleReply = () => {
+    // TODO: Implement reply functionality
+  };
+
+  const openImageInFullScreen = () => {
+    // TODO: Implement open image in full screen functionality
+  };
+
 
   const formatTweetContent = (content: string) => {
     // Regex pour détecter les hashtags
@@ -100,7 +134,7 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
                     variant="secondary" 
                     size="sm" 
                     className="bg-white/80 backdrop-blur-sm"
-                    onClick={() => window.open(tweet.media_url, '_blank')}
+                    onClick={openImageInFullScreen}
                   >
                     Voir l'image complète
                   </Button>
@@ -112,25 +146,40 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
       </CardHeader>
       <CardFooter className="border-t p-2">
         <div className="flex w-full justify-between">
-          <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-pink-500">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 text-gray-500 hover:text-pink-500 ${tweet.replies_count > 0 ? 'text-pink-500' : ''}`}
+            onClick={handleReply}
+          >
             <MessageCircle className="h-4 w-4" />
             <span>{tweet.replies.length}</span>
           </Button>
-          <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-purple-500">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 text-gray-500 hover:text-purple-500 ${tweet.is_retweeted ? 'text-purple-500' : ''}`}
+            onClick={handleRetweet}
+          >
             <Repeat2 className="h-4 w-4" />
             <span>{tweet.retweets_count}</span>
           </Button>
-          <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-red-500">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 text-gray-500 hover:text-red-500 ${tweet.is_liked ? 'text-red-500' : ''}`}
+            onClick={handleLike}
+          >
             <ThumbsUp className="h-4 w-4" />
             <span>{tweet.likes_count}</span>
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`${isBookmarked ? 'text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}
+            className={`${tweet.is_saved ? 'text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}
             onClick={handleBookmark}
           >
-            <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-blue-500' : ''}`} />
+            <Bookmark className={`h-4 w-4 ${tweet.is_saved ? 'fill-blue-500' : ''}`} />
             <span>{tweet.saves_count}</span>
           </Button>
           <Button 

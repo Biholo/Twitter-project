@@ -14,3 +14,11 @@ export interface User {
     updated_at: Date;
     username: string;
 }
+
+export interface UserSuggestion {
+    _id: string;
+    username: string;
+    avatar: string;
+    bio: string;
+    identifier_name: string;
+}

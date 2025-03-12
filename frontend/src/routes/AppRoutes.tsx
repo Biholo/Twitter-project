@@ -12,6 +12,7 @@ import Home from '@/features/feed/Home';
 import Profil from '@/features/feed/Profil';
 import Signets from '@/features/feed/Signet';
 import Explorer from '@/features/feed/Explorer';
+import MainLayout from '@/components/layout/MainLayout';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuthStore();
@@ -22,7 +23,6 @@ const AppRoutes = () => {
   }, [autoLogin]);
 
   if (isPending) return <Loader />
-
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,10 +36,12 @@ const AppRoutes = () => {
 
           {/* Routes privées */}
           <Route element={<PrivateRoutes />}>
-            <Route path='/home' element={<Home />} />
-            <Route path='/profil' element={<Profil />} />
-            <Route path='/explore' element={<Explorer />} />
-            <Route path='/signets' element={<Signets />} />
+            <Route element={<MainLayout />}>
+              <Route path='/home' element={<Home />} />
+              <Route path='/profil' element={<Profil />} />
+              <Route path='/explore' element={<Explorer />} />
+              <Route path='/signets' element={<Signets />} />
+            </Route>
           </Route>
 
           {/* Route par défaut */}

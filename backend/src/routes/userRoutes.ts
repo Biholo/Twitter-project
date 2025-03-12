@@ -6,6 +6,8 @@ import {
   deleteUser,
   followUser,
   unfollowUser,
+  getFollowers,
+  getFollowings,
 } from "@/controllers/userController";
 import { getUserTweetCollection } from "@/controllers/tweetController";
 import { validateZod } from "@/middlewares/validateZod";
@@ -13,6 +15,7 @@ import { isAuthenticated } from "@/middlewares/auth";
 import { verifyAccess } from "@/middlewares/verifyAccess";
 import { Role } from "@/config/role";
 import { updateUserSchema, filterUserSchema, idParamSchema } from "@/validators/userValidator";
+import { followParamsValidator, followQueryValidator } from "@/validators/followValidator";
 
 export function useRoutes() {
   const router = express.Router();
@@ -48,6 +51,24 @@ export function useRoutes() {
 
   // **Récupérer les favoris d'un utilisateur**
   router.get("/:id/interactions", isAuthenticated, validateZod(idParamSchema, "params"), getUserTweetCollection);
+
+  // **Récupérer les followers d'un utilisateur**
+  router.get(
+    "/:userId/followers",
+    isAuthenticated,
+    validateZod(followParamsValidator, "params"),
+    validateZod(followQueryValidator, "query"),
+    getFollowers
+  );
+
+  // **Récupérer les followings d'un utilisateur**
+  router.get(
+    "/:userId/followings",
+    isAuthenticated,
+    validateZod(followParamsValidator, "params"),
+    validateZod(followQueryValidator, "query"),
+    getFollowings
+  );
 
   return router;
 }

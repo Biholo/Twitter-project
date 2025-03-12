@@ -53,6 +53,7 @@ export const updateUserSchema = z.object({
   website_link: z
     .string()
     .url("L'URL du site web n'est pas valide")
+    .or(z.literal(""))
     .nullable()
     .optional(),
 

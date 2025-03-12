@@ -93,7 +93,7 @@ export const useAutoLogin = () => {
 
                             const userData = await authService.getUserByToken(newTokens.access_token);
                             login(newTokens.access_token, newTokens.refresh_token);
-                            setUser(userData?.data || null);
+                            setUser(userData?.user || null);
                             setIsAuthenticated(true);
                             console.log('Auto login successful with refreshed token');
                             return true;

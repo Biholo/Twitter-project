@@ -16,36 +16,39 @@ import followRepository from "@/repositories/followRepository";
  * @param req.body.roles - Les rôles de l'utilisateur (optionnel)
  */
 export const patchUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const updateData = req.body;
-  const authenticatedUser = req.user;
-
   try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const authenticatedUser = req.user;
+
     const isAdmin = authenticatedUser?.role?.includes('ROLE_ADMIN');
     const isOwnProfile = authenticatedUser?.id.toString() === id;
-    if (updateData.roles) {
-      if (!isAdmin) {
-        delete updateData.roles;
-      }
+    
+    if (updateData.roles && !isAdmin) {
+      delete updateData.roles;
     }
+    
     if(!isOwnProfile && !isAdmin) {
       res.status(403).json({ message: "Vous n'avez pas les permissions pour modifier ce profil." });
       return;
     }
 
-    const updatedUser = await userRepository.update(id, updateData, { 
-      new: true,
-      runValidators: true 
-    });
+    const updatedUser = await userRepository.update(
+      { _id: new mongoose.Types.ObjectId(id) },
+      updateData,
+      { new: true, runValidators: true }
+    );
     
     if (!updatedUser) {
       res.status(404).json({ message: "Utilisateur non trouvé." });
       return;
     }
 
+    const user = await userRepository.findOne({ _id: new mongoose.Types.ObjectId(id) });
+
     res.status(200).json({
       message: "Utilisateur mis à jour avec succès.",
-      data: updatedUser
+      data: user
     });
   } catch (error) {
     handleError(res, error, "Erreur lors de la mise à jour de l'utilisateur.");
@@ -247,4 +250,78 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     handleError(res, error, "Erreur lors de la suppression de l'utilisateur.");
   }
 };
+
+/**
+ * Récupère les followers d'un utilisateur
+ * @param req.params.userId - L'ID de l'utilisateur
+ * @param req.query.page - La page à récupérer (optionnel, défaut: 1)
+ * @param req.query.limit - Le nombre d'éléments par page (optionnel, défaut: 10)
+ */
+export const getFollowers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    const currentUserId = req.user?.id;
+
+    if(!userId) {
+      res.status(400).json({ message: "L'ID de l'utilisateur est requis." });
+      return;
+    }
+
+    const result = await followRepository.getFollowers(
+      userId, 
+      Number(page), 
+      Number(limit),
+      currentUserId?.toString()
+    );
+
+    res.status(200).json({
+      message: "Followers récupérés avec succès",
+      data: result.followers,
+      pagination: result.pagination
+    });
+    return;
+  } catch (error) {
+    handleError(res, error, "Erreur lors de la récupération des followers");
+    return;
+  }
+};
+
+/**
+ * Récupère les followings d'un utilisateur
+ * @param req.params.userId - L'ID de l'utilisateur
+ * @param req.query.page - La page à récupérer (optionnel, défaut: 1)
+ * @param req.query.limit - Le nombre d'éléments par page (optionnel, défaut: 10)
+ */
+export const getFollowings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    const currentUserId = req.user?.id;
+
+    if(!userId) {
+      res.status(400).json({ message: "L'ID de l'utilisateur est requis." });
+      return;
+    }
+
+    const result = await followRepository.getFollowings(
+      userId, 
+      Number(page), 
+      Number(limit),
+      currentUserId?.toString()
+    );
+
+    res.status(200).json({
+      message: "Followings récupérés avec succès",
+      data: result.followings,
+      pagination: result.pagination
+    });
+    return;
+  } catch (error) {
+    handleError(res, error, "Erreur lors de la récupération des followings");
+    return;
+  }
+};
+
+
 

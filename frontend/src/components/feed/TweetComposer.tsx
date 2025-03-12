@@ -24,7 +24,7 @@ export function TweetComposer() {
     try {
       createTweet({
         content: tweetText,
-        author: user,
+        tweet_type: "tweet",
       })
       
       // Réinitialiser le formulaire après l'envoi

@@ -6,7 +6,7 @@ import {
     RegisterCredentials,
     AuthResponse,
     RefreshTokenRequest,
-    User
+    UserData
 } from '@/types';
 
 class AuthService {
@@ -30,7 +30,7 @@ class AuthService {
 
     }
 
-    public async getUserByToken(accessToken: string): Promise<ApiResponse<User> | null> {
+    public async getUserByToken(accessToken: string): Promise<UserData | null> {
         if (!accessToken) {
             return null;
         }

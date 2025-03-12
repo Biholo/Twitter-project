@@ -7,7 +7,6 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 
 export function Tweet({ tweet }: { tweet: TweetType }) {
-  const [isBookmarked, setIsBookmarked] = useState(tweet.is_bookmarked || false);
   const [imageError, setImageError] = useState(false);
 
   const handleShare = () => {
@@ -15,9 +14,21 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
   };
 
   const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
+    // TODO: Implement bookmark functionality
   };
-  
+
+  const handleLike = () => {
+    // TODO: Implement like functionality
+  };
+
+  const handleRetweet = () => {
+    // TODO: Implement retweet functionality
+  };
+
+  const handleReply = () => {
+    // TODO: Implement reply functionality
+  };
+
 
   const formatTweetContent = (content: string) => {
     // Regex pour détecter les hashtags
@@ -112,25 +123,40 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
       </CardHeader>
       <CardFooter className="border-t p-2">
         <div className="flex w-full justify-between">
-          <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-pink-500">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 text-gray-500 hover:text-pink-500 ${tweet.replies_count > 0 ? 'text-pink-500' : ''}`}
+            onClick={handleReply}
+          >
             <MessageCircle className="h-4 w-4" />
             <span>{tweet.replies.length}</span>
           </Button>
-          <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-purple-500">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 text-gray-500 hover:text-purple-500 ${tweet.is_retweeted ? 'text-purple-500' : ''}`}
+            onClick={handleRetweet}
+          >
             <Repeat2 className="h-4 w-4" />
             <span>{tweet.retweets_count}</span>
           </Button>
-          <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-red-500">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`gap-1 text-gray-500 hover:text-red-500 ${tweet.is_liked ? 'text-red-500' : ''}`}
+            onClick={handleLike}
+          >
             <ThumbsUp className="h-4 w-4" />
             <span>{tweet.likes_count}</span>
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`${isBookmarked ? 'text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}
+            className={`${tweet.is_saved ? 'text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}
             onClick={handleBookmark}
           >
-            <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-blue-500' : ''}`} />
+            <Bookmark className={`h-4 w-4 ${tweet.is_saved ? 'fill-blue-500' : ''}`} />
             <span>{tweet.saves_count}</span>
           </Button>
           <Button 

@@ -77,14 +77,29 @@ class Interceptor {
         includeAuth: boolean = false
     ): Promise<any> {
         const isFormData = body instanceof FormData;
-        const fullUrl = `${this.url}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+        let fullUrl = `${this.url}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+
+        // Gestion des paramètres de requête pour les méthodes GET
+        if (method === "GET" && body) {
+            const queryParams = new URLSearchParams();
+            Object.entries(body).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    queryParams.append(key, value.toString());
+                }
+            });
+            const queryString = queryParams.toString();
+            if (queryString) {
+                fullUrl += `?${queryString}`;
+            }
+        }
     
         const options: RequestInit = {
             method,
             headers: this.createHeaders(includeAuth, isFormData),
         };
     
-        if (body) {
+        // Ajouter le body seulement pour les méthodes non-GET
+        if (body && method !== "GET") {
             options.body = isFormData ? body : JSON.stringify(body);
         }
     

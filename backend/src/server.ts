@@ -2,8 +2,8 @@ import { createExpressApp } from "@/app";
 import http from "http";
 import WebSocketManager from "@/services/websocketManager";
 
-export function runServer() {
-  const app = createExpressApp();
+export async function runServer() {
+  const app = await createExpressApp();
   const server = http.createServer(app);
   const wss = WebSocketManager.initialize(server);
 

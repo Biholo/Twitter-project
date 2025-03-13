@@ -14,24 +14,26 @@ import { logger } from "@/middlewares/logger";
 import dotenv from "dotenv";
 import connect from "@/config/conn";
 import { loadFixtures } from "@/fixtures/fixtures";
+import minioService from "@/services/minioService";
 
 dotenv.config();
 
-export function createExpressApp() {
+export async function createExpressApp() {
   const app = express();
+  await minioService.initialize();
   connect();
 
   app.use(express.json());
   app.use(securityHeaders);
   app.use(corsMiddleware);
-  app.use(httpLogger);
+  // app.use(httpLogger);
   app.use(limiter);
 
   registerRoutes(app);
  
   setupErrorMiddleware(app);
 
-  // loadFixtures();  
+  // loadFixtures();
   
   return app;
 }

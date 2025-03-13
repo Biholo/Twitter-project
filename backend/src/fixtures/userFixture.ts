@@ -43,6 +43,7 @@ export const userFixtures: Partial<IUser>[] = [
     bio: "Administrateur du site",
   },
   {
+    
     _id: fixtureIds.johnId,
     identifier_name: "john",
     username: "John",

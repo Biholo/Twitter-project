@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import { AuthenticatedRequest } from "@/types";
 import followRepository from "@/repositories/followRepository";
 import notificationService from "@/services/notificationService";
+import minioService from "@/services/minioService";
 
 /**
  * Met à jour les informations d'un utilisateur
@@ -21,6 +22,7 @@ export const patchUser = async (req: AuthenticatedRequest, res: Response): Promi
     const { id } = req.params;
     const updateData = req.body;
     const authenticatedUser = req.user;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     const isAdmin = authenticatedUser?.role?.includes('ROLE_ADMIN');
     const isOwnProfile = authenticatedUser?.id.toString() === id;
@@ -31,6 +33,22 @@ export const patchUser = async (req: AuthenticatedRequest, res: Response): Promi
     
     if(!isOwnProfile && !isAdmin) {
       res.status(403).json({ message: "Vous n'avez pas les permissions pour modifier ce profil." });
+      return;
+    }
+
+    // Gestion des uploads
+    try {
+      if (files) {
+        if (files.avatar && files.avatar[0]) {
+          updateData.avatar = await minioService.uploadFile(files.avatar[0]);
+        }
+        if (files.banner && files.banner[0]) {
+          updateData.banner = await minioService.uploadFile(files.banner[0]);
+        }
+      }
+    } catch (uploadError) {
+      console.error('Erreur lors de l\'upload des fichiers:', uploadError);
+      res.status(500).json({ message: "Erreur lors de l'upload des fichiers" });
       return;
     }
 

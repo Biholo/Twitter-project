@@ -16,6 +16,7 @@ import { verifyAccess } from "@/middlewares/verifyAccess";
 import { Role } from "@/config/role";
 import { updateUserSchema, filterUserSchema, idParamSchema } from "@/validators/userValidator";
 import { followParamsValidator, followQueryValidator } from "@/validators/followValidator";
+import { upload } from "@/middlewares/fileUploadMiddleware";
 
 export function useRoutes() {
   const router = express.Router();
@@ -24,6 +25,10 @@ export function useRoutes() {
   router.patch(
     "/:id",
     isAuthenticated,
+    upload.fields([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'banner', maxCount: 1 }
+    ]),
     validateZod(updateUserSchema, "body"),
     patchUser
   );

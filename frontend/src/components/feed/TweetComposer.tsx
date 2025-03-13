@@ -1,12 +1,12 @@
+import { useCreateTweet } from "@/api/queries/tweetQueries"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Card, CardHeader } from "@/components/ui/Card"
 import { Separator } from "@/components/ui/Separator"
 import { Textarea } from "@/components/ui/Textarea"
 import { Calendar, Image, Smile, X } from "lucide-react"
-import { useState, useRef } from "react"
+import { useRef, useState } from "react"
 import { useAuthStore } from "@/stores/authStore"
-import { useCreateTweet } from "@/api/queries/tweetQueries"
 
 export function TweetComposer() {
   const { user } = useAuthStore();
@@ -54,52 +54,23 @@ export function TweetComposer() {
     
     setIsSubmitting(true);
     if (!user) {
-      console.error("Utilisateur non connecté");
-      return;
+      console.error("Utilisateur non connecté")
+      return
     }
-
     try {
-      const formData = new FormData();
-      
-      // Ajouter le contenu et le type de tweet
-      formData.append('content', tweetText.trim());
-      formData.append('tweet_type', 'tweet');
-      
-      // Ajouter les fichiers
-      selectedFiles.forEach((file) => {
-        formData.append('files', file);
-      });
-
-      // Débogage amélioré du FormData
-      console.log('Contenu du FormData:');
-      for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}:`, {
-            name: value.name,
-            type: value.type,
-            size: value.size
-          });
-        } else {
-          console.log(`${key}:`, value);
-        }
-      }
-
-      // Envoyer le tweet
-      await createTweet(formData);
+      createTweet({
+        content: tweetText,
+        tweet_type: "tweet",
+      })
       
       // Réinitialiser le formulaire après l'envoi
-      setTweetText("");
-      setSelectedFiles([]);
-      setPreviewUrls(prev => {
-        prev.forEach(url => URL.revokeObjectURL(url));
-        return [];
-      });
+      setTweetText("")
     } catch (error) {
-      console.error("Erreur lors de l'envoi du tweet:", error);
+      console.error("Erreur lors de l'envoi du tweet:", error)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <Card className="overflow-hidden bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">

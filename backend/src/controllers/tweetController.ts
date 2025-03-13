@@ -1,6 +1,7 @@
 import { ITweet } from '@/models/tweetModel';
 import tweetInteractionRepository from '@/repositories/tweetInteractionRepository';
 import tweetRepository from '@/repositories/tweetRepository';
+import userRepository from '@/repositories/userRepository';
 import parsingService from '@/services/parsingService';
 import { AuthenticatedRequest, TweetFilters } from '@/types';
 import { handleError } from '@/utils/responseFormatter';
@@ -72,9 +73,29 @@ export const createTweet = async (req: AuthenticatedRequest, res: Response): Pro
             }
         }
 
+        // Récupérer les informations complètes de l'auteur
+        const author = await userRepository.findById(userId!.toString());
+        
+        if (!author) {
+            handleError(res, new Error("Auteur non trouvé"), "Erreur lors de la récupération des informations de l'auteur");
+            return;
+        }
+        
+        // Créer un objet tweet enrichi avec les informations de l'auteur
+        const enrichedTweet = {
+            ...tweet.toObject(),
+            replies: [],
+            author: {
+                _id: author._id,
+                username: author.username,
+                avatar: author.avatar || "",
+                identifier_name: author.username.toLowerCase()
+            }
+        };
+
         res.status(201).json({
             message: "Tweet créé avec succès",
-            tweet
+            tweet: enrichedTweet
         });
     } catch (error) {
         handleError(res, error, "Erreur lors de la création du tweet.");
@@ -202,31 +223,118 @@ export const unlikeTweet = async (req: AuthenticatedRequest, res: Response): Pro
 
 export const saveTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const { tweet_id } = req.params;
-        const tweet = await tweetInteractionRepository.create({ 
-            tweet_id: new Types.ObjectId(tweet_id), 
-            user_id: req.user?.id ? new Types.ObjectId(req.user.id) : undefined, 
-            action_type: 'bookmark' 
+        const { id } = req.params;
+        const user_id = req.user?.id;
+        
+        // Vérifier que l'utilisateur est authentifié
+        if (!user_id) {
+            res.status(401).json({ message: "Vous devez être connecté pour sauvegarder un tweet" });
+            return;
+        }
+        
+        // Convertir les IDs en ObjectId
+        const tweetObjectId = new Types.ObjectId(id);
+        const userObjectId = new Types.ObjectId(user_id);
+
+        // Vérifier que le tweet existe
+        const tweetExists = await tweetRepository.findById(tweetObjectId.toString());
+        if (!tweetExists) {
+            res.status(404).json({ message: "Tweet non trouvé" });
+            return;
+        }
+        
+        // Vérifier si l'utilisateur a déjà sauvegardé ce tweet
+        const existingBookmark = await tweetInteractionRepository.findOne({
+            tweet_id: tweetObjectId,
+            user_id: userObjectId,
+            action_type: 'bookmark'
+        }, true);
+        
+        if (existingBookmark) {
+            res.status(400).json({ message: "Vous avez déjà sauvegardé ce tweet" });
+            return;
+        }
+        
+        // Créer l'interaction de sauvegarde
+        const newBookmark = await tweetInteractionRepository.create({ 
+            tweet_id: tweetObjectId, 
+            user_id: userObjectId, 
+            action_type: 'bookmark',
+            action_date: new Date()
         });
+        
+        console.log("Nouvelle interaction de sauvegarde créée:", newBookmark);
+        
+        // Incrémenter le compteur de sauvegardes
+        const updatedTweet = await tweetRepository.update(
+            { _id: tweetObjectId }, 
+            { $inc: { bookmarks_count: 1 } }
+        );
+        
         res.status(200).json({
             message: "Tweet sauvegardé avec succès",
-            tweet
+            tweet: updatedTweet
         });
     } catch (error) {
+        console.error("Erreur détaillée:", error);
         handleError(res, error, "Erreur lors de la sauvegarde du tweet.");
     }
 };
 
 export const unsaveTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const { tweet_id } = req.params;
-        const tweet = await tweetInteractionRepository.delete({ tweet_id, user_id: req.user?.id, action_type: 'bookmark' });
+        const { id } = req.params;
+        const user_id = req.user?.id;
+
+        // Vérifier que l'utilisateur est authentifié
+        if (!user_id) {
+            res.status(401).json({ message: "Vous devez être connecté pour retirer un tweet des favoris" });
+            return;
+        }
+        
+        // Convertir les IDs en ObjectId
+        const tweetObjectId = new Types.ObjectId(id);
+        const userObjectId = new Types.ObjectId(user_id);
+
+        // Vérifier que le tweet existe
+        const tweetExists = await tweetRepository.findById(tweetObjectId.toString());
+        if (!tweetExists) {
+            res.status(404).json({ message: "Tweet non trouvé" });
+            return;
+        }
+        
+        // Vérifier si l'utilisateur a bien sauvegardé ce tweet
+        const existingBookmark = await tweetInteractionRepository.findOne({
+            tweet_id: tweetObjectId,
+            user_id: userObjectId,
+            action_type: 'bookmark'
+        }, true);
+        
+        if (!existingBookmark) {
+            res.status(400).json({ message: "Vous n'avez pas sauvegardé ce tweet" });
+            return;
+        }
+        
+        // Supprimer l'interaction de sauvegarde
+        await tweetInteractionRepository.delete({ 
+            tweet_id: tweetObjectId, 
+            user_id: userObjectId, 
+            action_type: 'bookmark'
+        });
+        
+        // Décrémenter le compteur de sauvegardes
+        const updatedTweet = await tweetRepository.update(
+            { _id: tweetObjectId }, 
+            { $inc: { bookmarks_count: -1 } }
+        );
+        
         res.status(200).json({
-            message: "Tweet sauvegardé avec succès",
-            tweet
+            message: "Tweet retiré des favoris avec succès",
+            tweet: updatedTweet
         });
     } catch (error) {
-        handleError(res, error, "Erreur lors de la sauvegarde du tweet.");
+        console.error("Erreur détaillée:", error);
+        handleError(res, error, "Erreur lors du retrait du tweet des favoris.");
     }
 };
 

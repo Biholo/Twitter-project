@@ -39,19 +39,12 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
 
   const handleLike = () => {
     if (user) {
-      console.log("Tentative de like/unlike pour le tweet:", tweet._id);
       if(tweet.is_liked) {
-        console.log("Tweet déjà liké, tentative d'unlike");
-        unlikeTweet(tweet._id, {
-          onSuccess: () => console.log("Unlike réussi"),
-          onError: (error) => console.error("Erreur lors de l'unlike:", error)
-        });
+        console.log("Unlike tweet", tweet._id);
+        unlikeTweet(tweet._id);
       } else {
-        console.log("Tweet non liké, tentative de like");
-        likeTweet(tweet._id, {
-          onSuccess: () => console.log("Like réussi"),
-          onError: (error) => console.error("Erreur lors du like:", error)
-        });
+        console.log("Like tweet", tweet._id);
+        likeTweet(tweet._id);
       }
     } else {
       console.log("Utilisateur non connecté, impossible de liker");

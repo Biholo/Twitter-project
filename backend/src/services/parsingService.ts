@@ -42,8 +42,8 @@ class ParsingService {
    * Extrait les hashtags (#tag) du contenu
    */
   private extractHashtags(content: string): string[] {
-    const matches = content.matchAll(this.HASHTAG_REGEX);
-    const hashtags = Array.from(matches).map(match => match[0].slice(1)); // Enlève le # du début
+    const matches = content.match(this.HASHTAG_REGEX) || [];
+    const hashtags = matches.map(match => match); // Garde le # au début
     return [...new Set(hashtags)]; // Élimine les doublons
   }
 
@@ -107,43 +107,66 @@ class ParsingService {
       if (!mentionedUser) {
         throw new Error(`Utilisateur mentionné ${mention} non trouvé`);
       }
-      const mentionExists = await mentionRepository.findOne({ where: { mentioned_user_id: mentionedUser.id, tweet_id: tweet.id } });
+      const mentionExists = await mentionRepository.findOne({ where: { mentioned_user_id: mentionedUser._id, tweet_id: tweet._id } });
       if (!mentionExists) {
-        await mentionRepository.create({ tweet_id: tweet.id, mentioned_user_id: mentionedUser.id });
-        await notificationService.notifyMention(tweet.author_id.toString(), mentionedUser.id.toString(), tweet.id.toString());
+        await mentionRepository.create({ tweet_id: tweet._id, mentioned_user_id: mentionedUser._id });
+        await notificationService.notifyMention(tweet.author_id.toString(), mentionedUser._id.toString(), tweet._id.toString());
       }
     }
   }
 
   public async createHashtags(tweet: ITweet) {
-    if (!tweet || !tweet.id) {
+    if (!tweet || !tweet._id) {
       throw new Error("Tweet invalide ou ID manquant");
     }
 
     const { hashtags } = this.parseContent(tweet.content || '');
-    for (const hashtag of hashtags) {
+    console.log('Traitement des hashtags:', hashtags);
+    
+    const hashtagPromises = hashtags.map(async (hashtag) => {
+      console.log('Traitement du hashtag:', hashtag);
       try {
+        // Vérifier si le hashtag existe déjà
         let hashtagDoc = await hashtagRepository.findOne({ where: { label: hashtag } });
+        
         if (!hashtagDoc) {
+          console.log('Création du hashtag:', hashtag);
           hashtagDoc = await hashtagRepository.create({ label: hashtag });
+          console.log('Hashtag créé:', hashtagDoc);
         }
-        await tweetHashtagRepository.create({ 
-          tweet_id: tweet.id, 
-          hashtag_id: hashtagDoc.id 
+
+        // Créer la relation tweet-hashtag
+        const tweetHashtag = await tweetHashtagRepository.create({ 
+          tweet_id: tweet._id, 
+          hashtag_id: hashtagDoc._id 
         });
+        console.log('Relation tweet-hashtag créée:', tweetHashtag);
+        
+        return tweetHashtag;
       } catch (error) {
+        console.error(`Erreur lors du traitement du hashtag ${hashtag}:`, error);
         if ((error as any).code !== 11000) { // Ignore les erreurs de doublon
           throw error;
         }
+        return null;
       }
+    });
+
+    try {
+      const results = await Promise.all(hashtagPromises);
+      console.log('Tous les hashtags ont été traités:', results);
+      return results;
+    } catch (error) {
+      console.error('Erreur lors du traitement des hashtags:', error);
+      throw error;
     }
   }
 
   public async updateTweetAssociations(tweet: ITweet) {
     // Suppression des anciennes associations
     await Promise.all([
-        tweetHashtagRepository.deleteMany({ tweet_id: tweet.id }),
-        mentionRepository.deleteMany({ tweet_id: tweet.id })
+        tweetHashtagRepository.deleteMany({ tweet_id: tweet._id }),
+        mentionRepository.deleteMany({ tweet_id: tweet._id })
     ]);
 
     // Création des nouvelles associations
@@ -151,7 +174,7 @@ class ParsingService {
         this.createHashtags(tweet),
         this.createMentions(tweet)
     ]);
-}
+  }
 }
 
 const parsingService = new ParsingService();

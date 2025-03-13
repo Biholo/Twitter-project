@@ -24,11 +24,9 @@ export default function Signets() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Signets</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">@{user?.identifier_name}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">@{user?.identifier_name}</p>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-50 dark:hover:bg-red-950">
-            <Trash2 className="h-5 w-5 text-red-500" />
-          </Button>
+         
         </div>
       </div>
 

@@ -81,8 +81,9 @@ export function Tweet({ tweet }: TweetProps) {
         return (
           <Link 
             key={index}
-            to={`/explore/hashtag/${hashtag}`}
+            to={`/explore?q=${hashtag}`}
             className="text-blue-500 hover:underline"
+            onClick={(e) => e.stopPropagation()}
           >
             {segment}
           </Link>

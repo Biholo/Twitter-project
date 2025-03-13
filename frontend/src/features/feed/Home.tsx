@@ -1,7 +1,6 @@
 import { useGetTweetsCollectionInfinite } from "@/api/queries/tweetQueries";
 import { Tweet as TweetComponent } from "@/components/feed/Tweet";
 import { TweetComposer } from "@/components/feed/TweetComposer";
-import SearchBar from "@/components/layout/Searchbar";
 import { TweetWithAuthor } from "@/types";
 import InfiniteScroll from "react-infinite-scroll-component";
 

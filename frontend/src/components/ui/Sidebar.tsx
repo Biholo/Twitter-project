@@ -1,6 +1,6 @@
 import unicornLogo from '@/assets/icons/unicorn-logo.svg'
 import { cn } from "@/lib/utils"
-import { Bookmark, Hash, Home, Settings, User } from "lucide-react"
+import { Bookmark, Hash, Home, User } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { Fragment } from 'react/jsx-runtime'
 

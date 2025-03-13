@@ -7,10 +7,11 @@ import { useEffect, useState, useRef } from "react"
 import { Bell, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useGetNotifications, useMarkAsRead, useMarkAllAsRead } from "@/api/queries/notificationQueries"
-import { Notification } from "@/types"
 import { useAuthStore } from "@/stores/authStore"
 import websocketService from "@/services/websocketService"
 import { queryClient } from "@/configs/queryClient"
+import { useNavigate } from "react-router-dom"
+
 export default function TrendingSection() {
   const { user } = useAuthStore();
   const { data: trendingHashtag, isLoading: isLoadingTrendingHashtag } = useTrendingHashtags();
@@ -18,6 +19,9 @@ export default function TrendingSection() {
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+
 
   const { data: notifications = [] } = useGetNotifications(user?._id || "");
   const { mutate: markAsReadMutation } = useMarkAsRead();
@@ -55,7 +59,11 @@ export default function TrendingSection() {
     markAllAsReadMutation();
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const showProfile = (userId: string) => {
+    navigate(`/profile/${userId}`);
+  }
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
     <div className="space-y-4">
@@ -99,20 +107,42 @@ export default function TrendingSection() {
                     )}
                   </div>
                   <div className="space-y-3">
-                    {notifications.map((notification: Notification) => (
+                    {notifications.map((notification) => (
                       <div
                         key={notification._id}
                         className={`p-3 rounded-lg transition-colors cursor-pointer ${
-                          notification.read
+                          notification.is_read
                             ? "bg-gray-50 dark:bg-gray-700/50"
                             : "bg-blue-50 dark:bg-blue-900/20"
                         }`}
                         onClick={() => markAsRead(notification._id)}
                       >
-                        <p className="text-sm">{notification.content}</p>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {notification.created_at.toLocaleString()}
-                        </span>
+                        <div className="flex items-start gap-2">
+                          <div className="flex-shrink-0">
+                            <img 
+                              onClick={() => showProfile(notification.sender_id._id)}
+                              src={notification.sender_id.avatar || "/placeholder.svg?height=32&width=32"} 
+                              alt={notification.sender_id.username}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm">
+                              <span className="font-semibold">@{notification.sender_id.identifier_name}</span>{" "}
+                              {notification.message}
+                            </p>
+                           
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(notification.notification_date).toLocaleString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>

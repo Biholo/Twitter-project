@@ -85,8 +85,17 @@ class UserRepository extends BaseRepository<IUser> {
       },
       {
         $project: {
-          password: 0,
-          refreshToken: 0,
+          _id: 1,
+          username: 1,
+          identifier_name: 1,
+          email: 1,
+          bio: 1,
+          avatar: 1,
+          banner_photo: 1,
+          website_link: 1,
+          created_at: 1,
+          followers: 1,
+          following: 1,
           followers_count: { $size: '$followers' },
           following_count: { $size: '$following' }
         }
@@ -101,7 +110,7 @@ class UserRepository extends BaseRepository<IUser> {
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
     // Récupérer d'abord les IDs des utilisateurs que la personne suit déjà
-    const following = await Follow.find({ follower: userObjectId }).select('following_id');
+    const following = await Follow.find({ follower_id: userObjectId }).select('following_id');
     const followingIds = following.map(f => f.following_id);
 
     // Récupérer les suggestions basées sur les abonnements actuels
@@ -125,7 +134,7 @@ class UserRepository extends BaseRepository<IUser> {
               $match: {
                 $expr: {
                   $and: [
-                    { $in: ['$follower', followingIds] },
+                    { $in: ['$follower_id', followingIds] },
                     { $eq: ['$following_id', '$$suggestedUserId'] }
                   ]
                 }

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/Button'
 import { useFollowUser } from '@/api/queries/userQueries';
+import { useNavigate } from 'react-router-dom';
 
 interface SuggestionCardProps {
   id: string;
@@ -11,9 +12,13 @@ interface SuggestionCardProps {
 
 export default function SuggestionCard({ id, username, identifier_name, bio, avatar }: SuggestionCardProps) {
   const { mutate: followUser, isPending: isFollowing } = useFollowUser();
-
+  const navigate = useNavigate();
   const handleFollow = (id: string) => {
     followUser(id);
+  }
+
+  const handleClick = () => {
+    navigate(`/profile/${id}`);
   }
 
   return (
@@ -21,13 +26,13 @@ export default function SuggestionCard({ id, username, identifier_name, bio, ava
       <div className="flex items-center gap-3">
         <div className="h-12 w-12 rounded-full bg-gradient-to-r from-pink-300 to-blue-300 flex items-center justify-center text-white font-semibold">
           {avatar ? (
-            <img src={avatar} alt={username} className="h-full w-full rounded-full object-cover" />
+            <img onClick={handleClick} src={avatar} alt={username} className="h-full w-full rounded-full object-cover" />
           ) : (
             username.charAt(0).toUpperCase()
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-medium">{username}</div>
+          <div className="font-medium" onClick={handleClick}>{username}</div>
           <div className="text-sm text-gray-500 dark:text-gray-400">@{identifier_name}</div>
           {bio && <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 truncate max-w-[200px]">{bio}</p>}
         </div>

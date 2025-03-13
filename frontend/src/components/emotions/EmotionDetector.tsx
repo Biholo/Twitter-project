@@ -1,18 +1,17 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { FaceDetection } from "./types";
+import type { FaceDetection } from "./types";
 import { fetchEmotionPrediction } from "@/components/emotions/utils";
 import { Button } from "@/components/ui/Button";
-import "./EmotionDetector.css";
+import { Camera, RefreshCw } from "lucide-react";
 
-// Composant principal
 export function EmotionDetector() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [detectedFaces, setDetectedFaces] = useState<FaceDetection[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [capturedImages, setCapturedImages] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  // Configuration de la webcam
   useEffect(() => {
     let mediaStream: MediaStream | null = null;
 
@@ -59,21 +58,33 @@ export function EmotionDetector() {
   }, []);
 
   const predictEmotion = useCallback(async (): Promise<void> => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
     const imageData = captureImage();
-    if (!imageData) return;
-
-    setErrorMessage("");
-    const response = await fetchEmotionPrediction(imageData);
-
-    if (!response.success) {
-      setErrorMessage("Erreur lors de la prédiction: " + response.error);
+    if (!imageData) {
+      setIsProcessing(false);
       return;
     }
-    setDetectedFaces(response.data.faces);
-  }, [captureImage]);
+
+    setErrorMessage("");
+    try {
+      const response = await fetchEmotionPrediction(imageData);
+
+      if (!response.success) {
+        setErrorMessage("Erreur lors de la prédiction: " + response.error);
+        return;
+      }
+      setDetectedFaces(response.data.faces);
+    } catch (_error) {
+      setErrorMessage("Erreur de connexion au service d'analyse");
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [captureImage, isProcessing]);
 
   useEffect(() => {
-    const intervalId = setInterval(predictEmotion, 200);
+    const intervalId = setInterval(predictEmotion, 500);
     return () => {
       clearInterval(intervalId);
     };
@@ -82,7 +93,7 @@ export function EmotionDetector() {
   const handleCaptureImage = () => {
     const imageData = captureImage();
     if (imageData) {
-      setCapturedImages((prev) => [...prev, imageData]);
+      setCapturedImages((prev) => [imageData, ...prev]);
     }
   };
 
@@ -98,59 +109,107 @@ export function EmotionDetector() {
   // Obtention d'une couleur en fonction de l'émotion
   const getEmotionColor = (emotion: string): string => {
     const colors: Record<string, string> = {
-      joie: "#FFEB3B",
-      colère: "#F44336",
-      tristesse: "#2196F3",
-      peur: "#9C27B0",
-      dégoût: "#4CAF50",
-      surprise: "#FF9800",
-      neutre: "#FFFFFF",
+      joie: "from-yellow-400 to-yellow-300",
+      colère: "from-red-500 to-red-400",
+      tristesse: "from-blue-500 to-blue-400",
+      peur: "from-purple-500 to-purple-400",
+      dégoût: "from-green-500 to-green-400",
+      surprise: "from-orange-500 to-orange-400",
+      neutre: "from-gray-400 to-gray-300",
     };
-    return colors[emotion] || "#FFFFFF";
+    return colors[emotion] || "from-gray-400 to-gray-300";
+  };
+
+  // Obtention d'une icône en fonction de l'émotion
+  const getEmotionIcon = (emotion: string): string => {
+    const icons: Record<string, string> = {
+      joie: "😊",
+      colère: "😠",
+      tristesse: "😢",
+      peur: "😨",
+      dégoût: "🤢",
+      surprise: "😲",
+      neutre: "😐",
+    };
+    return icons[emotion] || "😐";
   };
 
   return (
-    <div className="emotion-detector">
-      <h2>Détecteur d'Émotions en Temps Réel</h2>
-
-      <div className="video-container">
+    <div className="flex flex-col p-4 space-y-4">
+      <div className="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 aspect-video">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="video-element"
+          className="w-full h-full object-cover"
         />
+
         {/* Badge overlay pour l'émotion dominante */}
         {dominantFace && (
           <div
-            className="emotion-badge"
-            style={{ borderColor: getEmotionColor(dominantFace.emotion) }}
+            className={`absolute top-3 right-3 px-3 py-1.5 rounded-full bg-gradient-to-r ${getEmotionColor(
+              dominantFace.emotion
+            )} text-white font-medium text-sm shadow-md flex items-center gap-1.5 backdrop-blur-sm`}
           >
-            {dominantFace.emotion} - {Math.round(dominantFace.confidence * 100)}
-            %
+            <span>{getEmotionIcon(dominantFace.emotion)}</span>
+            <span>{dominantFace.emotion}</span>
+            <span className="opacity-75">
+              {Math.round(dominantFace.confidence * 100)}%
+            </span>
           </div>
         )}
-        <canvas ref={canvasRef} style={{ display: "none" }} />
+
+        {isProcessing && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm">
+            <RefreshCw className="w-8 h-8 text-white animate-spin" />
+          </div>
+        )}
+
+        <canvas ref={canvasRef} className="hidden" />
       </div>
 
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
+      {errorMessage && (
+        <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-300 text-sm">
+          {errorMessage}
+        </div>
+      )}
 
-      <div className="controls">
-        <Button onClick={handleCaptureImage}>Capturer une image</Button>
+      <div className="flex justify-center">
+        <Button
+          onClick={handleCaptureImage}
+          className="bg-gradient-to-r from-pink-500 to-blue-500 text-white hover:from-pink-600 hover:to-blue-600 transition-all"
+        >
+          <Camera className="w-4 h-4 mr-2" />
+          Capturer une image
+        </Button>
       </div>
 
       {capturedImages.length > 0 && (
-        <div className="captured-images-container">
-          {capturedImages.map((imgSrc, index) => (
-            <div key={index} className="captured-image-wrapper">
-              <img
-                src={imgSrc}
-                alt={`Capture ${index + 1}`}
-                className="captured-image"
-              />
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Images capturées
+          </h3>
+          <div className="relative h-32 w-full">
+            <div className="absolute inset-0 flex overflow-x-auto pb-2 space-x-3 snap-x scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+              {capturedImages.map((imgSrc, index) => (
+                <div
+                  key={index}
+                  className="flex-none w-32 h-full relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 snap-start"
+                >
+                  <img
+                    src={imgSrc || "/placeholder.svg"}
+                    alt={`Capture ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
+
+            {capturedImages.length > 3 && (
+              <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white dark:from-gray-800 to-transparent pointer-events-none" />
+            )}
+          </div>
         </div>
       )}
     </div>

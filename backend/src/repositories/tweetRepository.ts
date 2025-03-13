@@ -74,7 +74,7 @@ class TweetRepository extends BaseRepository<ITweet> {
             $filter: {
               input: '$interactions',
               as: 'interaction',
-              cond: { $eq: ['$$interaction.action_type', 'save'] }
+              cond: { $eq: ['$$interaction.action_type', 'bookmark'] }
             }
           }
         },
@@ -91,7 +91,7 @@ class TweetRepository extends BaseRepository<ITweet> {
           $cond: {
             if: authenticatedUserId,
             then: {
-              $in: ['save', '$currentUserInteractions.action_type']
+              $in: ['bookmark', '$currentUserInteractions.action_type']
             },
             else: false
           }
@@ -148,7 +148,7 @@ class TweetRepository extends BaseRepository<ITweet> {
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.action_type', 'save'] }
+                    cond: { $eq: ['$$interaction.action_type', 'bookmark'] }
                   }
                 }
               }
@@ -612,7 +612,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
               $filter: {
                 input: '$interactions',
                 as: 'interaction',
-                cond: { $eq: ['$$interaction.action_type', 'save'] }
+                cond: { $eq: ['$$interaction.action_type', 'bookmark'] }
               }
             }
           },
@@ -643,7 +643,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                       $filter: {
                         input: '$interactions',
                         as: 'interaction',
-                        cond: { $eq: ['$$interaction.action_type', 'save'] }
+                        cond: { $eq: ['$$interaction.action_type', 'bookmark'] }
                       }
                     }
                   },
@@ -697,7 +697,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
             $in: ['like', '$currentUserInteractions.action_type']
           },
           is_saved: {
-            $in: ['save', '$currentUserInteractions.action_type']
+            $in: ['bookmark', '$currentUserInteractions.action_type']
           },
           is_retweeted: {
             $in: ['retweet', '$currentUserInteractions.action_type']
@@ -755,7 +755,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
                   $filter: {
                     input: '$interactions',
                     as: 'interaction',
-                    cond: { $eq: ['$$interaction.action_type', 'save'] }
+                    cond: { $eq: ['$$interaction.action_type', 'bookmark'] }
                   }
                 }
               },

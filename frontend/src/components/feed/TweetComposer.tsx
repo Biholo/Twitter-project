@@ -1,12 +1,12 @@
+import { useCreateTweet } from "@/api/queries/tweetQueries"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Card, CardHeader } from "@/components/ui/Card"
 import { Separator } from "@/components/ui/Separator"
 import { Textarea } from "@/components/ui/Textarea"
+import { useAuthStore } from "@/stores/authStore"
 import { Calendar, Image, Smile } from "lucide-react"
 import { useState } from "react"
-import { useAuthStore } from "@/stores/authStore"
-import { useCreateTweet } from "@/api/queries/tweetQueries"
 export function TweetComposer() {
   const { user } = useAuthStore();
   const { mutate: createTweet } = useCreateTweet();
@@ -21,19 +21,24 @@ export function TweetComposer() {
       console.error("Utilisateur non connecté")
       return
     }
-    try {
-      createTweet({
+    
+    // Créer le tweet avec mise à jour optimiste
+    createTweet(
+      {
         content: tweetText,
         tweet_type: "tweet",
-      })
-      
-      // Réinitialiser le formulaire après l'envoi
-      setTweetText("")
-    } catch (error) {
-      console.error("Erreur lors de l'envoi du tweet:", error)
-    } finally {
-      setIsSubmitting(false)
-    }
+      },
+      {
+        onSuccess: () => {
+          setTweetText("")
+          setIsSubmitting(false)
+        },
+        onError: (error) => {
+          console.error("Erreur lors de l'envoi du tweet:", error)
+          setIsSubmitting(false)
+        }
+      }
+    )
   }
 
   return (

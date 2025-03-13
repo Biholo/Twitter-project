@@ -1,15 +1,20 @@
-import FeedTabs from "@/components/feed/FeedTabs"
-import SearchBar from "@/components/layout/Searchbar"
-import { useGetTweetsCollection } from "@/api/queries/tweetQueries";
-import { Tweet } from "@/types";
+import { useGetTweetsCollectionInfinite } from "@/api/queries/tweetQueries";
+import FeedTabs from "@/components/feed/FeedTabs";
 import { Tweet as TweetComponent } from "@/components/feed/Tweet";
-import { useAuthStore } from "@/stores/authStore";
-import { TweetComposer } from "@/components/feed/TweetComposer"
+import { TweetComposer } from "@/components/feed/TweetComposer";
+import SearchBar from "@/components/layout/Searchbar";
+import { Tweet } from "@/types";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 export default function Home() {
-  const { user } = useAuthStore();
-  const userId = user?._id || "";
-  const { data: tweets, isLoading } = useGetTweetsCollection(userId);
+  const { 
+    data, 
+    fetchNextPage, 
+    hasNextPage, 
+    isLoading 
+  } = useGetTweetsCollectionInfinite();
+
+  const tweets = data?.pages.flatMap(page => page.data) || [];
 
   return (
     <>
@@ -29,9 +34,19 @@ export default function Home() {
         ) : !tweets || tweets.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400">Aucun tweet n'est disponible</p>
         ) : (
-          tweets.map((tweet: Tweet) => (
-            <TweetComponent key={tweet._id} tweet={tweet} />
-          ))
+          <InfiniteScroll
+            dataLength={tweets.length}
+            next={fetchNextPage}
+            hasMore={!!hasNextPage}
+            loader={<p className="text-center text-gray-500 dark:text-gray-400">Chargement de plus de tweets...</p>}
+            scrollThreshold={0.7}
+          >
+            {tweets.map((tweet: Tweet, index: number) => (
+              <div key={tweet._id} className="py-2">
+                <TweetComponent tweet={tweet} key={index}/>
+              </div>
+            ))}
+          </InfiniteScroll>
         )}
       </div>
     </>

@@ -1,6 +1,7 @@
 import { ITweet } from '@/models/tweetModel';
 import tweetInteractionRepository from '@/repositories/tweetInteractionRepository';
 import tweetRepository from '@/repositories/tweetRepository';
+import userRepository from '@/repositories/userRepository';
 import parsingService from '@/services/parsingService';
 import { AuthenticatedRequest, TweetFilters } from '@/types';
 import { handleError } from '@/utils/responseFormatter';
@@ -18,13 +19,33 @@ export const createTweet = async (req: AuthenticatedRequest, res: Response): Pro
         }
 
         const tweet = await tweetRepository.create({ content, parent_tweet_id, media_url, tweet_type, author_id: userId });
-
+        
         await parsingService.createMentions(tweet);
         await parsingService.createHashtags(tweet);
 
+        // Récupérer les informations complètes de l'auteur
+        const author = await userRepository.findById(userId!.toString());
+        
+        if (!author) {
+            handleError(res, new Error("Auteur non trouvé"), "Erreur lors de la récupération des informations de l'auteur");
+            return;
+        }
+        
+        // Créer un objet tweet enrichi avec les informations de l'auteur
+        const enrichedTweet = {
+            ...tweet.toObject(),
+            replies: [],
+            author: {
+                _id: author._id,
+                username: author.username,
+                avatar: author.avatar || "",
+                identifier_name: author.username.toLowerCase()
+            }
+        };
+
         res.status(201).json({
             message: "Tweet créé avec succès",
-            tweet
+            tweet: enrichedTweet
         });
     } catch (error) {
         handleError(res, error, "Erreur lors de la création du tweet.");

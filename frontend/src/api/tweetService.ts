@@ -8,23 +8,8 @@ class TweetApi {
         return response;
     }
 
-    public async getTweets(queries: {
-        page?: number | null,
-        limit?: number | null,
-        user_id?: string | null,
-        search?: string | null,
-        hashtag?: string | null,
-        mentions?: string | null,
-        from_date?: string | null,
-        to_date?: string | null,
-        start_date?: string | null,
-        end_date?: string | null,
-        parent_tweet_id?: string | null,
-        include_liked?: boolean | null,
-        include_saved?: boolean | null,
-        tweet_type?: string | null
-    } = {}): Promise<ApiResponse<Tweet[]>> {
-        const response = await api.fetchRequest("/api/tweets", "GET", queries, true);
+    public async getTweets(page: number): Promise<ApiResponse<Tweet[]>> {
+        const response = await api.fetchRequest(`/api/tweets?page=${page}`, "GET", null, true);
         return response;
     }
 
@@ -35,6 +20,7 @@ class TweetApi {
     }
 
     public async unlikeTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
+        console.log(tweet_id);
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}/unlike`, "POST", null, true);
         return response;
     }

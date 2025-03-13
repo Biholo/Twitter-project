@@ -5,10 +5,10 @@ import { Card, CardHeader } from "@/components/ui/Card"
 import { Separator } from "@/components/ui/Separator"
 import { Textarea } from "@/components/ui/Textarea"
 import { useAuthStore } from "@/stores/authStore"
-import { Calendar, Image, Play, Smile, X } from "lucide-react"
+import { Image, Play, X } from "lucide-react"
 import { useRef, useState } from "react"
 
-export function TweetComposer() {
+export function TweetComposer({ parent_tweet_id }: { parent_tweet_id?: string }) {
   const { user } = useAuthStore();
   const { mutate: createTweet } = useCreateTweet();
   const [tweetText, setTweetText] = useState("")
@@ -60,7 +60,12 @@ export function TweetComposer() {
       const formData = new FormData();
       
       formData.append('content', tweetText.trim())
-      formData.append('tweet_type', 'tweet')
+      if (parent_tweet_id) {
+        formData.append('parent_tweet_id', parent_tweet_id)
+        formData.append('tweet_type', 'reply')
+      } else {
+        formData.append('tweet_type', 'tweet')
+      }
 
       selectedFiles.forEach(file => {
         formData.append('files', file)
@@ -158,20 +163,6 @@ export function TweetComposer() {
                   disabled={selectedFiles.length >= 4}
                 >
                   <Image className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950"
-                >
-                  <Smile className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950"
-                >
-                  <Calendar className="h-5 w-5" />
                 </Button>
               </div>
               <div className="flex items-center gap-3">

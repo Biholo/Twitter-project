@@ -1,23 +1,19 @@
-"use client"
-
 import { useState } from "react"
 import { useParams, Link } from "react-router-dom"
 import { MessageCircle, MoreHorizontal, Repeat2, ThumbsUp, Bookmark, Share2, ArrowLeft } from "lucide-react"
 import { Card, CardHeader, CardFooter, CardContent } from "@/components/ui/Card"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
-import { Textarea } from "@/components/ui/Textarea"
-
 import { useGetTweetById, useUnbookmarkTweet, useUnlikeTweet } from "@/api/queries/tweetQueries"
-import { useCreateTweet, useLikeTweet, useBookmarkTweet } from "@/api/queries/tweetQueries"
+import { useLikeTweet, useBookmarkTweet } from "@/api/queries/tweetQueries"
 import dateService from "@/services/dateService"
 import { useNavigate } from "react-router-dom"
+import { TweetComposer } from "@/components/feed/TweetComposer"
 
 export default function TweetDetails() {
   const params = useParams()
   const tweetId = params.id as string
   const { data: tweet, isLoading } = useGetTweetById(tweetId)
-  const [newComment, setNewComment] = useState("")
   const [imageError, setImageError] = useState(false)
   const navigate = useNavigate()
 
@@ -25,17 +21,9 @@ export default function TweetDetails() {
   const unlikeTweetMutation = useUnlikeTweet()
   const bookmarkTweetMutation = useBookmarkTweet()
   const unbookmarkTweetMutation = useUnbookmarkTweet()
-  const { mutate: createComment, isPending: isCreatingComment } = useCreateTweet()
 
   const commentAnAnswer = (commentId: string) => {
     navigate(`/tweet/${commentId}`)
-  }
-
-  // Action handlers
-  const handleReply = () => {
-    if (!newComment.trim()) return
-    createComment({ parent_tweet_id: tweetId, content: newComment, tweet_type: "reply" })
-    setNewComment("")
   }
 
   const handleRetweet = () => {}
@@ -251,37 +239,7 @@ export default function TweetDetails() {
       </Card>
 
       {/* Comment input */}
-      <Card className="mb-4 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">
-        <CardContent className="p-4">
-          <div className="flex gap-3">
-            <Avatar>
-              <AvatarImage src="/placeholder.svg?height=40&width=40&text=ME" alt="Your avatar" />
-              <AvatarFallback>ME</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <Textarea
-                placeholder="Répondre à ce tweet..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="resize-none border-none focus-visible:ring-0 p-0 shadow-none p-2"
-              />
-              <div className="flex justify-end mt-2">
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-pink-500 to-blue-500 text-white hover:from-pink-600 hover:to-blue-600"
-                  onClick={handleReply}
-                  disabled={!newComment.trim() || isCreatingComment}
-                >
-                  {isCreatingComment ? (
-                    <p>Chargement...</p>
-                  ) : null}
-                  Répondre
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <TweetComposer parent_tweet_id={tweetId}/>
 
       {/* Comments section */}
       <h2 className="text-lg font-semibold mb-2">Réponses</h2>
@@ -304,6 +262,47 @@ export default function TweetDetails() {
                   className="mt-1"
                   dangerouslySetInnerHTML={{ __html: dateService.formatTweetContent(comment.content) }}
                 />
+                {comment.media_url && comment.media_url.length > 0 && (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {Array.isArray(comment.media_url) ? (
+                      comment.media_url.map((url, index) => (
+                        <div key={index} className="relative rounded-xl overflow-hidden">
+                          {url.endsWith('.mp4') || url.endsWith('.mov') ? (
+                            <video 
+                              src={url}
+                              className="w-full h-48 object-cover"
+                              controls
+                            />
+                          ) : (
+                            <img 
+                              src={url}
+                              alt="Media content"
+                              className="w-full h-48 object-cover"
+                              onClick={() => window.open(url, "_blank")}
+                            />
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="relative rounded-xl overflow-hidden">
+                        {comment.media_url.endsWith('.mp4') || comment.media_url.endsWith('.mov') ? (
+                          <video 
+                            src={comment.media_url}
+                            className="w-full h-48 object-cover"
+                            controls
+                          />
+                        ) : (
+                          <img 
+                            src={comment.media_url}
+                            alt="Media content"
+                            className="w-full h-48 object-cover"
+                            onClick={() => window.open(comment.media_url || "", "_blank")}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="mt-2 flex items-center gap-4">
                   <Button
                     variant="ghost"

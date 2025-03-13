@@ -196,10 +196,10 @@ export function Tweet({ tweet }: TweetProps) {
                         className="bg-white/80 backdrop-blur-sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          openImageInFullScreen(tweet.media_url);
+                          openImageInFullScreen(tweet.media_url!);
                         }}
                       >
-                        {tweet.media_url.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? 'Voir la vidéo' : 'Voir l\'image complète'}
+                        {tweet.media_url?.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? 'Voir la vidéo' : 'Voir l\'image complète'}
                       </Button>
                     </div>
                   </div>

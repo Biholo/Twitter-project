@@ -52,6 +52,8 @@ export const useCreateTweet = () => {
 
   return useMutation({
     mutationFn: (tweetData: CreateTweet | FormData) => {
+      console.log("Tweet data", tweetData);
+      
         return tweetApi.createTweet(tweetData);
     },
 

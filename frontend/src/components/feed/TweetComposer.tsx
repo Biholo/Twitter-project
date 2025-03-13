@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/Button"
 import { Card, CardHeader } from "@/components/ui/Card"
 import { Separator } from "@/components/ui/Separator"
 import { Textarea } from "@/components/ui/Textarea"
-import { Calendar, Image, Smile, X } from "lucide-react"
-import { useRef, useState } from "react"
 import { useAuthStore } from "@/stores/authStore"
+import { Calendar, Image, Play, Smile, X } from "lucide-react"
+import { useRef, useState } from "react"
 
 export function TweetComposer() {
   const { user } = useAuthStore();
@@ -21,7 +21,7 @@ export function TweetComposer() {
     const files = Array.from(event.target.files || []);
     const validFiles = files.filter(file => {
       const isValid = file.type.startsWith('image/') || file.type.startsWith('video/');
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      const maxSize = 50 * 1024 * 1024; // 50MB
       return isValid && file.size <= maxSize;
     });
 
@@ -32,7 +32,6 @@ export function TweetComposer() {
 
     setSelectedFiles(prev => [...prev, ...validFiles]);
     
-    // Créer les URLs de prévisualisation
     validFiles.forEach(file => {
       const url = URL.createObjectURL(file);
       setPreviewUrls(prev => [...prev, url]);
@@ -58,13 +57,25 @@ export function TweetComposer() {
       return
     }
     try {
-      createTweet({
-        content: tweetText,
-        tweet_type: "tweet",
+      const formData = new FormData();
+      
+      formData.append('content', tweetText.trim())
+      formData.append('tweet_type', 'tweet')
+
+      selectedFiles.forEach(file => {
+        formData.append('files', file)
       })
       
-      // Réinitialiser le formulaire après l'envoi
+      createTweet(formData)
+      
       setTweetText("")
+      setSelectedFiles([])
+      setPreviewUrls(prev => {
+        prev.forEach(url => {
+          URL.revokeObjectURL(url)
+        })
+        return []
+      })
     } catch (error) {
       console.error("Erreur lors de l'envoi du tweet:", error)
     } finally {
@@ -93,18 +104,26 @@ export function TweetComposer() {
             {previewUrls.length > 0 && (
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {previewUrls.map((url, index) => (
-                  <div key={index} className="relative group">
+                  <div key={index} className="relative group rounded-xl overflow-hidden">
                     {selectedFiles[index]?.type.startsWith('video/') ? (
-                      <video 
-                        src={url} 
-                        className="w-full h-48 object-cover rounded-xl"
-                        controls
-                      />
+                      <div className="relative">
+                        <video 
+                          src={url} 
+                          className="w-full h-48 object-cover"
+                          controls
+                          preload="metadata"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="bg-black/30 rounded-full p-2">
+                            <Play className="h-8 w-8 text-white fill-white" />
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       <img 
                         src={url} 
                         alt={`Preview ${index}`}
-                        className="w-full h-48 object-cover rounded-xl"
+                        className="w-full h-48 object-cover"
                       />
                     )}
                     <Button

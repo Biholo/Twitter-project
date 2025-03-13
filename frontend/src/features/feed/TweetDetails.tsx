@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Textarea } from "@/components/ui/Textarea"
 
-import { useGetTweetById } from "@/api/queries/tweetQueries"
+import { useGetTweetById, useUnbookmarkTweet, useUnlikeTweet } from "@/api/queries/tweetQueries"
 import { useCreateTweet, useLikeTweet, useBookmarkTweet } from "@/api/queries/tweetQueries"
 import dateService from "@/services/dateService"
 import { useNavigate } from "react-router-dom"
@@ -22,7 +22,9 @@ export default function TweetDetails() {
   const navigate = useNavigate()
 
   const likeTweetMutation = useLikeTweet()
+  const unlikeTweetMutation = useUnlikeTweet()
   const bookmarkTweetMutation = useBookmarkTweet()
+  const unbookmarkTweetMutation = useUnbookmarkTweet()
   const { mutate: createComment, isPending: isCreatingComment } = useCreateTweet()
 
   const commentAnAnswer = (commentId: string) => {
@@ -37,8 +39,20 @@ export default function TweetDetails() {
   }
 
   const handleRetweet = () => {}
-  const handleLike = () => likeTweetMutation.mutate(tweetId)
-  const handleBookmark = () => bookmarkTweetMutation.mutate(tweetId)
+  const handleLike = () => {
+    if(tweet?.is_liked) {
+      unlikeTweetMutation.mutate(tweetId)
+    } else {
+      likeTweetMutation.mutate(tweetId)
+    }
+  }
+  const handleBookmark = () => {
+    if(tweet?.is_saved) {
+      unbookmarkTweetMutation.mutate(tweetId)
+    } else {
+      bookmarkTweetMutation.mutate(tweetId)
+    }
+  }
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({

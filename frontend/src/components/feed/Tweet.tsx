@@ -3,13 +3,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Card, CardFooter, CardHeader } from "@/components/ui/Card"
 import { useAuthStore } from "@/stores/authStore"
-import { Tweet as TweetType } from "@/types"
+import { TweetWithAuthor } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 
-export function Tweet({ tweet }: { tweet: TweetType }) {
+export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
   const [imageError, setImageError] = useState(false);
   const { user } = useAuthStore();
   const { mutate: likeTweet, isPending: _isLikePending } = useLikeTweet();
@@ -40,14 +40,10 @@ export function Tweet({ tweet }: { tweet: TweetType }) {
   const handleLike = () => {
     if (user) {
       if(tweet.is_liked) {
-        console.log("Unlike tweet", tweet._id);
         unlikeTweet(tweet._id);
       } else {
-        console.log("Like tweet", tweet._id);
         likeTweet(tweet._id);
       }
-    } else {
-      console.log("Utilisateur non connecté, impossible de liker");
     }
   };
 

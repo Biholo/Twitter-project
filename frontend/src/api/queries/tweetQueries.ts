@@ -357,6 +357,7 @@ export const useUnlikeTweet = () => {
     onMutate: async (tweetId) => {
       // Identifier toutes les clés de requête possibles qui pourraient contenir ce tweet
       const possibleQueryKeys = [
+        ["tweet", tweetId],
         ["tweets", user?._id],
         ["tweets", "infinite", user?._id],
         ["tweets", "collection", "infinite", user?._id],
@@ -376,52 +377,32 @@ export const useUnlikeTweet = () => {
       }
       
       // Fonction utilitaire pour mettre à jour un tweet dans n'importe quelle structure
-      const updateTweetInData = (oldData: PaginatedTweets): PaginatedTweets => {
-        // Si les données sont null ou undefined, retourner tel quel
+      const updateTweetInData = (oldData: PaginatedTweets | TweetPage[] | Tweet[] | Tweet | null): PaginatedTweets | TweetPage[] | Tweet[] | Tweet | null => {
+
         if (!oldData) return oldData;
         
-  
-        // Si c'est une structure paginée (infinite query)
-        if (oldData.pages) {
+        // Si c'est un tweet unique
+        if (!Array.isArray(oldData) && '_id' in oldData && oldData._id === tweetId) {
+          
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any) => {
-              // Si la page a une propriété data qui est un tableau
-              if (page.data && Array.isArray(page.data)) {
-                return {
-                  ...page,
-                  data: page.data.map((tweet: Tweet) => 
-                    tweet._id === tweetId 
-                      ? { ...tweet, likes_count: Math.max(0, tweet.likes_count - 1), is_liked: false }
-                      : tweet
-                  )
-                };
-              }
-              
-              // Si la page a une propriété tweets qui est un tableau
-              if (page.tweets && Array.isArray(page.tweets)) {
-                return {
-                  ...page,
-                  tweets: page.tweets.map((tweet: Tweet) => 
-                    tweet._id === tweetId 
-                      ? { ...tweet, likes_count: Math.max(0, tweet.likes_count - 1), is_liked: false }
-                      : tweet
-                  )
-                };
-              }
-              
-              // Si la page est elle-même un tableau de tweets
-              if (Array.isArray(page)) {
-                return page.map((tweet: Tweet) => 
-                  tweet._id === tweetId 
-                    ? { ...tweet, likes_count: Math.max(0, tweet.likes_count - 1), is_liked: false }
-                    : tweet
-                );
-              }
-              
-              // Si aucun format reconnu, retourner la page telle quelle
-              return page;
-            })
+            likes_count: oldData.likes_count - 1,
+            is_liked: false
+          };
+        }
+  
+        // Si c'est une structure paginée
+        if (!Array.isArray(oldData) && 'pages' in oldData) {
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: TweetPage) => ({
+              ...page,
+              data: page.data.map((tweet: TweetWithAuthor) => 
+                tweet._id === tweetId 
+                  ? { ...tweet, likes_count: tweet.likes_count - 1, is_liked: false }
+                  : tweet
+              )
+            }))
           };
         }
         
@@ -470,6 +451,7 @@ export const useBookmarkTweet = () => {
     onMutate: async (tweetId) => {
       // Identifier toutes les clés de requête possibles qui pourraient contenir ce tweet
       const possibleQueryKeys = [
+        ["tweet", tweetId],
         ["tweets", user?._id],
         ["tweets", "infinite", user?._id],
         ["tweets", "collection", "infinite", user?._id],
@@ -489,51 +471,30 @@ export const useBookmarkTweet = () => {
       }
       
       // Fonction utilitaire pour mettre à jour un tweet dans n'importe quelle structure
-      const updateTweetInData = (oldData: PaginatedTweets): PaginatedTweets => {
+      const updateTweetInData = (oldData: PaginatedTweets | TweetPage[] | Tweet[] | Tweet | null): PaginatedTweets | TweetPage[] | Tweet[] | Tweet | null => {
         // Si les données sont null ou undefined, retourner tel quel
         if (!oldData) return oldData;
-      
-        // Si c'est une structure paginée (infinite query)
-        if (oldData.pages) {
+
+        if (!Array.isArray(oldData) && '_id' in oldData && oldData._id === tweetId) {
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any) => {
-              // Si la page a une propriété data qui est un tableau
-              if (page.data && Array.isArray(page.data)) {
-                return {
-                  ...page,
-                  data: page.data.map((tweet: Tweet) => 
-                    tweet._id === tweetId 
-                      ? { ...tweet, saves_count: tweet.saves_count + 1, is_saved: true }
-                      : tweet
-                  )
-                };
-              }
-              
-              // Si la page a une propriété tweets qui est un tableau
-              if (page.tweets && Array.isArray(page.tweets)) {
-                return {
-                  ...page,
-                  tweets: page.tweets.map((tweet: Tweet) => 
-                    tweet._id === tweetId 
-                      ? { ...tweet, saves_count: tweet.saves_count + 1, is_saved: true }
-                      : tweet
-                  )
-                };
-              }
-              
-              // Si la page est elle-même un tableau de tweets
-              if (Array.isArray(page)) {
-                return page.map((tweet: Tweet) => 
-                  tweet._id === tweetId 
-                    ? { ...tweet, saves_count: tweet.saves_count + 1, is_saved: true }
-                    : tweet
-                );
-              }
-              
-              // Si aucun format reconnu, retourner la page telle quelle
-              return page;
-            })
+            saves_count: oldData.saves_count + 1,
+            is_saved: true
+          };
+        }
+      
+        // Si c'est une structure paginée
+        if (!Array.isArray(oldData) && 'pages' in oldData) {
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: TweetPage) => ({
+              ...page,
+              data: page.data.map((tweet: TweetWithAuthor) => 
+                tweet._id === tweetId 
+                  ? { ...tweet, saves_count: tweet.saves_count + 1, is_saved: true }
+                  : tweet
+              )
+            }))
           };
         }
         
@@ -582,6 +543,7 @@ export const useUnbookmarkTweet = () => {
     onMutate: async (tweetId) => {
       // Identifier toutes les clés de requête possibles qui pourraient contenir ce tweet
       const possibleQueryKeys = [
+        ["tweet", tweetId],
         ["tweets", user?._id],
         ["tweets", "infinite", user?._id],
         ["tweets", "collection", "infinite", user?._id],
@@ -601,51 +563,30 @@ export const useUnbookmarkTweet = () => {
       }
 
       // Fonction utilitaire pour mettre à jour un tweet dans n'importe quelle structure
-      const updateTweetInData = (oldData: PaginatedTweets): PaginatedTweets => {
+      const updateTweetInData = (oldData: PaginatedTweets | TweetPage[] | Tweet[] | Tweet | null): PaginatedTweets | TweetPage[] | Tweet[] | Tweet | null => {
         // Si les données sont null ou undefined, retourner tel quel
         if (!oldData) return oldData;
-      
-        // Si c'est une structure paginée (infinite query)
-        if (oldData.pages) {
+
+        if (!Array.isArray(oldData) && '_id' in oldData && oldData._id === tweetId) {
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any) => {
-              // Si la page a une propriété data qui est un tableau
-              if (page.data && Array.isArray(page.data)) {
-                return {
-                  ...page,
-                  data: page.data.map((tweet: Tweet) => 
-                    tweet._id === tweetId 
-                      ? { ...tweet, saves_count: Math.max(0, tweet.saves_count - 1), is_saved: false }
-                      : tweet
-                  )
-                };
-              }
-              
-              // Si la page a une propriété tweets qui est un tableau
-              if (page.tweets && Array.isArray(page.tweets)) {
-                return {
-                  ...page,
-                  tweets: page.tweets.map((tweet: Tweet) => 
-                    tweet._id === tweetId 
-                      ? { ...tweet, saves_count: Math.max(0, tweet.saves_count - 1), is_saved: false }
-                      : tweet
-                  )
-                };
-              }
-              
-              // Si la page est elle-même un tableau de tweets
-              if (Array.isArray(page)) {
-                return page.map((tweet: Tweet) => 
-                  tweet._id === tweetId 
-                    ? { ...tweet, saves_count: Math.max(0, tweet.saves_count - 1), is_saved: false }
-                    : tweet
-                );
-              }
-              
-              // Si aucun format reconnu, retourner la page telle quelle
-              return page;
-            })
+            saves_count: oldData.saves_count - 1,
+            is_saved: false
+          };
+        }
+      
+        // Si c'est une structure paginée (infinite query)
+        if (!Array.isArray(oldData) && 'pages' in oldData) {
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: TweetPage) => ({
+              ...page,
+              data: page.data.map((tweet: TweetWithAuthor) => 
+                tweet._id === tweetId 
+                  ? { ...tweet, saves_count: tweet.saves_count - 1, is_saved: false }
+                  : tweet
+              )
+            }))
           };
         }
         

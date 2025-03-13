@@ -20,7 +20,6 @@ class TweetApi {
     }
 
     public async unlikeTweet(tweetId: string): Promise<ApiResponse<Tweet>> {
-        console.log(tweetId);
         return api.fetchRequest(`${this.baseUrl}/${tweetId}/unlike`, "POST", null, true);
     }
 

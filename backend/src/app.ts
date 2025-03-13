@@ -14,11 +14,13 @@ import { logger } from "@/middlewares/logger";
 import dotenv from "dotenv";
 import connect from "@/config/conn";
 import { loadFixtures } from "@/fixtures/fixtures";
+import minioService from "@/services/minioService";
 
 dotenv.config();
 
-export function createExpressApp() {
+export async function createExpressApp() {
   const app = express();
+  await minioService.initialize();
   connect();
 
   app.use(express.json());

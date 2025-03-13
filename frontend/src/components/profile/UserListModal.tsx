@@ -19,27 +19,33 @@ export default function UserListModal({ isOpen, onClose, type, persons, isLoadin
       title={type === "followers" ? "Abonnés" : "Abonnements"}
     >
       <div className="space-y-4">
-        {persons.map((person) => (
-          <div key={person._id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={person.avatar || ""} />
-                <AvatarFallback>{person.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium">{person.username}</p>
-                <p className="text-sm text-gray-500">@{person.identifier_name}</p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-pink-300 hover:bg-pink-50"
-            >
-              {type === "followers" ? "Suivre" : "Ne plus suivre"}
-            </Button>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-40">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
           </div>
-        ))}
+        ) : (
+          persons.map((person) => (
+            <div key={person._id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={person.avatar || ""} />
+                  <AvatarFallback>{person.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{person.username}</p>
+                  <p className="text-sm text-gray-500">@{person.identifier_name}</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-pink-300 hover:bg-pink-50"
+              >
+                {type === "followers" ? "Suivre" : "Ne plus suivre"}
+              </Button>
+            </div>
+          ))
+        )}
       </div>
     </Modal>
   );

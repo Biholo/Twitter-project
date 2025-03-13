@@ -7,15 +7,21 @@ import { handleError } from '@/utils/responseFormatter';
 import { Response } from 'express';
 import { Types } from 'mongoose';
 import notificationService from '@/services/notificationService';
+import minioService from '@/services/minioService';
 
 export const createTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const { content, parent_tweet_id, media_url, tweet_type } = req.body;
+        const { content, parent_tweet_id, tweet_type } = req.body;
         const userId = req.user?.id;
 
         if (!parsingService.isContentAppropriate(content)) {
             handleError(res, new Error("Contenu inapproprié"), "Contenu inapproprié");
             return;
+        }
+
+        let media_url = null;
+        if (req.file) {
+            media_url = await minioService.uploadFile(req.file);
         }
 
         const tweet = await tweetRepository.create({ content, parent_tweet_id, media_url, tweet_type, author_id: userId });

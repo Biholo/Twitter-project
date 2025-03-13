@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createTweetSchema = z.object({
   content: z.string().min(1).max(280),
   parent_tweet_id: z.string().regex(/^[0-9a-fA-F]{24}$/, "L'ID doit être un ObjectId MongoDB valide").optional(),
-  media_url: z.string().url().optional(),
+  media: z.any().optional(),
   tweet_type: z.enum(['tweet', 'reply', 'retweet']).default('tweet')
 });
 

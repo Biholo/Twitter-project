@@ -35,15 +35,11 @@ export const updateUserSchema = z.object({
     .optional(),
 
   avatar: z
-    .string()
-    .url("L'URL de l'avatar n'est pas valide")
-    .nullable()
+    .any()
     .optional(),
 
-  banner_photo: z
-    .string()
-    .url("L'URL de la photo de bannière n'est pas valide")
-    .nullable()
+  banner: z
+    .any()
     .optional(),
 
   roles: z

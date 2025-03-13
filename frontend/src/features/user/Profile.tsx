@@ -1,4 +1,3 @@
-import React from 'react'
 import SearchBar from '@/components/layout/Searchbar'
 import { Sidebar } from '@/components/ui/Sidebar'
 

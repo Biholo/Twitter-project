@@ -31,22 +31,17 @@ git clone https://github.com/Biholo/Twitter-project.git
 
 ### 2. **Configurer les variables d'environnement**
 
-Créez un fichier `.env` à la racine du projet avec le contenu suivant :
-
-```env
-# Backend
-PORT=80000
-MONGO_URI=mongodb://127.0.0.1:27017/twitter-db
-
-# MinIO
-MINIO_ENDPOINT=localhost
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=miniouser
-MINIO_SECRET_KEY=miniopassword
-MINIO_BUCKET_NAME=tweet_bucket
-```
+Copiez les fichiers `.env.exemple` des dossiers `backend` et `frontend`
 
 ### 3. **Installer les dépendances**
+
+#### **Docker**
+
+Lancer docker, puis les services docker du projet :
+
+```bash
+docker compose -f compose.production.yml up -d
+```
 
 #### **Backend**
 
@@ -113,7 +108,7 @@ npm start
 
 ## 👨‍💻 **Contributeurs**
 
-- **Beji SOUHIR** - Frontend 
+- **Beji SOUHIR** - Frontend
 
 - **Damien LORTIE THIBAUT** - Frontend
 
@@ -121,7 +116,7 @@ npm start
 
 - **Sofiane MSATFA** - Intégration IA
 
-- **Killian TROUET** - Backend 
+- **Killian TROUET** - Backend
 
 - **Moussa BAKAYOKO** - Backend
 

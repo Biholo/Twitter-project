@@ -8,6 +8,9 @@ services:
       - backend/.env
     ports:
       - "8000:8000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
     volumes:
       - ./backend/src:/app/src
     networks:
@@ -27,6 +30,43 @@ services:
     networks:
       - app
 
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: twitter
+      MONGO_INITDB_ROOT_USERNAME: m0ng0db
+      MONGO_INITDB_ROOT_PASSWORD: p4ssw0rd
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ROOTNAME
+      MINIO_ROOT_PASSWORD: ROOTPASS
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - app
+
+
+volumes:
+  mongodb_data:
+  minio_data:
+
 networks:
   app:
-    driver: bridge

@@ -1,5 +1,5 @@
 import TweetApi from "@/api/tweetApi";
-import queryClient from "@/configs/queryClient";
+import { queryClient } from "@/configs/queryClient";
 import { useAuthStore } from "@/stores/authStore";
 import { CreateTweet, PaginatedTweets, Tweet, TweetPage, ApiResponse, TweetWithAuthor } from "@/types";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";

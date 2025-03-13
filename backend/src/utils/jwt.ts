@@ -1,23 +1,35 @@
 import jwt from 'jsonwebtoken';
 
 interface TokenPayload {
-  userId: string;
+  id: string;
+  roles: string[];
+  email?: string;
+  [key: string]: any;
 }
 
-export const verifyToken = (token: string): Promise<TokenPayload> => {
-  return new Promise((resolve, reject) => {
-    if (!token) {
-      reject(new Error('Token non fourni'));
+export const extractTokenFromHeader = (authHeader?: string): string => {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Token manquant ou mal formaté');
+  }
+
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    throw new Error('Token manquant');
+  }
+
+  return token;
+};
+
+export const verifyToken = async (token: string): Promise<TokenPayload> => {
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as TokenPayload;
+
+    if (!decoded || !decoded.id || !decoded.roles) {
+      throw new Error('Token invalide');
     }
 
-    // Enlever le préfixe "Bearer " si présent
-    const tokenToVerify = token.startsWith('Bearer ') ? token.slice(7) : token;
-
-    jwt.verify(tokenToVerify, process.env.JWT_SECRET || '', (err, decoded) => {
-      if (err) {
-        reject(new Error('Token invalide'));
-      }
-      resolve(decoded as TokenPayload);
-    });
-  });
+    return decoded;
+  } catch (error) {
+    throw new Error('Token invalide ou expiré');
+  }
 };

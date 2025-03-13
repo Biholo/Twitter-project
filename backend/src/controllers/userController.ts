@@ -5,6 +5,7 @@ import userRepository from "@/repositories/userRepository";
 import mongoose from "mongoose";
 import { AuthenticatedRequest } from "@/types";
 import followRepository from "@/repositories/followRepository";
+import notificationService from "@/services/notificationService";
 
 /**
  * Met à jour les informations d'un utilisateur
@@ -188,6 +189,8 @@ export const followUser = async (req: AuthenticatedRequest, res: Response): Prom
     }
     
     const newFollow =  followRepository.create({ follower_id: followerId, following_id: userId });
+
+    await notificationService.notifyFollow(followerId.toString(), userId);
     
     res.status(201).json({
       message: "Utilisateur suivi avec succès.",

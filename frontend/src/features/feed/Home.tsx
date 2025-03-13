@@ -3,7 +3,7 @@ import FeedTabs from "@/components/feed/FeedTabs";
 import { Tweet as TweetComponent } from "@/components/feed/Tweet";
 import { TweetComposer } from "@/components/feed/TweetComposer";
 import SearchBar from "@/components/layout/Searchbar";
-import { Tweet } from "@/types";
+import { TweetWithAuthor } from "@/types";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 export default function Home() {
@@ -41,7 +41,7 @@ export default function Home() {
             loader={<p className="text-center text-gray-500 dark:text-gray-400">Chargement de plus de tweets...</p>}
             scrollThreshold={0.7}
           >
-            {tweets.map((tweet: Tweet, index: number) => (
+            {tweets.map((tweet: TweetWithAuthor, index: number) => (
               <div key={tweet._id} className="py-2">
                 <TweetComponent tweet={tweet} key={index}/>
               </div>

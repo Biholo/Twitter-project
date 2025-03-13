@@ -16,6 +16,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import TweetDetails from '@/features/feed/TweetDetails';
 import websocketService from '@/services/websocketService';
 import Cookies from 'js-cookie';
+
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuthStore();
   const { refetch: autoLogin, isPending } = useAutoLogin();

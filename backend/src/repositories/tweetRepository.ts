@@ -445,7 +445,6 @@ class TweetRepository extends BaseRepository<ITweet> {
           },
           { $unwind: '$author' },
           { $sort: { created_at: -1 } },
-          { $limit: 3 },
           {
             $project: {
               _id: 1,

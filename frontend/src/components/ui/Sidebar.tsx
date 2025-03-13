@@ -9,7 +9,7 @@ const menuItems = [
   { icon: Hash, label: "Explorer", path: "/explore", className: "text-blue-500" },
   { icon: Bookmark, label: "Favoris", path: "/signets", className: "text-purple-500" },
   { icon: User, label: "Profil", path: "/profil", className: "text-cyan-500" },
-  { icon: Settings, label: "Paramètres", path: "/settings", className: "text-rose-500" },
+  // { icon: Settings, label: "Paramètres", path: "/settings", className: "text-rose-500" },
 ]
 
 export function Sidebar() {

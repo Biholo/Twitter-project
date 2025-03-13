@@ -539,3 +539,9 @@ export const useGetTweetsCollectionInfinite = () => {
   });
 };
 
+export const useSearchTweets = (search: string) => {
+  return useQuery({
+    queryKey: ["tweets", "search", search],
+    queryFn: () => tweetApi.searchTweets(search).then((response) => response.data),
+  });
+};

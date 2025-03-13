@@ -52,6 +52,10 @@ class TweetApi {
         const response = await api.fetchRequest(url, "GET", null, true);
         return response;
     }
+
+    public async searchTweets(search: string): Promise<ApiResponse<Tweet[]>> {
+        return api.fetchRequest(`${this.baseUrl}?search=${search}`, "GET", null, true);
+    }
 }
 
 export default TweetApi;

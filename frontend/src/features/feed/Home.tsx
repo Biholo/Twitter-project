@@ -20,12 +20,11 @@ export default function Home() {
   return (
     <>
       {/* En-tête fixe */}
-      <div className="sticky top-0 z-20 pt-4 pb-2 bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      {/* <div className="sticky top-0 z-20 pt-4 pb-2 bg-gradient-to-br from-rose-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <div className="mb-4">
           <SearchBar />
         </div>
-        {/* <FeedTabs /> */}
-      </div>
+      </div> */}
 
       {/* Contenu défilant */}
       <div className="space-y-4 py-4 relative">

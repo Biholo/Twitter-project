@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/Input"
 import { Search } from "lucide-react"
 
-export default function SearchBar() {
+export default function SearchBar({ value, onChange }: { value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
   return (
     <div className="relative">
       <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -10,6 +10,8 @@ export default function SearchBar() {
       <Input
         placeholder="Rechercher sur Tweeter..."
         className="pl-10 bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none rounded-full focus-visible:ring-pink-300 dark:focus-visible:ring-pink-800"
+        value={value}
+        onChange={onChange}
       />
     </div>
   )

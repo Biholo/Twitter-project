@@ -17,30 +17,31 @@ class HashtagRepository extends BaseRepository<IHashtag> {
 
         return this.model.aggregate([
             {
-                $match: {
-                    created_at: { $gte: startDate }
-                }
-            },
-            {
-                $group: {
-                    _id: '$hashtag_id',
-                    count: { $sum: 1 }
+                $lookup: {
+                    from: 'tweethashtags',
+                    localField: '_id',
+                    foreignField: 'hashtag_id',
+                    as: 'tweets'
                 }
             },
             {
                 $lookup: {
-                    from: 'hashtags',
-                    localField: '_id',
+                    from: 'tweets',
+                    localField: 'tweets.tweet_id',
                     foreignField: '_id',
-                    as: 'hashtag'
+                    as: 'tweetDetails'
                 }
             },
-            { $unwind: '$hashtag' },
+            {
+                $match: {
+                    'tweetDetails.created_at': { $gte: startDate }
+                }
+            },
             {
                 $project: {
-                    _id: 0,
-                    hashtag: '$hashtag.label',
-                    count: 1
+                    _id: 1,
+                    hashtag: '$label',
+                    count: { $size: '$tweetDetails' }
                 }
             },
             { $sort: { count: -1 } },

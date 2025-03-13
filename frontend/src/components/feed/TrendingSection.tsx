@@ -11,13 +11,17 @@ import { useAuthStore } from "@/stores/authStore"
 import websocketService from "@/services/websocketService"
 import { queryClient } from "@/configs/queryClient"
 import { useNavigate } from "react-router-dom"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 
 export default function TrendingSection() {
   const { user } = useAuthStore();
-  const { data: trendingHashtag, isLoading: isLoadingTrendingHashtag } = useTrendingHashtags();
+  const { data: trendingHashtag, isLoading: isLoadingTrendingHashtag } = useTrendingHashtags({
+    timeframe: 'daily'
+  });
   const { data: trendingSuggestions = [], isLoading: isLoadingTrendingSuggestions } = useTrendingSuggestions();
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showTrendingHashtag, setShowTrendingHashtag] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -119,12 +123,14 @@ export default function TrendingSection() {
                       >
                         <div className="flex items-start gap-2">
                           <div className="flex-shrink-0">
-                            <img 
-                              onClick={() => showProfile(notification.sender_id._id)}
-                              src={notification.sender_id.avatar || "/placeholder.svg?height=32&width=32"} 
-                              alt={notification.sender_id.username}
-                              className="w-8 h-8 rounded-full"
-                            />
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage 
+                                onClick={() => showProfile(notification.sender_id._id)}
+                                src={notification.sender_id.avatar || "/placeholder.svg?height=32&width=32"} 
+                                alt={notification.sender_id.username} 
+                              />
+                              <AvatarFallback>{notification.sender_id.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
                           </div>
                           <div className="flex-1">
                             <p className="text-sm">
@@ -166,15 +172,16 @@ export default function TrendingSection() {
             <p className="text-gray-500 dark:text-gray-400 text-center py-2">Aucune tendance disponible</p>
           ) : (
             <>
-              {trendingHashtag.map((hashtag) => (
+              {trendingHashtag.slice(0, showTrendingHashtag ? 7 : 3).map((hashtag) => (
                 <TopicCard key={hashtag.hashtag} topic={hashtag} />
               ))}
               {trendingHashtag.length > 0 && (
                 <Button
                   variant="ghost"
+                  onClick={() => setShowTrendingHashtag(!showTrendingHashtag)}
                   className="w-full text-pink-500 hover:text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-950"
                 >
-                  Voir plus
+                  {showTrendingHashtag ? "Voir moins" : "Voir plus"}
                 </Button>
               )}
             </>

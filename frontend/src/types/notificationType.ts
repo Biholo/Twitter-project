@@ -8,12 +8,14 @@ export enum NotificationType {
 
 export interface Notification {
     _id: string;
-    type: NotificationType;
-    content: string;
-    created_at: Date;
-    read: boolean;
-    sender: Sender;
-}
+    type: 'LIKE' | 'RETWEET' | 'REPLY' | 'NEW_FOLLOWER' | 'MENTION';
+    message: string;
+    is_read: boolean;
+    user_id: string;
+    sender_id: Sender;
+    notification_date: string;
+    __v: number;
+  }
 
 export interface Sender {
     _id: string;

@@ -1,6 +1,6 @@
 import TwitterProfile from "@/components/feed/TwitterProfile"
 import { useGetTweetsCollection, useGetTweets } from "@/api/queries/tweetQueries";
-import { Tweet, UpdateUser } from "@/types";
+import { Tweet, UpdateUser, TweetWithAuthor } from "@/types";
 import { Tweet as TweetComponent } from "@/components/feed/Tweet";
 import { useAuthStore } from "@/stores/authStore";
 import { useState } from "react";
@@ -51,7 +51,7 @@ export default function Profil() {
     }
   };
 
-  const { data: tweets, isLoading: isLoadingTweets } = useGetTweets({ user_id: userId });
+  const { data: tweets, isLoading: isLoadingTweets } = useGetTweets();
   const { data: tweetsLiked, isLoading: isLoadingLikes } = useGetTweetsCollection(userId, { type: 'liked', user_id: userId });
   const { data: tweetsRetweeted, isLoading: isLoadingRetweets } = useGetTweetsCollection(userId, { type: 'retweet', user_id: userId });
 
@@ -87,7 +87,7 @@ export default function Profil() {
         return isLoadingTweets ? (
           <p>Chargement des tweets...</p>
         ) : tweets && tweets.length > 0 ? (
-          tweets.map((tweet: Tweet) => (
+          tweets.map((tweet: TweetWithAuthor) => (
             <TweetComponent key={tweet._id} tweet={tweet} />
           ))
         ) : (

@@ -38,11 +38,11 @@ class NotificationService {
 
   private getNotificationContent(type: NotificationType, username: string): string {
     const contents = {
-      [NotificationType.LIKE]: `@${username} a aimé votre tweet`,
-      [NotificationType.NEW_FOLLOWER]: `@${username} vous suit maintenant`,
-      [NotificationType.RETWEET]: `@${username} a retweeté votre tweet`,
-      [NotificationType.REPLY]: `@${username} a répondu à votre tweet`,
-      [NotificationType.MENTION]: `@${username} vous a mentionné dans un tweet`,
+      [NotificationType.LIKE]: ` a aimé votre tweet`,
+      [NotificationType.NEW_FOLLOWER]: ` vous suit maintenant`,
+      [NotificationType.RETWEET]: ` a retweeté votre tweet`,
+      [NotificationType.REPLY]: ` a répondu à votre tweet`,
+      [NotificationType.MENTION]: ` vous a mentionné dans un tweet`,
     };
     return contents[type];
   }

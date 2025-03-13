@@ -3,13 +3,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
 import { Button } from "@/components/ui/Button"
 import { Card, CardFooter, CardHeader } from "@/components/ui/Card"
 import { useAuthStore } from "@/stores/authStore"
-import { TweetWithAuthor } from "@/types"
+import type { Tweet, TweetWithAuthor } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 
-export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
+type TweetProps = {
+  tweet: Tweet | TweetWithAuthor;
+}
+
+export function Tweet({ tweet }: TweetProps) {
   const [imageError, setImageError] = useState(false);
   const { user } = useAuthStore();
   const { mutate: likeTweet, isPending: _isLikePending } = useLikeTweet();
@@ -20,6 +24,11 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
 
   const openTweetDetails = () => {
     navigate(`/tweet/${tweet._id}`);
+  }
+
+  const openProfile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/profile/${tweet.author._id}`);
   }
 
   const handleShare = () => {
@@ -59,7 +68,6 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
     // TODO: Implement open image in full screen functionality
   };
 
-
   const formatTweetContent = (content: string) => {
     // Regex pour détecter les hashtags
     const hashtagRegex = /(#\w+)/g;
@@ -89,14 +97,14 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
   return (
     <Card className="overflow-hidden bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">
       <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4 cursor-pointer" onClick={openTweetDetails}>
-        <Avatar>
+        <Avatar onClick={openProfile}>
           <AvatarImage src={`/placeholder.svg?height=40&width=40&text=${tweet.author.username}`} alt={tweet.author.username} />
           <AvatarFallback>{tweet.author.username.substring(0, 2)}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
-              <span className="font-semibold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
+              <span onClick={openProfile} className="font-semibold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
                 {tweet.author.username}
               </span>
               <span className="text-gray-500 dark:text-gray-400">
@@ -160,7 +168,7 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
             onClick={handleReply}
           >
             <MessageCircle className="h-4 w-4" />
-            <span>{tweet.replies.length}</span>
+            <span>{tweet.replies_count}</span>
           </Button>
           <Button 
             variant="ghost" 

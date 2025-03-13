@@ -45,3 +45,10 @@ export const useGetFollowings = (userId: string) => {
         queryFn: () => userService.getFollowings(userId).then((res) => res.data),
     });
 }
+
+export const useGetUserById = (userId: string) => {
+    return useQuery({
+        queryKey: ["user", userId],
+        queryFn: () => userService.getUserById(userId).then((res) => res.data),
+    });
+}

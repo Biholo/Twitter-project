@@ -2,11 +2,11 @@ services:
   backend:
     build:
       context: backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.production
     env_file:
-      - backend/.env
-    ports:
-      - "8000:8000"
+      - backend/.env.production
+    # ports:
+    #   - "8000:8000"
     depends_on:
       mongodb:
         condition: service_healthy
@@ -16,23 +16,45 @@ services:
   frontend:
     build:
       context: frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.production
     env_file:
-      - frontend/.env
+      - frontend/.env.production
     ports:
       - "4173:4173"
     networks:
       - app
 
+  emotions:
+    build:
+      context: emotions
+      dockerfile: Dockerfile.production
+    # ports:
+    #   - "5000:5000"
+    networks:
+      - app
+
+  nginx:
+    build: 
+      context: nginx
+      dockerfile: Dockerfile.production
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+      - emotions
+    networks:
+      - app
+
   mongodb:
     image: mongo:latest
-    restart: unless-stopped
     environment:
       MONGO_INITDB_DATABASE: twitter
       MONGO_INITDB_ROOT_USERNAME: m0ng0db
       MONGO_INITDB_ROOT_PASSWORD: p4ssw0rd
-    ports:
-      - "27017:27017"
+    # ports:
+    #   - "27017:27017"
     volumes:
       - mongodb_data:/data/db
     healthcheck:
@@ -46,17 +68,20 @@ services:
   minio:
     image: 'minio/minio:latest'
     environment:
-      - MINIO_ROOT_USER=minio
-      - MINIO_ROOT_PASSWORD=password123
+      - MINIO_ROOT_USER=rootminioadmin
+      - MINIO_ROOT_PASSWORD=KRk1SkDwtYCjHu9J
     ports:
       - "9000:9000"
-      - "8900:8900"
+      - "9001:9001"
     volumes:
       - 'minio:/data/minio'
-    command: 'minio server /data/minio --console-address ":8900"'
+    command: 'minio server /data/minio --console-address ":9001"'
     networks:
       - app
 
+volumes:
+  mongodb_data:
+  minio:
+
 networks:
   app:
-    driver: bridge

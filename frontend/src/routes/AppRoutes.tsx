@@ -17,6 +17,7 @@ import TweetDetails from '@/features/feed/TweetDetails';
 import websocketService from '@/services/websocketService';
 import Profile from '@/features/user/Profile';
 import Cookies from 'js-cookie';
+import DetectPage from '@/features/DetectPage';
 
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuthStore();
@@ -61,6 +62,7 @@ const AppRoutes = () => {
               <Route path='/signets' element={<Signets />} />
               <Route path='/tweet/:id' element={<TweetDetails />} />
               <Route path='/profile/:id' element={<Profile />} />
+              <Route path='/detect' element={<DetectPage />} />
             </Route>
           </Route>
 

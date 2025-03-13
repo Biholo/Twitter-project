@@ -1,5 +1,5 @@
 import { ITweet } from "@/models/tweetModel";
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 import { fixtureIds } from "./userFixture";
 
 // Garder les tweets originaux pour référence
@@ -12,32 +12,32 @@ export const tweetIds = {
   tweet1Id,
   tweet2Id,
   tweet3Id,
-  tweet4Id
-}
+  tweet4Id,
+};
 
 // Contenu varié par catégories thématiques
 const tweetContentsByCategory = {
   tech: [
-  "J'adore programmer en #TypeScript !",
-  "Le développement web est fascinant #webdev",
-  "Qui utilise encore #jQuery de nos jours ?",
-  "React vs Angular vs Vue : le débat continue #frontend",
-  "Node.js est incroyable pour le backend #nodejs",
-  "MongoDB ou PostgreSQL ? #database",
-  "Le cloud computing change tout #aws #azure",
-  "L'intelligence artificielle va révolutionner notre façon de coder #AI",
-  "Docker simplifie tellement le déploiement #devops",
-  "Kubernetes est compliqué mais puissant #k8s",
-  "GraphQL ou REST ? #api",
-  "Le TDD améliore vraiment la qualité du code #testing",
-  "Je viens de découvrir Deno, c'est prometteur ! #deno",
-  "Les microservices ne sont pas toujours la solution #architecture",
-  "Svelte est vraiment impressionnant #svelte",
-  "Next.js simplifie tellement React #nextjs",
-  "Tailwind CSS est devenu mon framework CSS préféré #css",
-  "Les PWA sont l'avenir du mobile #pwa",
-  "WebAssembly va changer le web #wasm",
-  "TypeScript > JavaScript, change my mind #typescript"
+    "J'adore programmer en #TypeScript !",
+    "Le développement web est fascinant #webdev",
+    "Qui utilise encore #jQuery de nos jours ?",
+    "React vs Angular vs Vue : le débat continue #frontend",
+    "Node.js est incroyable pour le backend #nodejs",
+    "MongoDB ou PostgreSQL ? #database",
+    "Le cloud computing change tout #aws #azure",
+    "L'intelligence artificielle va révolutionner notre façon de coder #AI",
+    "Docker simplifie tellement le déploiement #devops",
+    "Kubernetes est compliqué mais puissant #k8s",
+    "GraphQL ou REST ? #api",
+    "Le TDD améliore vraiment la qualité du code #testing",
+    "Je viens de découvrir Deno, c'est prometteur ! #deno",
+    "Les microservices ne sont pas toujours la solution #architecture",
+    "Svelte est vraiment impressionnant #svelte",
+    "Next.js simplifie tellement React #nextjs",
+    "Tailwind CSS est devenu mon framework CSS préféré #css",
+    "Les PWA sont l'avenir du mobile #pwa",
+    "WebAssembly va changer le web #wasm",
+    "TypeScript > JavaScript, change my mind #typescript",
   ],
   cinema: [
     "Je viens de voir le dernier Nolan, c'est incroyable ! #cinema",
@@ -54,7 +54,7 @@ const tweetContentsByCategory = {
     "Avatar 2 valait-il vraiment l'attente ? #Avatar",
     "Les Oscars sont-ils encore pertinents ? #Oscars",
     "Le streaming a changé notre façon de consommer les films #Netflix",
-    "Miyazaki est un génie de l'animation #Ghibli"
+    "Miyazaki est un génie de l'animation #Ghibli",
   ],
   sport: [
     "Incroyable match hier soir ! #football",
@@ -71,7 +71,7 @@ const tweetContentsByCategory = {
     "Les sports extrêmes gagnent en popularité #extreme",
     "L'e-sport est-il vraiment un sport ? #esport",
     "Le dopage reste un problème majeur dans le sport de haut niveau #dopage",
-    "Les athlètes féminines méritent la même couverture médiatique #sportfeminin"
+    "Les athlètes féminines méritent la même couverture médiatique #sportfeminin",
   ],
   architecture: [
     "L'architecture brutaliste est fascinante #brutalisme",
@@ -88,7 +88,7 @@ const tweetContentsByCategory = {
     "La Tour Eiffel reste un chef-d'œuvre d'ingénierie #Paris",
     "Les maisons passives sont l'avenir de l'habitat #passivhaus",
     "Le biomimétisme inspire de plus en plus d'architectes #biomimetisme",
-    "La verticalisation des villes est-elle inévitable ? #urbanisme"
+    "La verticalisation des villes est-elle inévitable ? #urbanisme",
   ],
   graphisme: [
     "Le flat design a-t-il fait son temps ? #design",
@@ -105,7 +105,7 @@ const tweetContentsByCategory = {
     "Les palettes de couleurs définissent l'ambiance d'un design #couleur",
     "Figma a changé la façon dont nous collaborons #Figma",
     "L'accessibilité devrait être au cœur de tout design #a11y",
-    "Le design génératif ouvre de nouvelles possibilités créatives #generatif"
+    "Le design génératif ouvre de nouvelles possibilités créatives #generatif",
   ],
   politique: [
     "Les élections approchent, quel sera le taux d'abstention ? #elections",
@@ -122,7 +122,7 @@ const tweetContentsByCategory = {
     "L'Union Européenne face à ses défis #UE",
     "La diplomatie à l'ère des réseaux sociaux #diplomatie",
     "Les lobbies ont-ils trop d'influence ? #lobbying",
-    "La politique locale est souvent négligée #local"
+    "La politique locale est souvent négligée #local",
   ],
   actualité: [
     "La crise climatique s'accélère, que faire ? #climat",
@@ -139,57 +139,233 @@ const tweetContentsByCategory = {
     "Les réseaux sociaux face à leurs responsabilités #socialmedia",
     "L'éducation doit se réinventer pour le 21e siècle #education",
     "La crise migratoire pose des défis humanitaires majeurs #migration",
-    "L'accès à l'eau devient un enjeu géopolitique #eau"
-  ]
+    "L'accès à l'eau devient un enjeu géopolitique #eau",
+  ],
 };
 
 // Tous les hashtags par catégorie
 const hashtagsByCategory = {
-  tech: ["#javascript", "#typescript", "#react", "#angular", "#vue", "#nodejs", "#mongodb", "#postgres", "#aws", "#azure", "#gcp", "#docker", "#kubernetes", "#devops", "#frontend", "#backend", "#fullstack", "#webdev", "#coding", "#programming", "#developer", "#softwareengineering", "#tech", "#ai", "#ml"],
-  cinema: ["#film", "#cinema", "#movie", "#director", "#actor", "#actress", "#hollywood", "#blockbuster", "#indiefilm", "#oscars", "#netflix", "#streaming", "#marvel", "#dc", "#starwars", "#scifi", "#drama", "#comedy", "#thriller", "#horror"],
-  sport: ["#football", "#soccer", "#nba", "#tennis", "#rugby", "#f1", "#running", "#fitness", "#olympics", "#worldcup", "#champion", "#athlete", "#sports", "#training", "#marathon", "#cycling", "#golf", "#skiing", "#climbing", "#swimming"],
-  architecture: ["#architecture", "#design", "#building", "#urban", "#city", "#construction", "#interior", "#exterior", "#sustainable", "#modern", "#classic", "#brutalism", "#minimalist", "#skyscraper", "#house", "#apartment", "#renovation", "#heritage", "#landscape", "#urbanplanning"],
-  graphisme: ["#design", "#graphic", "#illustration", "#art", "#creative", "#logo", "#branding", "#typography", "#color", "#vector", "#digital", "#print", "#poster", "#packaging", "#webdesign", "#ux", "#ui", "#userinterface", "#photoshop", "#illustrator"],
-  politique: ["#politics", "#government", "#democracy", "#election", "#vote", "#policy", "#law", "#rights", "#freedom", "#justice", "#parliament", "#congress", "#president", "#minister", "#campaign", "#party", "#left", "#right", "#center", "#reform"],
-  actualité: ["#news", "#current", "#today", "#breaking", "#headline", "#report", "#journalist", "#media", "#press", "#broadcast", "#live", "#update", "#world", "#national", "#local", "#global", "#crisis", "#event", "#analysis", "#investigation"]
+  tech: [
+    "#javascript",
+    "#typescript",
+    "#react",
+    "#angular",
+    "#vue",
+    "#nodejs",
+    "#mongodb",
+    "#postgres",
+    "#aws",
+    "#azure",
+    "#gcp",
+    "#docker",
+    "#kubernetes",
+    "#devops",
+    "#frontend",
+    "#backend",
+    "#fullstack",
+    "#webdev",
+    "#coding",
+    "#programming",
+    "#developer",
+    "#softwareengineering",
+    "#tech",
+    "#ai",
+    "#ml",
+  ],
+  cinema: [
+    "#film",
+    "#cinema",
+    "#movie",
+    "#director",
+    "#actor",
+    "#actress",
+    "#hollywood",
+    "#blockbuster",
+    "#indiefilm",
+    "#oscars",
+    "#netflix",
+    "#streaming",
+    "#marvel",
+    "#dc",
+    "#starwars",
+    "#scifi",
+    "#drama",
+    "#comedy",
+    "#thriller",
+    "#horror",
+  ],
+  sport: [
+    "#football",
+    "#soccer",
+    "#nba",
+    "#tennis",
+    "#rugby",
+    "#f1",
+    "#running",
+    "#fitness",
+    "#olympics",
+    "#worldcup",
+    "#champion",
+    "#athlete",
+    "#sports",
+    "#training",
+    "#marathon",
+    "#cycling",
+    "#golf",
+    "#skiing",
+    "#climbing",
+    "#swimming",
+  ],
+  architecture: [
+    "#architecture",
+    "#design",
+    "#building",
+    "#urban",
+    "#city",
+    "#construction",
+    "#interior",
+    "#exterior",
+    "#sustainable",
+    "#modern",
+    "#classic",
+    "#brutalism",
+    "#minimalist",
+    "#skyscraper",
+    "#house",
+    "#apartment",
+    "#renovation",
+    "#heritage",
+    "#landscape",
+    "#urbanplanning",
+  ],
+  graphisme: [
+    "#design",
+    "#graphic",
+    "#illustration",
+    "#art",
+    "#creative",
+    "#logo",
+    "#branding",
+    "#typography",
+    "#color",
+    "#vector",
+    "#digital",
+    "#print",
+    "#poster",
+    "#packaging",
+    "#webdesign",
+    "#ux",
+    "#ui",
+    "#userinterface",
+    "#photoshop",
+    "#illustrator",
+  ],
+  politique: [
+    "#politics",
+    "#government",
+    "#democracy",
+    "#election",
+    "#vote",
+    "#policy",
+    "#law",
+    "#rights",
+    "#freedom",
+    "#justice",
+    "#parliament",
+    "#congress",
+    "#president",
+    "#minister",
+    "#campaign",
+    "#party",
+    "#left",
+    "#right",
+    "#center",
+    "#reform",
+  ],
+  actualité: [
+    "#news",
+    "#current",
+    "#today",
+    "#breaking",
+    "#headline",
+    "#report",
+    "#journalist",
+    "#media",
+    "#press",
+    "#broadcast",
+    "#live",
+    "#update",
+    "#world",
+    "#national",
+    "#local",
+    "#global",
+    "#crisis",
+    "#event",
+    "#analysis",
+    "#investigation",
+  ],
 };
 
 // Fonction pour générer un tweet aléatoire avec des thématiques variées
 function generateRandomTweet(index: number): Partial<ITweet> {
-  const authorIds = [fixtureIds.kilianId, fixtureIds.adminId, fixtureIds.johnId];
+  const authorIds = [
+    fixtureIds.kilianId,
+    fixtureIds.adminId,
+    fixtureIds.johnId,
+  ];
   const tweetTypes = ["tweet", "reply", "retweet"];
-  
+
   // Sélectionner une catégorie aléatoire
   const categories = Object.keys(tweetContentsByCategory);
-  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-  
-  const randomAuthorId = authorIds[Math.floor(Math.random() * authorIds.length)];
-  const randomTweetType = tweetTypes[Math.floor(Math.random() * tweetTypes.length)];
-  
+  const randomCategory =
+    categories[Math.floor(Math.random() * categories.length)];
+
+  const randomAuthorId =
+    authorIds[Math.floor(Math.random() * authorIds.length)];
+  const randomTweetType =
+    tweetTypes[Math.floor(Math.random() * tweetTypes.length)];
+
   // Sélectionner un contenu aléatoire de la catégorie choisie
-  const categoryContents = tweetContentsByCategory[randomCategory as keyof typeof tweetContentsByCategory];
-  const randomContent = categoryContents[Math.floor(Math.random() * categoryContents.length)];
-  
+  const categoryContents =
+    tweetContentsByCategory[
+      randomCategory as keyof typeof tweetContentsByCategory
+    ];
+  const randomContent =
+    categoryContents[Math.floor(Math.random() * categoryContents.length)];
+
   // Sélectionner des hashtags de la catégorie choisie
-  const categoryHashtags = hashtagsByCategory[randomCategory as keyof typeof hashtagsByCategory];
+  const categoryHashtags =
+    hashtagsByCategory[randomCategory as keyof typeof hashtagsByCategory];
   const randomHashtags = Array(Math.floor(Math.random() * 3) + 1)
     .fill(0)
-    .map(() => categoryHashtags[Math.floor(Math.random() * categoryHashtags.length)])
+    .map(
+      () =>
+        categoryHashtags[Math.floor(Math.random() * categoryHashtags.length)]
+    )
     .join(" ");
-  
+
   // Ajouter parfois un hashtag d'une autre catégorie pour plus de diversité
-  const crossCategoryHashtag = Math.random() > 0.7 ? 
-    ` ${hashtagsByCategory[categories[Math.floor(Math.random() * categories.length)] as keyof typeof hashtagsByCategory][Math.floor(Math.random() * 5)]}` : 
-    '';
-  
-  const randomDate = new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)); // Entre maintenant et 30 jours avant
+  const crossCategoryHashtag =
+    Math.random() > 0.7
+      ? ` ${
+          hashtagsByCategory[
+            categories[
+              Math.floor(Math.random() * categories.length)
+            ] as keyof typeof hashtagsByCategory
+          ][Math.floor(Math.random() * 5)]
+        }`
+      : "";
+
+  const randomDate = new Date(
+    Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)
+  ); // Entre maintenant et 30 jours avant
   const likesCount = Math.floor(Math.random() * 100);
   const retweetsCount = Math.floor(Math.random() * 30);
   const bookmarksCount = Math.floor(Math.random() * 50);
   const isEdited = Math.random() > 0.8; // 20% de chance d'être édité
-  
+
   const tweetId = new mongoose.Types.ObjectId();
-  
+
   // Pour les réponses, on référence un tweet existant
   let parentTweetId = undefined;
   if (randomTweetType === "reply" && index > 0) {
@@ -197,7 +373,7 @@ function generateRandomTweet(index: number): Partial<ITweet> {
     const randomPreviousTweetIndex = Math.floor(Math.random() * index);
     parentTweetId = generatedTweets[randomPreviousTweetIndex]?._id;
   }
-  
+
   return {
     _id: tweetId,
     content: `${randomContent} ${randomHashtags}${crossCategoryHashtag}`,
@@ -208,10 +384,15 @@ function generateRandomTweet(index: number): Partial<ITweet> {
     likes_count: likesCount,
     retweets_count: retweetsCount,
     bookmarks_count: bookmarksCount,
-    media_url: Math.random() > 0.7 ? `https://example.com/image${randomCategory}_${index % 20}.jpg` : undefined,
+    media_url:
+      Math.random() > 0.7
+        ? [`https://example.com/image${randomCategory}_${index % 20}.jpg`]
+        : undefined,
     is_edited: isEdited,
     created_at: randomDate,
-    updated_at: new Date(randomDate.getTime() + (isEdited ? 24 * 60 * 60 * 1000 : 0))
+    updated_at: new Date(
+      randomDate.getTime() + (isEdited ? 24 * 60 * 60 * 1000 : 0)
+    ),
   };
 }
 
@@ -229,10 +410,10 @@ generatedTweets.push(
     likes_count: 5,
     retweets_count: 2,
     bookmarks_count: 3,
-    media_url: "https://example.com/image1.jpg",
+    media_url: ["https://example.com/image1.jpg"],
     is_edited: false,
     created_at: new Date(),
-    updated_at: new Date()
+    updated_at: new Date(),
   },
   {
     _id: tweetIds.tweet2Id,
@@ -246,7 +427,7 @@ generatedTweets.push(
     bookmarks_count: 1,
     is_edited: false,
     created_at: new Date(),
-    updated_at: new Date()
+    updated_at: new Date(),
   },
   {
     _id: tweetIds.tweet3Id,
@@ -257,10 +438,10 @@ generatedTweets.push(
     likes_count: 10,
     retweets_count: 5,
     bookmarks_count: 7,
-    media_url: "https://example.com/code-snippet.png",
+    media_url: ["https://example.com/code-snippet.png"],
     is_edited: true,
     created_at: new Date(Date.now() - 86400000), // 1 jour avant
-    updated_at: new Date()
+    updated_at: new Date(),
   },
   {
     _id: tweetIds.tweet4Id,
@@ -273,7 +454,7 @@ generatedTweets.push(
     bookmarks_count: 0,
     is_edited: false,
     created_at: new Date(),
-    updated_at: new Date()
+    updated_at: new Date(),
   }
 );
 
@@ -283,4 +464,3 @@ for (let i = 4; i < 15000; i++) {
 }
 
 export const tweetFixtures = generatedTweets;
-

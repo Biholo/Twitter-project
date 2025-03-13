@@ -14,26 +14,26 @@ const requestLimits: RequestLimits = {};
 
 const environment = process.env.NODE_ENV || 'development';
 
-let store;
+let store = undefined;
 
-if (environment === 'production') {
-  // En production, on utilise Redis pour le rate limiting
-  const redisClient = new Redis({
-    host: process.env.REDIS_HOST || 'localhost', // à ajuster selon votre environnement Docker
-    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
-    password: process.env.REDIS_PASSWORD || undefined,
-  });
+// if (environment === 'production') {
+//   // En production, on utilise Redis pour le rate limiting
+//   const redisClient = new Redis({
+//     host: process.env.REDIS_HOST || 'localhost', // à ajuster selon votre environnement Docker
+//     port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : 6379,
+//     password: process.env.REDIS_PASSWORD || undefined,
+//   });
 
-  store = new RedisStore({
-    sendCommand: async (command: string, ...args: string[]): Promise<RedisReply> => {
-      const result = await redisClient.call(command, ...args);
-      return result as RedisReply;
-    }
-  });
-} else {
-  // En environnement de développement/local, on peut utiliser le store en mémoire fourni par défaut
-  store = undefined; // Cela utilisera l'implémentation en mémoire intégrée
-}
+//   store = new RedisStore({
+//     sendCommand: async (command: string, ...args: string[]): Promise<RedisReply> => {
+//       const result = await redisClient.call(command, ...args);
+//       return result as RedisReply;
+//     }
+//   });
+// } else {
+//   // En environnement de développement/local, on peut utiliser le store en mémoire fourni par défaut
+//   store = undefined; // Cela utilisera l'implémentation en mémoire intégrée
+// }
 
 export const limiter = rateLimit({
   store,

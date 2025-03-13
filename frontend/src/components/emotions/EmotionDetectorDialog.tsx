@@ -1,7 +1,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";
@@ -18,12 +17,9 @@ export function EmotionDetectorDialog({
 }: EmotionDetectorDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
-      <DialogContent>
+      <DialogContent className="DialogContent">
         <DialogHeader>
           <DialogTitle>Détecteur d'Émotions en Temps Réel</DialogTitle>
-          {/* <DialogDescription className={socketConnectionClassname}>
-            Status de la connexion: {socketConnectionStatus}
-          </DialogDescription> */}
         </DialogHeader>
 
         <EmotionDetector />

@@ -1,14 +1,16 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { FaceDetection, EmotionResponse } from "./types";
+import { FaceDetection } from "./types";
 import { fetchEmotionPrediction } from "@/components/emotions/utils";
+import { Button } from "@/components/ui/Button";
 import "./EmotionDetector.css";
 
+// Composant principal
 export function EmotionDetector() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [detectedFaces, setDetectedFaces] = useState<FaceDetection[]>([]);
-  const [isRunning, setIsRunning] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [capturedImages, setCapturedImages] = useState<string[]>([]);
 
   // Configuration de la webcam
   useEffect(() => {
@@ -25,7 +27,6 @@ export function EmotionDetector() {
           videoRef.current.srcObject = stream;
           mediaStream = stream;
         }
-
         setErrorMessage("");
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : "Erreur inconnue";
@@ -37,74 +38,74 @@ export function EmotionDetector() {
     setupCamera();
 
     return () => {
-      // Nettoyer le flux vidéo quand le composant est démonté
       if (mediaStream) {
         mediaStream.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
 
-  // Fonction pour capturer une image de la vidéo
+  // Fonction pour capturer une image depuis la vidéo
   const captureImage = useCallback((): string | null => {
     if (!videoRef.current || !canvasRef.current) return null;
-
     const canvas = canvasRef.current;
     const video = videoRef.current;
     const ctx = canvas.getContext("2d");
-
     if (!ctx) return null;
 
-    // Définir les dimensions du canvas pour correspondre à la vidéo
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    // Dessiner l'image de la vidéo sur le canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Convertir le canvas en base64
     return canvas.toDataURL("image/jpeg", 0.8);
   }, []);
 
-  // Fonction pour prédire l'émotion via HTTP POST (capture unique)
   const predictEmotion = useCallback(async (): Promise<void> => {
     const imageData = captureImage();
     if (!imageData) return;
 
+    setErrorMessage("");
     const response = await fetchEmotionPrediction(imageData);
 
     if (!response.success) {
       setErrorMessage("Erreur lors de la prédiction: " + response.error);
       return;
     }
-
     setDetectedFaces(response.data.faces);
   }, [captureImage]);
 
   useEffect(() => {
     const intervalId = setInterval(predictEmotion, 200);
-
     return () => {
       clearInterval(intervalId);
     };
   }, [predictEmotion]);
 
-  // Fonction pour démarrer/arrêter la détection continue
-  // const toggleDetection = (): void => {
-  //   setIsRunning((isRunning) => !isRunning);
-  // };
+  const handleCaptureImage = () => {
+    const imageData = captureImage();
+    if (imageData) {
+      setCapturedImages((prev) => [...prev, imageData]);
+    }
+  };
 
-  // Obtenir une couleur en fonction de l'émotion
+  const getDominantFace = (): FaceDetection | null => {
+    if (detectedFaces.length === 0) return null;
+    return detectedFaces.reduce((prev, current) =>
+      current.confidence > prev.confidence ? current : prev
+    );
+  };
+
+  const dominantFace = getDominantFace();
+
+  // Obtention d'une couleur en fonction de l'émotion
   const getEmotionColor = (emotion: string): string => {
     const colors: Record<string, string> = {
-      joie: "#FFEB3B", // jaune
-      colère: "#F44336", // rouge
-      tristesse: "#2196F3", // bleu
-      peur: "#9C27B0", // violet
-      dégoût: "#4CAF50", // vert
-      surprise: "#FF9800", // orange
-      neutre: "#FFFFFF", // blanc
+      joie: "#FFEB3B",
+      colère: "#F44336",
+      tristesse: "#2196F3",
+      peur: "#9C27B0",
+      dégoût: "#4CAF50",
+      surprise: "#FF9800",
+      neutre: "#FFFFFF",
     };
-
     return colors[emotion] || "#FFFFFF";
   };
 
@@ -112,65 +113,46 @@ export function EmotionDetector() {
     <div className="emotion-detector">
       <h2>Détecteur d'Émotions en Temps Réel</h2>
 
-      {/* <div className="connection-status">
-        État de la connexion:
-        <span className={socketConnected ? "connected" : "disconnected"}>
-          {socketConnected ? "Connecté" : "Déconnecté"}
-        </span>
-      </div> */}
-
       <div className="video-container">
-        <video ref={videoRef} autoPlay playsInline muted />
-        <canvas ref={canvasRef} />
-        {/* <canvas ref={canvasRef} className="detection-overlay" /> */}
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className="video-element"
+        />
+        {/* Badge overlay pour l'émotion dominante */}
+        {dominantFace && (
+          <div
+            className="emotion-badge"
+            style={{ borderColor: getEmotionColor(dominantFace.emotion) }}
+          >
+            {dominantFace.emotion} - {Math.round(dominantFace.confidence * 100)}
+            %
+          </div>
+        )}
+        <canvas ref={canvasRef} style={{ display: "none" }} />
       </div>
 
       {errorMessage && <div className="error-message">{errorMessage}</div>}
 
       <div className="controls">
-        {/* <button
-          onClick={toggleDetection}
-          className={isRunning ? "stop" : "start"}
-          disabled={!socketConnected}
-        >
-          {isRunning ? "Arrêter la détection" : "Démarrer la détection"}
-        </button> */}
-
-        <button onClick={predictEmotion} disabled={isRunning}>
-          Capturer une image
-        </button>
+        <Button onClick={handleCaptureImage}>Capturer une image</Button>
       </div>
 
-      <div className="detection-summary">
-        <h3>Visages détectés: {detectedFaces.length}</h3>
-
-        {detectedFaces.length > 0 && (
-          <div className="faces-list">
-            {detectedFaces.map((face, index) => (
-              <div
-                key={index}
-                className="face-item"
-                style={{ borderColor: getEmotionColor(face.emotion) }}
-              >
-                <div className="face-header">Visage #{index + 1}</div>
-                <div className="face-emotion">Émotion: {face.emotion}</div>
-                <div className="confidence-bar">
-                  <div
-                    className="confidence-level"
-                    style={{
-                      width: `${face.confidence * 100}%`,
-                      backgroundColor: getEmotionColor(face.emotion),
-                    }}
-                  />
-                </div>
-                <div className="face-confidence">
-                  Confiance: {Math.round(face.confidence * 100)}%
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {capturedImages.length > 0 && (
+        <div className="captured-images-container">
+          {capturedImages.map((imgSrc, index) => (
+            <div key={index} className="captured-image-wrapper">
+              <img
+                src={imgSrc}
+                alt={`Capture ${index + 1}`}
+                className="captured-image"
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

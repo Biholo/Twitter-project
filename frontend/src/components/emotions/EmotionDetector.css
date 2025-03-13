@@ -1,153 +1,63 @@
-/* EmotionDetector.css */
 .emotion-detector {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
   font-family: Arial, sans-serif;
-}
-
-h2, h3 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.connection-status {
-  text-align: center;
-  margin-bottom: 15px;
-  font-weight: bold;
-}
-
-.connected {
-  color: #0f9d58;
-  margin-left: 10px;
-}
-
-.disconnected {
-  color: #db4437;
-  margin-left: 10px;
+  margin: 20px;
 }
 
 .video-container {
   position: relative;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-video {
-  width: 100%;
-  max-height: 480px;
-  background-color: #000;
-  border-radius: 8px;
-}
-
-.detection-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  background-color: #4285f4;
-  color: white;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #3367d6;
-}
-
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-button.start {
-  background-color: #0f9d58;
-}
-
-button.start:hover {
-  background-color: #0b8043;
-}
-
-button.stop {
-  background-color: #db4437;
-}
-
-button.stop:hover {
-  background-color: #c53929;
-}
-
-.detection-summary {
-  text-align: center;
-  padding: 15px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  margin-top: 20px;
-}
-
-.faces-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.face-item {
-  width: 200px;
-  padding: 10px;
-  background-color: #fff;
-  border: 2px solid;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.face-header {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.face-emotion {
-  margin-bottom: 5px;
-}
-
-.confidence-bar {
-  height: 10px;
-  background-color: #e0e0e0;
-  border-radius: 5px;
-  margin: 10px 0;
+  margin: 0 auto;
+  border: 1px solid #ccc;
   overflow: hidden;
 }
 
-.confidence-level {
-  height: 100%;
-  transition: width 0.3s ease;
+.video-element {
+  width: 100%;
+  display: block;
 }
 
-.face-confidence {
+.emotion-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
   font-size: 14px;
+  border: 2px solid;
+  border-radius: 5px;
+}
+
+.controls {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.captured-images-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.captured-image-wrapper {
+  flex-shrink: 0;
+}
+
+.captured-image {
+  height: 120px;
+  width: 120px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  object-fit: cover;
 }
 
 .error-message {
-  color: #db4437;
+  color: red;
   text-align: center;
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #ffebee;
-  border-radius: 4px;
+}
+
+.detection-summary {
+  margin-top: 20px;
 }

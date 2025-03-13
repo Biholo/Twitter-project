@@ -1,5 +1,4 @@
 import { Client } from 'minio';
-import { Readable } from 'stream';
 
 class MinioService {
   private client: Client;
@@ -7,7 +6,7 @@ class MinioService {
 
   constructor() {
     this.client = new Client({
-      endPoint: process.env.MINIO_ENDPOINT || 'localhost',
+      endPoint: process.env.MINIO_ENDPOINT || 'minio',
       port: Number(process.env.MINIO_PORT) || 9000,
       useSSL: process.env.MINIO_USE_SSL === 'true',
       accessKey: process.env.MINIO_ACCESS_KEY || 'minio',

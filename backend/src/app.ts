@@ -33,7 +33,7 @@ export async function createExpressApp() {
  
   setupErrorMiddleware(app);
 
-  // loadFixtures();  
+  loadFixtures();
   
   return app;
 }

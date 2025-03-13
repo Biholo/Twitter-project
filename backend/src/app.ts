@@ -26,14 +26,14 @@ export async function createExpressApp() {
   app.use(express.json());
   app.use(securityHeaders);
   app.use(corsMiddleware);
-  app.use(httpLogger);
+  // app.use(httpLogger);
   app.use(limiter);
 
   registerRoutes(app);
  
   setupErrorMiddleware(app);
 
-  loadFixtures();
+  // loadFixtures();
   
   return app;
 }

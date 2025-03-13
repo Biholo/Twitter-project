@@ -18,7 +18,7 @@ export const upload = multer({
 
 // Configuration pour différents scénarios d'upload
 export const uploadFields = {
-  tweet: upload.single('media'),
+  tweet: upload.array('files', 4), // Permet jusqu'à 4 fichiers avec le nom 'files'
   profile: upload.fields([
     { name: 'avatar', maxCount: 1 },
     { name: 'banner', maxCount: 1 }

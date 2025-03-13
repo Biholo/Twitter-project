@@ -10,7 +10,7 @@ export interface ITweet extends Document {
   likes_count: number;
   retweets_count: number;
   bookmarks_count: number;
-  media_url?: string;
+  media_url?: string[];
   is_edited: boolean;
   created_at: Date;
   updated_at: Date;
@@ -30,7 +30,7 @@ const TweetSchema = new Schema({
   likes_count: { type: Number, default: 0 },
   retweets_count: { type: Number, default: 0 },
   bookmarks_count: { type: Number, default: 0 },
-  media_url: { type: String },
+  media_url: { type: [String], default: [] },
   is_edited: { type: Boolean, default: false },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }

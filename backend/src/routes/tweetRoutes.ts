@@ -3,11 +3,13 @@ import { createTweet, likeTweet, unlikeTweet, saveTweet, unsaveTweet, getTweets,
 import { isAuthenticated } from "@/middlewares/auth";
 import { validateZod } from "@/middlewares/validateZod";
 import { createTweetSchema, getTweetsQuerySchema, tweetIdSchema, updateTweetSchema, getUserTweetCollectionQuerySchema } from "@/validators/tweetValidator";
+import { uploadFields } from "@/middlewares/fileUploadMiddleware";
+
 
 export function tweetRoutes() {
   const router = express.Router();
 
-  router.post("/", isAuthenticated, validateZod(createTweetSchema, "body"), createTweet);
+  router.post("/", isAuthenticated, uploadFields.tweet, createTweet);
   router.post("/:id/like", isAuthenticated, validateZod(tweetIdSchema, "params"), likeTweet);
   router.post("/:id/unlike", isAuthenticated, validateZod(tweetIdSchema, "params"), unlikeTweet);
   router.post("/:id/save", isAuthenticated, validateZod(tweetIdSchema, "params"), saveTweet);

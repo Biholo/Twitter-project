@@ -10,8 +10,9 @@ export const useCreateTweet = () => {
   const { user } = useAuthStore();
 
   return useMutation({
-    mutationFn: (tweetData: CreateTweet) =>
-      tweetApi.createTweet(tweetData),
+    mutationFn: (tweetData: CreateTweet | FormData) => {
+        return tweetApi.createTweet(tweetData);
+    },
 
     // En cas d'erreur
     onError: (err) => {

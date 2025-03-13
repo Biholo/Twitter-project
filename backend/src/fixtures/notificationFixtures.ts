@@ -12,7 +12,8 @@ export const notifications = [
     tweet: tweetFixtures[0]!._id,
     created_at: new Date('2024-03-10T10:00:00Z'),
     notification_date: new Date('2024-03-10T10:00:00Z'),
-    is_read: false
+    is_read: false,
+    
   },
   {
     _id: new Types.ObjectId(),

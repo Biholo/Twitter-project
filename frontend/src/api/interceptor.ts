@@ -18,6 +18,7 @@ class Interceptor {
     private createHeaders(includeAuth: boolean = false, isFormData: boolean = false): HeadersInit {
         const headers: HeadersInit = {};
         
+        // Ne pas définir Content-Type pour FormData, il sera automatiquement défini avec la boundary
         if (!isFormData) {
             headers['Content-Type'] = 'application/json';
         }
@@ -74,9 +75,9 @@ class Interceptor {
         endpoint: string,
         method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
         body: any = null,
-        includeAuth: boolean = false
+        includeAuth: boolean = false,
+        isFormData: boolean = false
     ): Promise<any> {
-        const isFormData = body instanceof FormData;
         let fullUrl = `${this.url}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
         // Gestion des paramètres de requête pour les méthodes GET
@@ -100,14 +101,18 @@ class Interceptor {
     
         // Ajouter le body seulement pour les méthodes non-GET
         if (body && method !== "GET") {
-            options.body = isFormData ? body : JSON.stringify(body);
+            if (isFormData && body instanceof FormData) {
+                options.body = body;
+            } else {
+                options.body = JSON.stringify(body);
+            }
         }
     
         try {
             let response = await fetch(fullUrl, options);
     
             response = await this.handleUnauthorizedRequest(response, () =>
-                this.fetchRequest(endpoint, method, body, includeAuth)
+                this.fetchRequest(endpoint, method, body, includeAuth, isFormData)
             );
     
             if (!response.ok) {

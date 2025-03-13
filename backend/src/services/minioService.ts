@@ -6,11 +6,11 @@ class MinioService {
 
   constructor() {
     this.client = new Client({
-      endPoint: process.env.MINIO_ENDPOINT || 'minio',
+      endPoint: process.env.MINIO_ENDPOINT || 'localhost',
       port: Number(process.env.MINIO_PORT) || 9000,
       useSSL: process.env.MINIO_USE_SSL === 'true',
-      accessKey: process.env.MINIO_ACCESS_KEY || 'minio',
-      secretKey: process.env.MINIO_SECRET_KEY || 'password123'
+      accessKey: process.env.MINIO_ROOT_USER || 'ROOTNAME',
+      secretKey: process.env.MINIO_ROOT_PASSWORD || 'ROOTPASS'
     });
   }
 

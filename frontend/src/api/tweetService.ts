@@ -3,14 +3,14 @@ import { Tweet, ApiResponse, CreateTweet } from "@/types";
 
 class TweetApi {
 
-    public async createTweet(tweet: CreateTweet): Promise<ApiResponse<Tweet>> {
-        const response = await api.fetchRequest("/api/tweets", "POST", tweet, true);
+    public async createTweet(tweetData: CreateTweet | FormData): Promise<ApiResponse<Tweet>> {
+        const response = await api.fetchRequest("/api/tweets", "POST", tweetData, true, true);
         return response;
     }
 
     public async getTweets(queries: {
         page?: number | null,
-        limit?: number | null,
+            limit?: number | null,
         user_id?: string | null,
         search?: string | null,
         hashtag?: string | null,

@@ -1,10 +1,24 @@
 import { z } from 'zod';
 
 export const createTweetSchema = z.object({
-  content: z.string().min(1).max(280),
+  content: z.string().min(1).max(280).optional(),
   parent_tweet_id: z.string().regex(/^[0-9a-fA-F]{24}$/, "L'ID doit être un ObjectId MongoDB valide").optional(),
-  media: z.any().optional(),
+  files: z.array(z.object({
+    buffer: z.any(),
+    originalname: z.string(),
+    mimetype: z.string().refine((val) => 
+      val.startsWith('image/'),
+      "Le fichier doit être une image"
+    ),
+    size: z.number().max(5 * 1024 * 1024, "La taille maximale est de 5MB")
+  })).max(4, "Maximum 4 médias par tweet").optional(),
   tweet_type: z.enum(['tweet', 'reply', 'retweet']).default('tweet')
+}).refine((data) => {
+  // Au moins un contenu ou un média doit être présent
+  return data.content || (data.files && data.files.length > 0);
+}, {
+  message: "Le tweet doit contenir du texte ou au moins un média",
+  path: ["content"]
 });
 
 export const getTweetsQuerySchema = z.object({

@@ -5,13 +5,13 @@ const storage = multer.memoryStorage();
 export const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB max
+    fileSize: 50 * 1024 * 1024, // 50MB max (mis à jour pour les vidéos)
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
-      cb(new Error('Format de fichier non supporté. Seules les images sont acceptées.'));
+      cb(new Error('Format de fichier non supporté. Seules les images et les vidéos sont acceptées.'));
     }
   },
 });

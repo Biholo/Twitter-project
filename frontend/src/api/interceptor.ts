@@ -7,7 +7,6 @@ class Interceptor {
     private refreshFailed: boolean = false;
 
     constructor() {
-
         this.url = import.meta.env.VITE_API_BASE_URL as string;
     }
 

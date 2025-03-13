@@ -1,8 +1,9 @@
 import TweetApi from "@/api/tweetApi";
 import { queryClient } from "@/configs/queryClient";
 import { useAuthStore } from "@/stores/authStore";
-import { CreateTweet, PaginatedTweets, Tweet, TweetPage, ApiResponse, TweetWithAuthor } from "@/types";
+import { ApiResponse, PaginatedTweets, Tweet, TweetPage, TweetWithAuthor } from "@/types";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 interface PreviousQueryData {
   [key: string]: PaginatedTweets | undefined;
@@ -47,217 +48,55 @@ const getQueryKeys = (user_id?: string, params?: number) => {
 };
 
 export const useCreateTweet = () => {
-  const { user } = useAuthStore();
-  const keys = getQueryKeys(user?._id);
-
   return useMutation({
-    mutationFn: (tweetData: CreateTweet | FormData) => {
-        return tweetApi.createTweet(tweetData);
-    },
-
-    onMutate: async (newTweet: CreateTweet) => {
-      const possibleQueryKeys = [...keys.all];
+    mutationFn: (tweetData: FormData) => {
+      const toastId = toast.loading("Envoi du tweet en cours...");
       
-      // Si le tweet est une réponse, ajouter la clé du tweet parent
-      if (newTweet.parent_tweet_id) {
-        possibleQueryKeys.push(keys.tweetKey(newTweet.parent_tweet_id));
-      }
+      console.log("Tweet data", tweetData);
       
-      // Annuler toutes les requêtes en cours pour ces clés pour éviter les conflits
-      for (const key of possibleQueryKeys) {
-        await queryClient.cancelQueries({ queryKey: key });
-      }
-      // Sauvegarder l'état précédent pour toutes les clés
-      const previousData: Record<string, Tweet[]> = {};
-      for (const key of possibleQueryKeys) {
-        const keyString = JSON.stringify(key);
-        previousData[keyString] = queryClient.getQueryData(key) || [];
-      }
-      
-      // Créer un faux tweet optimiste avec les données fournies
-      const optimisticTweet: Tweet = {
-        _id: `temp-${Date.now()}`,
-        content: newTweet.content,
-        media_url: "",
-        parent_tweet_id: newTweet.parent_tweet_id || null,
-        tweet_type: newTweet.tweet_type || "tweet",
-        created_at: new Date().toISOString(),
-        likes_count: 0,
-        retweets_count: 0,
-        replies_count: 0,
-        saves_count: 0,
-        is_liked: false,
-        is_retweeted: false,
-        is_saved: false,
-        author: {
-          _id: user?._id || "",
-          username: user?.username || "",
-          identifier_name: user?.identifier_name || "",
-          avatar: user?.avatar || "",
-        },
-        replies: [],
-      };
-            
-      // Fonction utilitaire pour mettre à jour les données avec le nouveau tweet
-      const updateDataWithNewTweet = (oldData: PaginatedTweets | null): PaginatedTweets | null => {
-        // Si les données sont null ou undefined, retourner tel quel
-        if (!oldData) return oldData;
-        
-        // Si c'est un tweet unique (pour la clé du tweet parent)
-        if (!Array.isArray(oldData) && 'pages' in oldData) {
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page: TweetPage, index: number) => {
-              // Ajouter le tweet uniquement à la première page
-              if (index === 0) {
-                return {
-                  ...page,
-                  data: [optimisticTweet, ...page.data]
-                };
-              }
-              
-              // Pour les autres pages, ne pas modifier
-              return page;
-            })
-          };
-        }
-        
-        // Si c'est une structure paginée (infinite query)
-        if (oldData && oldData.pages) {
-          
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page: any, index: number) => {
-              // Ajouter le tweet uniquement à la première page
-              if (index === 0) {
-                // Si la page a une propriété data qui est un tableau
-                if (page.data && Array.isArray(page.data)) {
-                  return {
-                    ...page,
-                    data: [optimisticTweet, ...page.data]
-                  };
-                }
-                
-                // Si la page a une propriété tweets qui est un tableau
-                if (page.tweets && Array.isArray(page.tweets)) {
-                  return {
-                    ...page,
-                    tweets: [optimisticTweet, ...page.tweets]
-                  };
-                }
-                
-                // Si la page est elle-même un tableau de tweets
-                if (Array.isArray(page)) {
-                  return [optimisticTweet, ...page];
-                }
-              }
-              
-              // Pour les autres pages, ne pas modifier
-              return page;
-            })
-          };
-        }
-                
-        // Si aucun format reconnu, retourner les données telles quelles
-        return oldData;
-      };
-      
-      // Mettre à jour les données pour toutes les clés
-      for (const key of possibleQueryKeys) {
-        try {
-          queryClient.setQueryData(key, (oldData: PaginatedTweets | null) => {
-            const updatedData = updateDataWithNewTweet(oldData);
-            return updatedData;
+      return tweetApi.createTweet(tweetData)
+        .then(response => {
+          return { response, toastId };
+        })
+        .catch(error => {
+          toast.update(toastId, { 
+            render: "Erreur lors de l'envoi du tweet", 
+            type: "error", 
+            isLoading: false,
+            autoClose: 3000
           });
-        } catch (error) {
-          console.error(`Erreur lors de la mise à jour du cache pour la clé ${JSON.stringify(key)}:`, error);
-        }
-      }
+          throw error;
+        });
+    },
+    
+    onError: (error) => {
+      console.error("Erreur lors de la création du tweet:", error);
+    },
+    
+    onSuccess: (data, formData) => {
+      const { response, toastId } = data;
       
-      return { previousData, optimisticTweet };
-    },
-    onError: (_err, _newTweet, context) => {
-      // Restaurer l'état précédent pour toutes les clés
-      if (context?.previousData) {
-        for (const [keyString, data] of Object.entries(context.previousData)) {
-          if (data) {
-            const key = JSON.parse(keyString);
-            queryClient.setQueryData(key, data);
-          }
-        }
-      }
-    },
-    onSuccess: (response, newTweet, context) => {
-      // Remplacer le tweet optimiste par le tweet réel dans le cache
-      if (context?.optimisticTweet && response) {
-
-        const possibleQueryKeys = [...keys.all];
-        
-        for (const key of possibleQueryKeys) {
-          try {
-            queryClient.setQueryData(key, (oldData: PaginatedTweets | null) => {
-
-              if (!oldData) return oldData;
-                            
-              // Si c'est une structure paginée
-              if (oldData.pages) {
-                return {
-                  ...oldData,
-                  pages: oldData.pages.map((page: any) => {
-                    // Si la page a une propriété data qui est un tableau
-                    if (page.data && Array.isArray(page.data)) {
-                      return {
-                        ...page,
-                        data: page.data.map((tweet: Tweet) => 
-                          tweet._id === context.optimisticTweet._id ? response : tweet
-                        )
-                      };
-                    }
-                    
-                    // Si la page a une propriété tweets qui est un tableau
-                    if (page.tweets && Array.isArray(page.tweets)) {
-                      return {
-                        ...page,
-                        tweets: page.tweets.map((tweet: Tweet) => 
-                          tweet._id === context.optimisticTweet._id ? response : tweet
-                        )
-                      };
-                    }
-                    
-                    // Si la page est elle-même un tableau de tweets
-                    if (Array.isArray(page)) {
-                      return page.map((tweet: Tweet) => 
-                        tweet._id === context.optimisticTweet._id ? response : tweet
-                      );
-                    }
-                    
-                    return page;
-                  })
-                };
-              }   
-              
-              return oldData;
-            });
-          } catch (error) {
-            console.error(`Erreur lors du remplacement du tweet optimiste pour la clé ${JSON.stringify(key)}:`, error);
-          }
-        }
-      } else {
-        console.warn("Impossible de remplacer le tweet optimiste: tweet réel ou optimiste manquant", {
-          response,
-          optimisticTweet: context?.optimisticTweet
+      toast.update(toastId, { 
+        render: "Tweet publié avec succès !", 
+        type: "success", 
+        isLoading: false,
+        autoClose: 2000
+      });
+      
+      const parent_tweet_id = formData.get('parent_tweet_id') as string;
+      
+      if (parent_tweet_id) {
+        queryClient.invalidateQueries({ 
+          queryKey: ["tweet", parent_tweet_id] 
         });
       }
       
-      // Si c'est une réponse à un tweet, invalider la requête du tweet parent
-      if (newTweet.parent_tweet_id) {
-        queryClient.invalidateQueries({ queryKey: keys.tweetKey(newTweet.parent_tweet_id) });
-      }
-    },
-    onSettled: () => {
-      // Invalider toutes les requêtes potentiellement affectées pour s'assurer que les données sont à jour
-      queryClient.invalidateQueries({ queryKey: ["tweets"] });
-    },
+      queryClient.invalidateQueries({ 
+        queryKey: ["tweets"] 
+      });
+      
+      console.log("Tweet créé avec succès:", response);
+    }
   });
 };
 

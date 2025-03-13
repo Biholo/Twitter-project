@@ -6,8 +6,7 @@ import { useAuthStore } from "@/stores/authStore"
 import type { Tweet, TweetWithAuthor } from "@/types"
 import { Bookmark, MessageCircle, MoreHorizontal, Repeat2, Share2, ThumbsUp } from "lucide-react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 type TweetProps = {
   tweet: Tweet | TweetWithAuthor;
@@ -64,8 +63,8 @@ export function Tweet({ tweet }: TweetProps) {
     // TODO: Implement reply functionality
   };
 
-  const openImageInFullScreen = () => {
-    // TODO: Implement open image in full screen functionality
+  const openImageInFullScreen = (url: string) => {
+    window.open(url, "_blank");
   };
 
   const formatTweetContent = (content: string) => {
@@ -135,25 +134,76 @@ export function Tweet({ tweet }: TweetProps) {
           <p className="mt-2">{formatTweetContent(tweet.content)}</p>
           {tweet.media_url && !imageError && (
             <div className="mt-3 overflow-hidden rounded-xl">
-              <div className="relative w-full max-h-[400px] overflow-hidden">
-                <img
-                  src={tweet.media_url}
-                  alt="Tweet media"
-                  className="w-full h-auto object-contain max-h-[400px] rounded-xl"
-                  onError={() => setImageError(true)}
-                  loading="lazy"
-                />
-                {/* Overlay pour les images très grandes avec bouton pour voir en plein écran */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30 rounded-xl">
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    className="bg-white/80 backdrop-blur-sm"
-                    onClick={openImageInFullScreen}
-                  >
-                    Voir l'image complète
-                  </Button>
-                </div>
+              <div className={`grid ${Array.isArray(tweet.media_url) && tweet.media_url.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-1 max-h-[350px]`}>
+                {Array.isArray(tweet.media_url) ? (
+                  tweet.media_url.map((url, index) => (
+                    <div key={index} className="relative aspect-video overflow-hidden rounded-xl">
+                      {url.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? (
+                        <video
+                          src={url}
+                          controls
+                          className="w-full h-full object-cover rounded-xl"
+                          onError={() => setImageError(true)}
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img
+                          src={url}
+                          alt={`Tweet media ${index + 1}`}
+                          className="w-full h-full object-cover rounded-xl"
+                          onError={() => setImageError(true)}
+                          loading="lazy"
+                        />
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30 rounded-xl">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="bg-white/80 backdrop-blur-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openImageInFullScreen(url);
+                          }}
+                        >
+                          {url.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? 'Voir la vidéo' : 'Voir l\'image complète'}
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="relative aspect-video overflow-hidden rounded-xl">
+                    {tweet.media_url.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? (
+                      <video
+                        src={tweet.media_url}
+                        controls
+                        className="w-full h-full object-cover rounded-xl"
+                        onError={() => setImageError(true)}
+                        preload="metadata"
+                      />
+                    ) : (
+                      <img
+                        src={tweet.media_url}
+                        alt="Tweet media"
+                        className="w-full h-full object-cover rounded-xl"
+                        onError={() => setImageError(true)}
+                        loading="lazy"
+                      />
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30 rounded-xl">
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        className="bg-white/80 backdrop-blur-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openImageInFullScreen(tweet.media_url!);
+                        }}
+                      >
+                        {tweet.media_url?.toLowerCase().match(/\.(mp4|webm|ogg)$/) ? 'Voir la vidéo' : 'Voir l\'image complète'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

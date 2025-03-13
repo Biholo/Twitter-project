@@ -19,9 +19,6 @@ export const createTweet = async (req: AuthenticatedRequest, res: Response): Pro
         const parent_tweet_id = req.body.parent_tweet_id;
         const tweet_type = req.body.tweet_type || 'tweet';
 
-        console.log(req.body);
-        console.log(req.files);
-
         // Vérifier que l'utilisateur est authentifié
         if (!userId) {
             handleError(res, new Error("Utilisateur non authentifié"), "Vous devez être connecté pour créer un tweet");
@@ -58,7 +55,7 @@ export const createTweet = async (req: AuthenticatedRequest, res: Response): Pro
         const tweet = await tweetRepository.create({ 
             content, 
             parent_tweet_id, 
-            media_urls, 
+            media_url: media_urls, 
             tweet_type, 
             author_id: userId 
         });

@@ -29,11 +29,7 @@ Ce projet est une plateforme de type Twitter qui permet aux utilisateurs de s'in
 git clone https://github.com/Biholo/Twitter-project.git
 ```
 
-### 2. **Configurer les variables d'environnement**
-
-Copiez les fichiers `.env.exemple` des dossiers `backend` et `frontend`
-
-### 3. **Installer les dépendances**
+### 2. **Installer les dépendances**
 
 #### **Docker**
 
@@ -43,51 +39,9 @@ Lancer docker, puis les services docker du projet :
 docker compose -f compose.production.yml up -d
 ```
 
-#### **Backend**
+### 3. **Accéder à l'application**
 
-```bash
-cd backend
-npm i
-```
-
-#### **Frontend**
-
-```bash
-cd frontend
-npm i
-```
-
-### 4. **Lancer MinIO (en Docker)**
-
-```bash
-docker run -p 9000:9000 -p 9001:9001 \
--e MINIO_ROOT_USER=miniouser \
--e MINIO_ROOT_PASSWORD=miniopassword \
-minio/minio server /data --console-address ":9001"
-```
-
-### 5. **Démarrer le serveur backend**
-
-```bash
-cd backend
-npm run dev
-```
-
-### 6. **Démarrer le frontend**
-
-```bash
-cd frontend
-npm start
-```
-
----
-
-## 🌐 **Accès à MinIO**
-
-- **Console MinIO :** [http://localhost:9001](http://localhost:9001)
-- **API MinIO :** [http://localhost:9000](http://localhost:9000)
-
----
+Accéder à l'application via l'URL suivant : http://localhost
 
 ## 🎯 **Trello**
 

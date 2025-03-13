@@ -6,9 +6,11 @@ import { notificationRoutes } from "@/routes/notificationRoutes";
 import { trendingRoutes } from "@/routes/trendingRoutes";
 
 export function registerRoutes(app: Express) {
-  app.use("/api/auth", authRoutes());
-  app.use("/api/users", useRoutes());
-  app.use("/api/tweets", tweetRoutes());
-  app.use("/api/notifications", notificationRoutes());
-  app.use("/api/trending", trendingRoutes());
+  const prefix = process.env.NODE_ENV === "production" ? "/" : "/api";
+
+  app.use(`${prefix}/auth`, authRoutes());
+  app.use(`${prefix}/users`, useRoutes());
+  app.use(`${prefix}/tweets`, tweetRoutes());
+  app.use(`${prefix}/notifications`, notificationRoutes());
+  app.use(`${prefix}/trending`, trendingRoutes());
 }

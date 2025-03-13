@@ -17,7 +17,7 @@ export async function fetchEmotionPrediction(
   imageBase64: string
 ): Promise<ApiResponse<EmotionResponse, string>> {
   try {
-    const response = await fetch(import.meta.env.PREDICTION_API_URL, {
+    const response = await fetch(import.meta.env.VITE_PREDICTION_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ image: imageBase64 }),

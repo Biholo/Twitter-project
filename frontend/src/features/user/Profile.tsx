@@ -10,8 +10,6 @@ import { Button } from "@/components/ui/Button"
 import { useAuthStore } from "@/stores/authStore";
 import { Calendar, Link2 } from "lucide-react"
 import UserListModal from "@/components/profile/UserListModal";
-import SearchBar from '@/components/layout/Searchbar';
-import { Sidebar } from '@/components/ui/Sidebar';
 import { Navigate } from 'react-router-dom';
 
 const tabs = [
@@ -24,7 +22,7 @@ export default function Profile() {
   const { id } = useParams();
   const [selectedTab, setSelectedTab] = useState<string>("posts");
   const { user } = useAuthStore();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
 

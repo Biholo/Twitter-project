@@ -10,20 +10,20 @@ class NotificationRepository extends BaseRepository<INotification> {
 
   async findNotifications(filter: any): Promise<any[]> {
     return this.model.find(filter)
-      .populate('sender', 'username identifier_name avatar')
-      .populate('tweet', 'content media_url')
-      .sort({ created_at: -1 });
+      .populate('sender_id', 'username identifier_name avatar')
+      .populate('source_id', 'content media_url')
+      .sort({ notification_date: -1 });
   }
 
   async markAllAsRead(userId: mongoose.Types.ObjectId) {
     return this.model.updateMany(
-      { receiver: userId, read: false },
-      { read: true }
+      { user_id: userId, is_read: false },
+      { is_read: true }
     );
   }
 
   async markAsRead(id: mongoose.Types.ObjectId) {
-    return this.model.findByIdAndUpdate(id, { read: true });
+    return this.model.findByIdAndUpdate(id, { is_read: true });
   }
 }
 

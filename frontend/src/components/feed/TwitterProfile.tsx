@@ -52,12 +52,6 @@ export default function TwitterProfile({ setIsModalOpen }: { setIsModalOpen: (is
               >
                 Modifier le profil
               </Button>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600"
-              >
-                Suivre
-              </Button>
             </div>
           </div>
 

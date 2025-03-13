@@ -1,4 +1,4 @@
-import { UpdateUser, UserList } from "@/types";
+import { UpdateUser, UserList, User } from "@/types";
 import { api } from "./interceptor";
 import { ApiResponse } from "@/types";
 class UserService {
@@ -25,6 +25,11 @@ class UserService {
 
     public async getFollowings(userId: string) : Promise<ApiResponse<UserList[]>> {
         const response = await api.fetchRequest(`/api/users/${userId}/followings`, "GET", {}, true);
+        return response;
+    }
+
+    public async getUserById(userId: string) : Promise<ApiResponse<User>> {
+        const response = await api.fetchRequest(`/api/users/${userId}`, "GET", {}, true);
         return response;
     }
 }

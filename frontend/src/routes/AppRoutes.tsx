@@ -15,6 +15,7 @@ import Explorer from '@/features/feed/Explorer';
 import MainLayout from '@/components/layout/MainLayout';
 import TweetDetails from '@/features/feed/TweetDetails';
 import websocketService from '@/services/websocketService';
+import Profile from '@/features/user/Profile';
 import Cookies from 'js-cookie';
 
 const AppRoutes = () => {
@@ -59,6 +60,7 @@ const AppRoutes = () => {
               <Route path='/explore' element={<Explorer />} />
               <Route path='/signets' element={<Signets />} />
               <Route path='/tweet/:id' element={<TweetDetails />} />
+              <Route path='/profile/:id' element={<Profile />} />
             </Route>
           </Route>
 

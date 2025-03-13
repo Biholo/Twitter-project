@@ -23,7 +23,7 @@ export default function Home() {
         <div className="mb-4">
           <SearchBar />
         </div>
-        <FeedTabs />
+        {/* <FeedTabs /> */}
       </div>
 
       {/* Contenu défilant */}

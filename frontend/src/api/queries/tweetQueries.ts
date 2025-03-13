@@ -51,10 +51,11 @@ export const useCreateTweet = () => {
   const keys = getQueryKeys(user?._id);
 
   return useMutation({
-    mutationFn: (tweetData: CreateTweet) => {
-      return tweetApi.createTweet(tweetData);
+    mutationFn: (tweetData: CreateTweet | FormData) => {
+        return tweetApi.createTweet(tweetData);
     },
-    onMutate: async (newTweet) => {
+
+    onMutate: async (newTweet: CreateTweet) => {
       const possibleQueryKeys = [...keys.all];
       
       // Si le tweet est une réponse, ajouter la clé du tweet parent

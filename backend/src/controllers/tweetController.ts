@@ -8,19 +8,61 @@ import { handleError } from '@/utils/responseFormatter';
 import { Response } from 'express';
 import { Types } from 'mongoose';
 import notificationService from '@/services/notificationService';
+import minioService from '@/services/minioService';
 
 export const createTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-        const { content, parent_tweet_id, media_url, tweet_type } = req.body;
         const userId = req.user?.id;
 
-        if (!parsingService.isContentAppropriate(content)) {
+        // Récupérer les données du FormData
+        const content = req.body.content || '';
+        const parent_tweet_id = req.body.parent_tweet_id;
+        const tweet_type = req.body.tweet_type || 'tweet';
+
+        console.log(req.body);
+        console.log(req.files);
+
+        // Vérifier que l'utilisateur est authentifié
+        if (!userId) {
+            handleError(res, new Error("Utilisateur non authentifié"), "Vous devez être connecté pour créer un tweet");
+            return;
+        }
+
+        // Vérifier le contenu seulement s'il n'est pas vide
+        if (content && !parsingService.isContentAppropriate(content)) {
             handleError(res, new Error("Contenu inapproprié"), "Contenu inapproprié");
             return;
         }
 
-        const tweet = await tweetRepository.create({ content, parent_tweet_id, media_url, tweet_type, author_id: userId });
-        
+        let media_urls = [];
+        if (req.files && Array.isArray(req.files)) {
+            // Traiter chaque fichier
+            for (const file of req.files) {
+                try {
+                    const media_url = await minioService.uploadFile(file);
+                    media_urls.push(media_url);
+                } catch (error) {
+                    console.error("Erreur lors de l'upload du fichier:", error);
+                    handleError(res, error, "Erreur lors de l'upload d'un fichier");
+                    return;
+                }
+            }
+        }
+
+        // Vérifier qu'il y a au moins du contenu ou des médias
+        if (!content && media_urls.length === 0) {
+            handleError(res, new Error("Le tweet doit contenir du texte ou au moins un média"), "Le tweet doit contenir du texte ou au moins un média");
+            return;
+        }
+
+        const tweet = await tweetRepository.create({ 
+            content, 
+            parent_tweet_id, 
+            media_urls, 
+            tweet_type, 
+            author_id: userId 
+        });
+
         await parsingService.createMentions(tweet);
         await parsingService.createHashtags(tweet);
 
@@ -57,7 +99,7 @@ export const createTweet = async (req: AuthenticatedRequest, res: Response): Pro
         });
     } catch (error) {
         handleError(res, error, "Erreur lors de la création du tweet.");
-        console.log(error);
+        console.error("Erreur complète:", error);
     }
 };
 

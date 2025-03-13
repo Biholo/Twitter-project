@@ -51,7 +51,9 @@ export interface InteractionResponse {
 }
 
 export interface CreateTweet {
-  parent_tweet_id?: string;
   content: string;
   tweet_type: "tweet" | "reply" | "retweet";
+  parent_tweet_id?: string;
+  media?: File[];
+  
 }

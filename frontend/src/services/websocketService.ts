@@ -1,4 +1,3 @@
-import { NotificationType } from "@/types";
 import { queryClient } from "@/configs/queryClient";
 
 class WebSocketService {

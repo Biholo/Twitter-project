@@ -4,7 +4,7 @@ import { ApiResponse, CreateTweet, Tweet, TweetPage } from "@/types";
 class TweetApi {
     private baseUrl = "/api/tweets";
 
-    public async createTweet(tweet: CreateTweet): Promise<ApiResponse<Tweet>> {
+    public async createTweet(tweet: CreateTweet | FormData): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest(this.baseUrl, "POST", tweet, true);
         return response.data;
     }

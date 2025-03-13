@@ -16,6 +16,8 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
   const { mutate: unlikeTweet, isPending: _isUnlikePending } = useUnlikeTweet();
   const { mutate: bookmarkTweet, isPending: _isBookmarkPending } = useBookmarkTweet();
   const { mutate: unbookmarkTweet, isPending: _isUnbookmarkPending } = useUnbookmarkTweet();
+  const { mutate: retweetTweet, isPending: _isRetweetPending } = useRetweetTweet();
+  const { mutate: unretweetTweet, isPending: _isUnretweetPending } = useUnretweetTweet();
   const navigate = useNavigate();
 
   const openTweetDetails = () => {
@@ -48,7 +50,21 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
   };
 
   const handleRetweet = () => {
-    // TODO: Implement retweet functionality
+    if (!user) {
+      return;
+    }
+    
+    // Utiliser un toggle : si le tweet est déjà retweeté, appeler unretweetTweet
+    // Sinon, appeler retweetTweet
+    if (tweet.is_retweeted) {
+      unretweetTweet(tweet._id);
+    } else {
+      retweetTweet(tweet._id);
+    }
+    
+    // Afficher un message de confirmation (optionnel)
+    const message = tweet.is_retweeted ? "Tweet retiré de vos retweets" : "Tweet retweeté avec succès";
+    console.log(message);
   };
 
   const handleReply = () => {
@@ -58,7 +74,6 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
   const openImageInFullScreen = () => {
     // TODO: Implement open image in full screen functionality
   };
-
 
   const formatTweetContent = (content: string) => {
     // Regex pour détecter les hashtags
@@ -87,8 +102,14 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
   };
   
   return (
-    <Card className="overflow-hidden bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none">
-      <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4 cursor-pointer" onClick={openTweetDetails}>
+    <Card className="overflow-hidden bg-white/80 backdrop-blur-sm dark:bg-gray-800/80 border-none" onClick={openTweetDetails}>
+      {tweet.retweeted_by && (
+        <div className="flex items-center gap-1 px-4 pt-2 text-xs text-gray-500">
+          <Repeat2 className="h-3 w-3 text-purple-500" />
+          <span>Retweeté par <span className="font-medium text-purple-500">@{tweet.retweeted_by.identifier_name}</span></span>
+        </div>
+      )}
+      <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-4">
         <Avatar>
           <AvatarImage src={`/placeholder.svg?height=40&width=40&text=${tweet.author.username}`} alt={tweet.author.username} />
           <AvatarFallback>{tweet.author.username.substring(0, 2)}</AvatarFallback>
@@ -157,7 +178,10 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
             variant="ghost" 
             size="sm" 
             className={`gap-1 text-gray-500 hover:text-pink-500 ${tweet.replies_count > 0 ? 'text-pink-500' : ''}`}
-            onClick={handleReply}
+            onClick={(e) => {
+              e.stopPropagation(); // Empêcher la propagation pour éviter d'ouvrir le tweet
+              handleReply();
+            }}
           >
             <MessageCircle className="h-4 w-4" />
             <span>{tweet.replies.length}</span>
@@ -165,28 +189,37 @@ export function Tweet({ tweet }: { tweet: TweetWithAuthor }) {
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`gap-1 text-gray-500 hover:text-purple-500 ${tweet.is_retweeted ? 'text-purple-500' : ''}`}
-            onClick={handleRetweet}
+            className={`gap-1 text-gray-500 hover:text-purple-500 ${tweet.is_retweeted ? 'text-purple-500 font-bold' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation(); // Empêcher la propagation pour éviter d'ouvrir le tweet
+              handleRetweet();
+            }}
           >
-            <Repeat2 className="h-4 w-4" />
+            <Repeat2 className={`h-4 w-4 ${tweet.is_retweeted ? 'animate-pulse' : ''}`} />
             <span>{tweet.retweets_count}</span>
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`gap-1 text-gray-500 hover:text-red-500 ${tweet.is_liked ? 'text-red-500' : ''}`}
-            onClick={handleLike}
+            className={`gap-1 text-gray-500 hover:text-red-500 ${tweet.is_liked ? 'text-red-500 font-bold' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation(); // Empêcher la propagation pour éviter d'ouvrir le tweet
+              handleLike();
+            }}
           >
-            <ThumbsUp className="h-4 w-4" />
+            <ThumbsUp className={`h-4 w-4 ${tweet.is_liked ? 'animate-pulse' : ''}`} />
             <span>{tweet.likes_count}</span>
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`${tweet.is_saved ? 'text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}
-            onClick={handleBookmark}
+            className={`gap-1 ${tweet.is_saved ? 'text-blue-500 font-bold' : 'text-gray-500 hover:text-blue-500'}`}
+            onClick={(e) => {
+              e.stopPropagation(); // Empêcher la propagation pour éviter d'ouvrir le tweet
+              handleBookmark();
+            }}
           >
-            <Bookmark className={`h-4 w-4 ${tweet.is_saved ? 'fill-blue-500' : ''}`} />
+            <Bookmark className={`h-4 w-4 ${tweet.is_saved ? 'fill-blue-500 animate-pulse' : ''}`} />
             <span>{tweet.saves_count}</span>
           </Button>
           <Button 

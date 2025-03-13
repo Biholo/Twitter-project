@@ -7,7 +7,6 @@ class Interceptor {
     private refreshFailed: boolean = false;
 
     constructor() {
-
         this.url = import.meta.env.VITE_API_BASE_URL as string;
     }
 
@@ -69,7 +68,6 @@ class Interceptor {
         return response;
     }
     
-
     // Fonction générique pour gérer toutes les requêtes HTTP
     public async fetchRequest(
         endpoint: string,
@@ -131,7 +129,6 @@ class Interceptor {
             throw new Error(error.message || "Une erreur est survenue lors de la requête");
         }
     }
-    
 
     // Récupération d'un nouveau token via le refresh token
     public async getNewAccessToken(refresh_token: string): Promise<AuthResponse | null> {

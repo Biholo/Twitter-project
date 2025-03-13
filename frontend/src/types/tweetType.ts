@@ -14,6 +14,7 @@ export interface Tweet {
   media_url: string | null;
   replies_count: number;
   replies: Tweet[];
+  retweeted_by?: Author; // Utilisateur qui a retweeté ce tweet (optionnel)
 }
 
 export interface Author {

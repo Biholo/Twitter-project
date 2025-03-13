@@ -65,7 +65,7 @@ class TweetRepository extends BaseRepository<ITweet> {
             $filter: {
               input: '$interactions',
               as: 'interaction',
-              cond: { $eq: ['$$interaction.action_type', 'like'] }
+              cond: { $eq: ['$$interaction.interaction_type', 'like'] }
             }
           }
         },
@@ -192,6 +192,7 @@ class TweetRepository extends BaseRepository<ITweet> {
         saves_count: 1,
         is_liked: 1,
         is_saved: 1,
+        is_retweeted: 1,
         parent_tweet_id: 1,
         replies: 1,
         replies_count: { $size: '$replies' }
@@ -415,6 +416,7 @@ class TweetRepository extends BaseRepository<ITweet> {
         saves_count: 1,
         is_liked: 1,
         is_saved: 1,
+        is_retweeted: 1,
         parent_tweet_id: 1
       }
     });
@@ -694,6 +696,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
         $addFields: {
           is_liked: {
             $in: ['like', '$currentUserInteractions.action_type']
+            $in: ['like', '$currentUserInteractions.action_type']
           },
           is_saved: {
             $in: ['bookmark', '$currentUserInteractions.action_type']
@@ -814,6 +817,7 @@ async findTrendingTweets({ limit = 10, date, authenticatedUserId }: { limit: num
           retweets_count: 1,
           is_liked: 1,
           is_saved: 1,
+        is_retweeted: 1,
           is_retweeted: 1,
           replies: 1,
           replies_count: { $size: '$replies' }

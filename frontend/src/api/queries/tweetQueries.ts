@@ -340,12 +340,15 @@ export const useLikeTweet = () => {
           }
         }
       }
+      console.error("Erreur lors du like:", error);
     },
     onSettled: () => {
       // Invalider toutes les requêtes potentiellement affectées
       queryClient.invalidateQueries({ queryKey: ["tweets"] });
     },
   });
+  
+  return mutation;
 };
 
 export const useUnlikeTweet = () => {
@@ -434,12 +437,15 @@ export const useUnlikeTweet = () => {
           }
         }
       }
+      console.error("Erreur lors de l'unlike:", error);
     },
     onSettled: () => {
       // Invalider toutes les requêtes potentiellement affectées
       queryClient.invalidateQueries({ queryKey: ["tweets"] });
     },
   });
+  
+  return mutation;
 };
 
 export const useBookmarkTweet = () => {
@@ -526,12 +532,15 @@ export const useBookmarkTweet = () => {
           }
         }
       }
+      console.error("Erreur lors du bookmark:", error);
     },
     onSettled: () => {
       // Invalider toutes les requêtes potentiellement affectées
       queryClient.invalidateQueries({ queryKey: ["tweets"] });
     },
   });
+  
+  return mutation;
 };
 
 export const useUnbookmarkTweet = () => {
@@ -618,12 +627,15 @@ export const useUnbookmarkTweet = () => {
           }
         }
       }
+      console.error("Erreur lors de l'unbookmark:", error);
     },
     onSettled: () => {
       // Invalider toutes les requêtes potentiellement affectées
       queryClient.invalidateQueries({ queryKey: ["tweets"] });
     },
   });
+  
+  return mutation;
 };
 
 export const useGetTweets = (params: number = 1) => {

@@ -553,4 +553,79 @@ export const getUserTweetCollection = async (req: AuthenticatedRequest, res: Res
     } catch (error) {
         handleError(res, error, `Erreur lors de la récupération des tweets ${req.query.type === 'liked' ? 'favoris' : req.query.type === 'saved' ? 'sauvegardés' : 'retweetés'}.`);
     }
+};export const retweetTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { id: tweet_id } = req.params;
+        const userId = req.user?.id;
+
+        if (!userId) {
+            handleError(res, new Error("Utilisateur non authentifié"), "Utilisateur non authentifié");
+            return;
+        }
+
+        // Vérifier si le tweet existe
+        const originalTweet = await tweetRepository.findById(tweet_id);
+        if (!originalTweet) {
+            handleError(res, new Error("Tweet non trouvé"), "Le tweet que vous essayez de retweeter n'existe pas");
+            return;
+        }
+
+        // Créer l'interaction de retweet
+        const interaction = await tweetInteractionRepository.create({ 
+            tweet_id: new Types.ObjectId(tweet_id), 
+            user_id: new Types.ObjectId(userId), 
+            action_type: 'retweet' 
+        });
+
+        // Créer un nouveau tweet de type retweet qui référence le tweet original
+        const retweet = await tweetRepository.create({
+            content: originalTweet.content,
+            parent_tweet_id: tweet_id,
+            tweet_type: 'retweet',
+            author_id: userId,
+            media_url: originalTweet.media_url
+        });
+
+        res.status(200).json({
+            message: "Tweet retweeté avec succès",
+            interaction,
+            retweet
+        });
+    } catch (error) {
+        handleError(res, error, "Erreur lors du retweet.");
+    }
+};
+
+export const unretweetTweet = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { id: tweet_id } = req.params;
+        const userId = req.user?.id;
+
+        if (!userId) {
+            handleError(res, new Error("Utilisateur non authentifié"), "Utilisateur non authentifié");
+            return;
+        }
+
+        // Supprimer l'interaction de retweet
+        const interaction = await tweetInteractionRepository.delete({ 
+            tweet_id, 
+            user_id: userId, 
+            action_type: 'retweet' 
+        });
+
+        // Trouver et supprimer le tweet de type retweet
+        const retweet = await tweetRepository.findOneAndDelete({
+            parent_tweet_id: tweet_id,
+            author_id: userId,
+            tweet_type: 'retweet'
+        });
+
+        res.status(200).json({
+            message: "Retweet supprimé avec succès",
+            interaction,
+            retweet
+        });
+    } catch (error) {
+        handleError(res, error, "Erreur lors de la suppression du retweet.");
+    }
 };

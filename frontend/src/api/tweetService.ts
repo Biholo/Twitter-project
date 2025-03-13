@@ -35,6 +35,18 @@ class TweetApi {
         return response;
     }
 
+    public async retweetTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
+        // Appel direct à l'API sans vérification préalable
+        // Le backend gère maintenant les cas où le tweet est déjà retweeté
+        const response = await api.fetchRequest(`/api/tweets/${tweet_id}/retweet`, "POST", null, true);
+        return response;
+    }
+
+    public async unretweetTweet(tweet_id: string): Promise<ApiResponse<Tweet>> {
+        const response = await api.fetchRequest(`/api/tweets/${tweet_id}/unretweet`, "POST", null, true);
+        return response;
+    }
+
     public async getTweetById(tweet_id: string): Promise<ApiResponse<Tweet>> {
         const response = await api.fetchRequest(`/api/tweets/${tweet_id}`, "GET", null, true);
         return response;
@@ -48,8 +60,7 @@ class TweetApi {
         const response = await api.fetchRequest(`/api/tweets/${userId}/interactions`, 'GET', queries, true);
         return response;
     }
-    
-        
 }
 
-export default TweetApi;
+const tweetApi = new TweetApi();
+export default tweetApi;

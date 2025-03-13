@@ -11,7 +11,7 @@ Ce projet est une plateforme de type Twitter qui permet aux utilisateurs de s'in
 - **Frontend :** React.js
 - **Backend :** Node.js, Express
 - **Base de données :** MongoDB Atlas
-- **Déploiement :** Docker / En local
+- **Déploiement :** Docker
 
 ### **M2 :**
 

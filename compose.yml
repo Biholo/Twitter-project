@@ -1,35 +1,4 @@
 services:
-  backend:
-    build:
-      context: backend
-      dockerfile: Dockerfile
-    container_name: backend-dev
-    env_file:
-      - backend/.env
-    ports:
-      - "8000:8000"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    volumes:
-      - ./backend/src:/app/src
-    networks:
-      - app
-
-  frontend:
-    build:
-      context: frontend
-      dockerfile: Dockerfile
-    container_name: frontend-dev
-    env_file:
-      - frontend/.env
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend/src:/app/src
-    networks:
-      - app
-
   mongodb:
     image: mongo:latest
     restart: unless-stopped
